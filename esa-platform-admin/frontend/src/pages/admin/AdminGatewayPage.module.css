@@ -1,0 +1,122 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--esa-surface);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--esa-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--esa-shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.iconWrap {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--esa-radius-md);
+  background: var(--esa-navy-900);
+  color: var(--esa-gold-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--esa-navy-900);
+  margin-bottom: 0.2rem;
+}
+
+.divisionBadge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--esa-cyan-700);
+}
+
+.cardDesc {
+  color: var(--esa-text-secondary);
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.managedPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.managedPill {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--esa-navy-800);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 576px) {
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statBox {
+  text-align: center;
+  background: var(--esa-surface-alt);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-sm);
+  padding: 0.75rem 0.35rem;
+}
+
+.statValue {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--esa-navy-900);
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: 0.68rem;
+  color: var(--esa-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.2rem;
+  font-weight: 600;
+}

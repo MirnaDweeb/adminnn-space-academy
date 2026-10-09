@@ -1,0 +1,18 @@
+.wrap {
+  position: relative;
+  max-width: 320px;
+  width: 100%;
+}
+
+.icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--esa-text-muted);
+  font-size: 0.85rem;
+}
+
+.input {
+  padding-left: 2.2rem;
+}

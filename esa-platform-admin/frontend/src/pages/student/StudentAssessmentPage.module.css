@@ -1,0 +1,170 @@
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.assessmentCard {
+  background: var(--esa-surface);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-lg);
+  box-shadow: var(--esa-shadow-md);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.headerWrap {
+  border-bottom: 1px solid var(--esa-border);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--esa-navy-900);
+  margin-bottom: 0.35rem;
+}
+
+.programMeta {
+  color: var(--esa-cyan-700);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.instructionsBox {
+  background: var(--esa-surface-alt);
+  border-left: 4px solid var(--esa-cyan-600);
+  padding: 0.85rem 1rem;
+  border-radius: var(--esa-radius-sm);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--esa-text-secondary);
+}
+
+.questionItem {
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  background: #ffffff;
+}
+
+.questionNumber {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--esa-navy-700);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.questionText {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--esa-navy-900);
+  margin-bottom: 1rem;
+}
+
+.optionsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--esa-radius-sm);
+  border: 1px solid var(--esa-border);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  background: var(--esa-surface-alt);
+  font-size: 0.92rem;
+}
+
+.optionLabel:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.optionSelected {
+  background: rgba(14, 165, 233, 0.08);
+  border-color: var(--esa-cyan-600);
+  font-weight: 500;
+}
+
+.ratingGroup {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.ratingBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--esa-border);
+  background: var(--esa-surface-alt);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ratingBtn:hover {
+  background: var(--esa-gold-100);
+  border-color: var(--esa-gold-500);
+}
+
+.ratingSelected {
+  background: var(--esa-gold-500);
+  color: #fff;
+  border-color: var(--esa-gold-500);
+}
+
+.resultCard {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.scoreCircle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f0fdf4;
+  border: 4px solid var(--esa-success);
+}
+
+.scoreVal {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--esa-navy-900);
+  line-height: 1;
+}
+
+.scoreLabel {
+  font-size: 0.7rem;
+  color: var(--esa-text-secondary);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.decisionNote {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--esa-radius-sm);
+  padding: 1rem;
+  margin: 1.5rem auto;
+  font-size: 0.88rem;
+  color: #475569;
+  text-align: left;
+}

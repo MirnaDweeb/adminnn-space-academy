@@ -1,0 +1,54 @@
+.nav {
+  background: var(--esa-navy-950);
+  color: var(--esa-text-inverse);
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--esa-text-inverse);
+}
+
+.brandIcon {
+  color: var(--esa-gold-500);
+}
+
+.brandText {
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+.brandText small {
+  display: block;
+  color: #9aa7bd;
+  font-weight: 400;
+  font-size: 0.72rem;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.userName {
+  font-size: 0.85rem;
+}
+
+.roleTag {
+  font-size: 0.68rem;
+  color: var(--esa-navy-950);
+  background: var(--esa-gold-500);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}

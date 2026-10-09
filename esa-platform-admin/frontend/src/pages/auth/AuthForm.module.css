@@ -1,0 +1,27 @@
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: var(--esa-navy-900);
+}
+
+.subtitle {
+  color: var(--esa-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.footerLink {
+  margin-top: 1rem;
+  font-size: 0.88rem;
+  text-align: center;
+  color: var(--esa-text-secondary);
+}
+
+.alert {
+  font-size: 0.85rem;
+}

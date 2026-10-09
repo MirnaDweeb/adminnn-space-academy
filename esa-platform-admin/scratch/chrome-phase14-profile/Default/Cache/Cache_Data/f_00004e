@@ -1,0 +1,1187 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/admin/FeedbackPage.jsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=12dbc091"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=12dbc091"; const useState = __vite__cjsImport3_react["useState"]; const useEffect = __vite__cjsImport3_react["useEffect"]; const useCallback = __vite__cjsImport3_react["useCallback"];
+import { useParams } from "/node_modules/.vite/deps/react-router-dom.js?v=12dbc091";
+import PageHeader from "/src/components/common/PageHeader.jsx?t=1790537577976";
+import StatCard from "/src/components/common/StatCard.jsx";
+import DataTable from "/src/components/common/DataTable.jsx";
+import StatusBadge from "/src/components/common/StatusBadge.jsx";
+import Modal from "/src/components/common/Modal.jsx";
+import LoadingState from "/src/components/common/LoadingState.jsx";
+import EmptyState from "/src/components/common/EmptyState.jsx";
+import ErrorState from "/src/components/common/ErrorState.jsx";
+import adminService from "/src/services/api/adminService.js?t=1790544787544";
+import programService from "/src/services/api/programService.js";
+import { useAuth } from "/src/hooks/useAuth.js";
+import { ROLE_TO_DIVISION, DIVISION_LABELS } from "/src/constants/divisions.js";
+import styles from "/src/pages/admin/FeedbackPage.module.css";
+export default function FeedbackPage() {
+  _s();
+  const { user } = useAuth();
+  const params = useParams();
+  const activeDivision = params.division || ROLE_TO_DIVISION[user?.role] || "ALL";
+  const [feedbackList, setFeedbackList] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
+  const [metrics, setMetrics] = useState({ total: 0, averageRating: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [summaryData, setSummaryData] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState("");
+  const [ratingFilter, setRatingFilter] = useState("");
+  const [sentimentFilter, setSentimentFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [programFilter, setProgramFilter] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [programs, setPrograms] = useState([]);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const fetchFeedback = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await adminService.listFeedback({
+        division: activeDivision === "ALL" ? void 0 : activeDivision,
+        rating: ratingFilter || void 0,
+        sentiment: sentimentFilter || void 0,
+        feedbackType: typeFilter || void 0,
+        program: programFilter || void 0,
+        search: search.trim() || void 0,
+        page,
+        limit: 20
+      });
+      setFeedbackList(res.feedback || []);
+      setPagination(res.pagination || { page: 1, limit: 20, total: 0, totalPages: 1 });
+      setMetrics(res.metrics || { total: 0, averageRating: 0 });
+    } catch (err) {
+      setError(err.message || "Failed to load student feedback");
+    } finally {
+      setLoading(false);
+    }
+  }, [activeDivision, ratingFilter, sentimentFilter, typeFilter, programFilter, search, page]);
+  const fetchSummary = useCallback(async () => {
+    setSummaryLoading(true);
+    setSummaryError("");
+    try {
+      const res = await adminService.getFeedbackSummary({
+        division: activeDivision === "ALL" ? void 0 : activeDivision,
+        program: programFilter || void 0
+      });
+      setSummaryData(res.summary || null);
+    } catch (err) {
+      setSummaryError(err.message || "Failed to generate feedback summary");
+    } finally {
+      setSummaryLoading(false);
+    }
+  }, [activeDivision, programFilter]);
+  useEffect(() => {
+    fetchFeedback();
+  }, [fetchFeedback]);
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
+  useEffect(() => {
+    async function loadPrograms() {
+      try {
+        const query = activeDivision === "ALL" ? {} : { division: activeDivision };
+        const res = await programService.listPrograms(query);
+        setPrograms(res.programs || []);
+      } catch (err) {
+        console.error("Failed to load programs for filter:", err);
+      }
+    }
+    loadPrograms();
+  }, [activeDivision]);
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        /* @__PURE__ */ jsxDEV(
+          "i",
+          {
+            className: `fa-solid fa-star ${i <= rating ? "text-warning" : "text-muted"}`,
+            style: { fontSize: "0.85rem" }
+          },
+          i,
+          false,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 136,
+            columnNumber: 9
+          },
+          this
+        )
+      );
+    }
+    return /* @__PURE__ */ jsxDEV("span", { className: styles.feedbackRating, children: stars }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+      lineNumber: 143,
+      columnNumber: 12
+    }, this);
+  };
+  const columns = [
+    {
+      header: "Student",
+      render: (item) => /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "fw-semibold text-dark", children: item.student?.fullName || "Anonymous / Student" }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 151,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "text-muted small", children: item.student?.email || "Confidential" }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 152,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 150,
+        columnNumber: 5
+      }, this)
+    },
+    {
+      header: "Program & Cohort",
+      render: (item) => /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "fw-medium text-dark", children: item.program?.title || "Academy Program" }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 160,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "text-muted small", children: [
+          item.cohort?.cohortNumber,
+          " (",
+          item.division?.replace("_", " "),
+          ")"
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 161,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 159,
+        columnNumber: 5
+      }, this)
+    },
+    {
+      header: "Rating & Sentiment",
+      render: (item) => /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("div", { children: renderStars(item.rating) }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 171,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV(
+          "span",
+          {
+            className: `badge mt-1 ${item.sentiment === "POSITIVE" ? "bg-success" : item.sentiment === "NEGATIVE" ? "bg-danger" : "bg-secondary"}`,
+            style: { fontSize: "0.7rem" },
+            children: item.sentiment
+          },
+          void 0,
+          false,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 172,
+            columnNumber: 11
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 170,
+        columnNumber: 5
+      }, this)
+    },
+    {
+      header: "Type",
+      render: (item) => /* @__PURE__ */ jsxDEV("span", { className: "badge bg-light text-dark border", children: item.feedbackType?.replace("_", " ") }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 190,
+        columnNumber: 5
+      }, this)
+    },
+    {
+      header: "Comments Summary",
+      render: (item) => /* @__PURE__ */ jsxDEV("div", { style: { maxWidth: "340px" }, children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "text-truncate text-dark small", children: item.comments }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 199,
+          columnNumber: 11
+        }, this),
+        item.strengths && /* @__PURE__ */ jsxDEV("div", { className: "text-success small text-truncate", children: [
+          /* @__PURE__ */ jsxDEV("strong", { children: "+" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 202,
+            columnNumber: 15
+          }, this),
+          " ",
+          item.strengths
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 201,
+          columnNumber: 7
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 198,
+        columnNumber: 5
+      }, this)
+    },
+    {
+      header: "Date",
+      render: (item) => /* @__PURE__ */ jsxDEV("span", { className: "small text-secondary", children: new Date(item.submittedAt || item.createdAt).toLocaleDateString() }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 211,
+        columnNumber: 5
+      }, this)
+    },
+    {
+      header: "Actions",
+      render: (item) => /* @__PURE__ */ jsxDEV(
+        "button",
+        {
+          type: "button",
+          className: "btn btn-outline-primary btn-sm py-0 px-2",
+          onClick: () => setSelectedFeedback(item),
+          id: `btn-view-feedback-${item._id}`,
+          children: [
+            /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-eye me-1" }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 225,
+              columnNumber: 11
+            }, this),
+            " View"
+          ]
+        },
+        void 0,
+        true,
+        {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 219,
+          columnNumber: 5
+        },
+        this
+      )
+    }
+  ];
+  const divisionTitle = activeDivision === "ALL" ? "All Divisions" : DIVISION_LABELS[activeDivision] || activeDivision;
+  return /* @__PURE__ */ jsxDEV("div", { className: styles.container, children: [
+    /* @__PURE__ */ jsxDEV(
+      PageHeader,
+      {
+        title: `${divisionTitle} Student Feedback Center`,
+        subtitle: "Review real student sentiment, evaluate training experience, and leverage AI-assisted feedback analytics grounded in verified submissions.",
+        actions: /* @__PURE__ */ jsxDEV(
+          "button",
+          {
+            type: "button",
+            className: "btn btn-outline-primary d-flex align-items-center gap-2",
+            id: "btn-refresh-summary",
+            onClick: fetchSummary,
+            disabled: summaryLoading,
+            children: [
+              /* @__PURE__ */ jsxDEV("i", { className: `fa-solid fa-arrows-rotate ${summaryLoading ? "fa-spin" : ""}` }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 249,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Refresh Insights" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 250,
+                columnNumber: 13
+              }, this)
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 242,
+            columnNumber: 9
+          },
+          this
+        )
+      },
+      void 0,
+      false,
+      {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 238,
+        columnNumber: 7
+      },
+      this
+    ),
+    /* @__PURE__ */ jsxDEV("div", { className: styles.statsGrid, children: [
+      /* @__PURE__ */ jsxDEV(StatCard, { label: "Total Feedback Responses", value: metrics.total || pagination.total, icon: "fa-comments" }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 257,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(
+        StatCard,
+        {
+          label: "Average Academy Rating",
+          value: metrics.averageRating ? `${metrics.averageRating} / 5.0` : "N/A",
+          icon: "fa-star"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 258,
+          columnNumber: 9
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDEV(
+        StatCard,
+        {
+          label: "Positive Sentiment",
+          value: summaryData?.sentimentBreakdown ? `${summaryData.sentimentBreakdown.POSITIVE || 0} (${Math.round(
+            (summaryData.sentimentBreakdown.POSITIVE || 0) / (summaryData.totalAnalyzed || 1) * 100
+          )}%)` : "N/A",
+          icon: "fa-face-smile"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 263,
+          columnNumber: 9
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDEV(
+        StatCard,
+        {
+          label: "Areas for Improvement",
+          value: summaryData?.sentimentBreakdown ? `${summaryData.sentimentBreakdown.NEGATIVE || 0} responses` : "0",
+          icon: "fa-triangle-exclamation"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 274,
+          columnNumber: 9
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+      lineNumber: 256,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: styles.insightsCard, children: [
+      /* @__PURE__ */ jsxDEV("div", { className: styles.insightsHeader, children: [
+        /* @__PURE__ */ jsxDEV("div", { className: styles.insightsTitle, children: [
+          /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-wand-magic-sparkles text-info" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 289,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { children: "STUDENT FEEDBACK INSIGHTS" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 290,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { className: styles.insightsBadge, children: summaryData?.provider?.includes("GEMINI") ? "Google Gemini 1.5 Flash" : "ESA Thematic & Grounded NLP Engine" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 291,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 288,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "d-flex align-items-center gap-2 small text-light", children: [
+          /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-database" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 299,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { children: [
+            summaryData?.totalAnalyzed || 0,
+            " real responses analyzed · Avg Rating:",
+            " ",
+            /* @__PURE__ */ jsxDEV("strong", { children: [
+              summaryData?.averageRating || 0,
+              " / 5.0"
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 302,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 300,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 298,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 287,
+        columnNumber: 9
+      }, this),
+      summaryLoading ? /* @__PURE__ */ jsxDEV("div", { className: "text-center py-4", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "spinner-border text-info mb-2", role: "status" }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 309,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "small text-light", children: "Synthesizing institutional student feedback..." }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 310,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 308,
+        columnNumber: 9
+      }, this) : summaryError ? /* @__PURE__ */ jsxDEV("div", { className: "alert alert-danger py-2 small mb-0", children: summaryError }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 313,
+        columnNumber: 9
+      }, this) : !summaryData || summaryData.totalAnalyzed === 0 ? /* @__PURE__ */ jsxDEV("div", { className: "text-center py-3 text-light small", children: "No student feedback records available for automated thematic synthesis." }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 315,
+        columnNumber: 9
+      }, this) : /* @__PURE__ */ jsxDEV("div", { children: [
+        summaryData.executiveOverview && /* @__PURE__ */ jsxDEV("div", { className: "mb-3 p-2 rounded bg-white bg-opacity-10 small text-light border border-white border-opacity-10", children: [
+          /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-circle-info me-2 text-info" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 323,
+            columnNumber: 17
+          }, this),
+          summaryData.executiveOverview
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 322,
+          columnNumber: 11
+        }, this),
+        summaryData.keyThemes && summaryData.keyThemes.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "mb-3", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "small text-uppercase fw-bold text-info mb-2", children: "Key Themes Detected:" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 331,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: styles.themesContainer, children: summaryData.keyThemes.map(
+            (theme, i) => /* @__PURE__ */ jsxDEV("span", { className: styles.themeChip, children: [
+              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-tag me-1" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 335,
+                columnNumber: 23
+              }, this),
+              " ",
+              theme
+            ] }, i, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 334,
+              columnNumber: 15
+            }, this)
+          ) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 332,
+            columnNumber: 17
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 330,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: styles.insightsGrid, children: [
+          /* @__PURE__ */ jsxDEV("div", { className: styles.insightSection, children: [
+            /* @__PURE__ */ jsxDEV("div", { className: styles.sectionTitle, children: [
+              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-circle-check text-success" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 347,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Most Mentioned Strengths" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 348,
+                columnNumber: 19
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 346,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDEV("ul", { className: styles.insightList, children: summaryData.mostMentionedStrengths?.map(
+              (str, i) => /* @__PURE__ */ jsxDEV("li", { className: styles.insightItem, children: str }, i, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 352,
+                columnNumber: 17
+              }, this)
+            ) }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 350,
+              columnNumber: 17
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 345,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: styles.insightSection, children: [
+            /* @__PURE__ */ jsxDEV("div", { className: styles.sectionTitle, children: [
+              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-triangle-exclamation text-warning" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 360,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Most Mentioned Issues" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 361,
+                columnNumber: 19
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 359,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDEV("ul", { className: styles.insightList, children: summaryData.mostMentionedIssues?.map(
+              (iss, i) => /* @__PURE__ */ jsxDEV("li", { className: styles.insightItem, children: iss }, i, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 365,
+                columnNumber: 17
+              }, this)
+            ) }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 363,
+              columnNumber: 17
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 358,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: styles.insightSection, children: [
+            /* @__PURE__ */ jsxDEV("div", { className: styles.sectionTitle, children: [
+              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-lightbulb text-info" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 373,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Common Suggestions" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 374,
+                columnNumber: 19
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 372,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDEV("ul", { className: styles.insightList, children: summaryData.commonSuggestions?.map(
+              (sug, i) => /* @__PURE__ */ jsxDEV("li", { className: styles.insightItem, children: sug }, i, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 378,
+                columnNumber: 17
+              }, this)
+            ) }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 376,
+              columnNumber: 17
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 371,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: styles.insightSection, children: [
+            /* @__PURE__ */ jsxDEV("div", { className: styles.sectionTitle, children: [
+              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-bell text-danger" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 386,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Important Signals" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 387,
+                columnNumber: 19
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 385,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDEV("ul", { className: styles.insightList, children: summaryData.importantSignals?.map(
+              (sig, i) => /* @__PURE__ */ jsxDEV("li", { className: styles.insightItem, children: sig }, i, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 391,
+                columnNumber: 17
+              }, this)
+            ) }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 389,
+              columnNumber: 17
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 384,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 343,
+          columnNumber: 13
+        }, this),
+        summaryData.representativeFeedback && summaryData.representativeFeedback.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "mt-3 pt-3 border-top border-white border-opacity-10", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "small text-uppercase fw-bold text-info mb-2", children: "Representative Student Feedback:" }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 400,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: styles.quotesContainer, children: summaryData.representativeFeedback.map(
+            (quote, i) => /* @__PURE__ */ jsxDEV("div", { className: styles.quoteItem, children: [
+              '"',
+              quote,
+              '"'
+            ] }, i, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 403,
+              columnNumber: 15
+            }, this)
+          ) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 401,
+            columnNumber: 17
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 399,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 319,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+      lineNumber: 286,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: styles.toolbar, children: [
+      /* @__PURE__ */ jsxDEV("div", { className: styles.searchBox, children: /* @__PURE__ */ jsxDEV(
+        "input",
+        {
+          type: "text",
+          className: "form-control form-control-sm",
+          placeholder: "Search feedback comments, strengths, or student names...",
+          value: search,
+          onChange: (e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          },
+          id: "input-search-feedback"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+          lineNumber: 417,
+          columnNumber: 11
+        },
+        this
+      ) }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 416,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: styles.filters, children: [
+        /* @__PURE__ */ jsxDEV(
+          "select",
+          {
+            className: styles.selectInput,
+            value: ratingFilter,
+            onChange: (e) => {
+              setRatingFilter(e.target.value);
+              setPage(1);
+            },
+            id: "select-feedback-rating",
+            children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "", children: "All Ratings" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 440,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "5", children: "5 Stars" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 441,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "4", children: "4 Stars" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 442,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "3", children: "3 Stars" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 443,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "2", children: "2 Stars" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 444,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "1", children: "1 Star" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 445,
+                columnNumber: 13
+              }, this)
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 431,
+            columnNumber: 11
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDEV(
+          "select",
+          {
+            className: styles.selectInput,
+            value: sentimentFilter,
+            onChange: (e) => {
+              setSentimentFilter(e.target.value);
+              setPage(1);
+            },
+            id: "select-feedback-sentiment",
+            children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "", children: "All Sentiments" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 457,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "POSITIVE", children: "Positive" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 458,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "NEUTRAL", children: "Neutral" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 459,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "NEGATIVE", children: "Negative" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 460,
+                columnNumber: 13
+              }, this)
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 448,
+            columnNumber: 11
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDEV(
+          "select",
+          {
+            className: styles.selectInput,
+            value: typeFilter,
+            onChange: (e) => {
+              setTypeFilter(e.target.value);
+              setPage(1);
+            },
+            id: "select-feedback-type",
+            children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "", children: "All Types" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 472,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "COURSE_CONTENT", children: "Course Content" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 473,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "INSTRUCTOR", children: "Instructor" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 474,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "FACILITY", children: "Facility & Lab" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 475,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "PLATFORM", children: "Platform & Systems" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 476,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "GENERAL", children: "General" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 477,
+                columnNumber: 13
+              }, this)
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 463,
+            columnNumber: 11
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDEV(
+          "select",
+          {
+            className: styles.selectInput,
+            value: programFilter,
+            onChange: (e) => {
+              setProgramFilter(e.target.value);
+              setPage(1);
+            },
+            id: "select-feedback-program",
+            children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "", children: "All Programs" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 489,
+                columnNumber: 13
+              }, this),
+              programs.map(
+                (p) => /* @__PURE__ */ jsxDEV("option", { value: p._id, children: p.title }, p._id, false, {
+                  fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                  lineNumber: 491,
+                  columnNumber: 13
+                }, this)
+              )
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 480,
+            columnNumber: 11
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 430,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+      lineNumber: 415,
+      columnNumber: 7
+    }, this),
+    loading ? /* @__PURE__ */ jsxDEV(LoadingState, { message: "Loading student feedback..." }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+      lineNumber: 501,
+      columnNumber: 7
+    }, this) : error ? /* @__PURE__ */ jsxDEV(ErrorState, { message: error, onRetry: fetchFeedback }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+      lineNumber: 503,
+      columnNumber: 7
+    }, this) : feedbackList.length === 0 ? /* @__PURE__ */ jsxDEV(
+      EmptyState,
+      {
+        title: "No Student Feedback Records",
+        message: "No student feedback matches the active filters. Feedback is collected directly from enrolled candidates following course completion."
+      },
+      void 0,
+      false,
+      {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 505,
+        columnNumber: 7
+      },
+      this
+    ) : /* @__PURE__ */ jsxDEV(
+      DataTable,
+      {
+        columns,
+        data: feedbackList,
+        pagination,
+        onPageChange: (p) => setPage(p),
+        id: "table-student-feedback"
+      },
+      void 0,
+      false,
+      {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 510,
+        columnNumber: 7
+      },
+      this
+    ),
+    selectedFeedback && /* @__PURE__ */ jsxDEV(
+      Modal,
+      {
+        isOpen: Boolean(selectedFeedback),
+        onClose: () => setSelectedFeedback(null),
+        title: "Student Feedback Record",
+        size: "md",
+        children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "d-flex justify-content-between align-items-center mb-3", children: [
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "fw-bold text-dark", children: selectedFeedback.student?.fullName || "Anonymous Student" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 529,
+                columnNumber: 15
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "text-muted small", children: selectedFeedback.student?.email }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 530,
+                columnNumber: 15
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 528,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "text-end", children: [
+              /* @__PURE__ */ jsxDEV("div", { children: renderStars(selectedFeedback.rating) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 533,
+                columnNumber: 15
+              }, this),
+              /* @__PURE__ */ jsxDEV(
+                "span",
+                {
+                  className: `badge mt-1 ${selectedFeedback.sentiment === "POSITIVE" ? "bg-success" : selectedFeedback.sentiment === "NEGATIVE" ? "bg-danger" : "bg-secondary"}`,
+                  children: selectedFeedback.sentiment
+                },
+                void 0,
+                false,
+                {
+                  fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                  lineNumber: 534,
+                  columnNumber: 15
+                },
+                this
+              )
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 532,
+              columnNumber: 13
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 527,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "p-3 bg-light rounded border mb-3 small", children: /* @__PURE__ */ jsxDEV("div", { className: "row g-2", children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "col-sm-6", children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "text-secondary fw-semibold", children: "Program:" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 551,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "fw-medium text-dark", children: selectedFeedback.program?.title }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 552,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 550,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "col-sm-6", children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "text-secondary fw-semibold", children: "Cohort:" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 555,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "fw-medium text-dark", children: [
+                selectedFeedback.cohort?.cohortNumber,
+                " (",
+                selectedFeedback.division?.replace("_", " "),
+                ")"
+              ] }, void 0, true, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 556,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 554,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "col-sm-6", children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "text-secondary fw-semibold", children: "Feedback Type:" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 559,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "fw-medium text-dark", children: selectedFeedback.feedbackType?.replace("_", " ") }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 560,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 558,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "col-sm-6", children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "text-secondary fw-semibold", children: "Submission Date:" }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 563,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "fw-medium text-dark", children: new Date(selectedFeedback.submittedAt || selectedFeedback.createdAt).toLocaleString() }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+                lineNumber: 564,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 562,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 549,
+            columnNumber: 13
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 548,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "mb-3", children: [
+            /* @__PURE__ */ jsxDEV("label", { className: "form-label fw-bold text-dark small", children: "Student Comments & Review" }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 570,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "p-3 bg-white border rounded small text-dark", style: { minHeight: "80px", lineHeight: 1.5 }, children: selectedFeedback.comments }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 571,
+              columnNumber: 13
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 569,
+            columnNumber: 11
+          }, this),
+          selectedFeedback.strengths && /* @__PURE__ */ jsxDEV("div", { className: "mb-3", children: [
+            /* @__PURE__ */ jsxDEV("label", { className: "form-label fw-bold text-success small", children: "Noted Strengths" }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 578,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "p-2 bg-success bg-opacity-10 border border-success border-opacity-25 rounded small text-dark", children: selectedFeedback.strengths }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 579,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 577,
+            columnNumber: 9
+          }, this),
+          selectedFeedback.improvements && /* @__PURE__ */ jsxDEV("div", { className: "mb-3", children: [
+            /* @__PURE__ */ jsxDEV("label", { className: "form-label fw-bold text-warning small", children: "Suggested Improvements" }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 587,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "p-2 bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded small text-dark", children: selectedFeedback.improvements }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 588,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 586,
+            columnNumber: 9
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "d-flex justify-content-end pt-2 border-top", children: /* @__PURE__ */ jsxDEV(
+            "button",
+            {
+              type: "button",
+              className: "btn btn-secondary btn-sm",
+              onClick: () => setSelectedFeedback(null),
+              children: "Close"
+            },
+            void 0,
+            false,
+            {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+              lineNumber: 595,
+              columnNumber: 13
+            },
+            this
+          ) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+            lineNumber: 594,
+            columnNumber: 11
+          }, this)
+        ]
+      },
+      void 0,
+      true,
+      {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+        lineNumber: 521,
+        columnNumber: 7
+      },
+      this
+    )
+  ] }, void 0, true, {
+    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx",
+    lineNumber: 237,
+    columnNumber: 5
+  }, this);
+}
+_s(FeedbackPage, "98mQF7upTnev1LVYS3/GkaXOv7o=", false, function() {
+  return [useAuth, useParams];
+});
+_c = FeedbackPage;
+var _c;
+$RefreshReg$(_c, "FeedbackPage");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/pages/admin/FeedbackPage.jsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IkFBb0hROzs7Ozs7Ozs7Ozs7Ozs7OztBQXBIUixTQUFTQSxVQUFVQyxXQUFXQyxtQkFBbUI7QUFDakQsU0FBU0MsaUJBQWlCO0FBQzFCLE9BQU9DLGdCQUFnQjtBQUN2QixPQUFPQyxjQUFjO0FBQ3JCLE9BQU9DLGVBQWU7QUFDdEIsT0FBT0MsaUJBQWlCO0FBQ3hCLE9BQU9DLFdBQVc7QUFDbEIsT0FBT0Msa0JBQWtCO0FBQ3pCLE9BQU9DLGdCQUFnQjtBQUN2QixPQUFPQyxnQkFBZ0I7QUFDdkIsT0FBT0Msa0JBQWtCO0FBQ3pCLE9BQU9DLG9CQUFvQjtBQUMzQixTQUFTQyxlQUFlO0FBQ3hCLFNBQVNDLGtCQUFrQkMsdUJBQXVCO0FBQ2xELE9BQU9DLFlBQVk7QUFFbkIsd0JBQXdCQyxlQUFlO0FBQUFDLEtBQUE7QUFDckMsUUFBTSxFQUFFQyxLQUFLLElBQUlOLFFBQVE7QUFDekIsUUFBTU8sU0FBU2xCLFVBQVU7QUFDekIsUUFBTW1CLGlCQUFpQkQsT0FBT0UsWUFBWVIsaUJBQWlCSyxNQUFNSSxJQUFJLEtBQUs7QUFHMUUsUUFBTSxDQUFDQyxjQUFjQyxlQUFlLElBQUkxQixTQUFTLEVBQUU7QUFDbkQsUUFBTSxDQUFDMkIsWUFBWUMsYUFBYSxJQUFJNUIsU0FBUyxFQUFFNkIsTUFBTSxHQUFHQyxPQUFPLElBQUlDLE9BQU8sR0FBR0MsWUFBWSxFQUFFLENBQUM7QUFDNUYsUUFBTSxDQUFDQyxTQUFTQyxVQUFVLElBQUlsQyxTQUFTLEVBQUUrQixPQUFPLEdBQUdJLGVBQWUsRUFBRSxDQUFDO0FBQ3JFLFFBQU0sQ0FBQ0MsU0FBU0MsVUFBVSxJQUFJckMsU0FBUyxJQUFJO0FBQzNDLFFBQU0sQ0FBQ3NDLE9BQU9DLFFBQVEsSUFBSXZDLFNBQVMsRUFBRTtBQUdyQyxRQUFNLENBQUN3QyxhQUFhQyxjQUFjLElBQUl6QyxTQUFTLElBQUk7QUFDbkQsUUFBTSxDQUFDMEMsZ0JBQWdCQyxpQkFBaUIsSUFBSTNDLFNBQVMsS0FBSztBQUMxRCxRQUFNLENBQUM0QyxjQUFjQyxlQUFlLElBQUk3QyxTQUFTLEVBQUU7QUFHbkQsUUFBTSxDQUFDOEMsY0FBY0MsZUFBZSxJQUFJL0MsU0FBUyxFQUFFO0FBQ25ELFFBQU0sQ0FBQ2dELGlCQUFpQkMsa0JBQWtCLElBQUlqRCxTQUFTLEVBQUU7QUFDekQsUUFBTSxDQUFDa0QsWUFBWUMsYUFBYSxJQUFJbkQsU0FBUyxFQUFFO0FBQy9DLFFBQU0sQ0FBQ29ELGVBQWVDLGdCQUFnQixJQUFJckQsU0FBUyxFQUFFO0FBQ3JELFFBQU0sQ0FBQ3NELFFBQVFDLFNBQVMsSUFBSXZELFNBQVMsRUFBRTtBQUN2QyxRQUFNLENBQUM2QixNQUFNMkIsT0FBTyxJQUFJeEQsU0FBUyxDQUFDO0FBQ2xDLFFBQU0sQ0FBQ3lELFVBQVVDLFdBQVcsSUFBSTFELFNBQVMsRUFBRTtBQUczQyxRQUFNLENBQUMyRCxrQkFBa0JDLG1CQUFtQixJQUFJNUQsU0FBUyxJQUFJO0FBRzdELFFBQU02RCxnQkFBZ0IzRCxZQUFZLFlBQVk7QUFDNUNtQyxlQUFXLElBQUk7QUFDZkUsYUFBUyxFQUFFO0FBQ1gsUUFBSTtBQUNGLFlBQU11QixNQUFNLE1BQU1sRCxhQUFhbUQsYUFBYTtBQUFBLFFBQzFDeEMsVUFBVUQsbUJBQW1CLFFBQVEwQyxTQUFZMUM7QUFBQUEsUUFDakQyQyxRQUFRbkIsZ0JBQWdCa0I7QUFBQUEsUUFDeEJFLFdBQVdsQixtQkFBbUJnQjtBQUFBQSxRQUM5QkcsY0FBY2pCLGNBQWNjO0FBQUFBLFFBQzVCSSxTQUFTaEIsaUJBQWlCWTtBQUFBQSxRQUMxQlYsUUFBUUEsT0FBT2UsS0FBSyxLQUFLTDtBQUFBQSxRQUN6Qm5DO0FBQUFBLFFBQ0FDLE9BQU87QUFBQSxNQUNULENBQUM7QUFFREosc0JBQWdCb0MsSUFBSVEsWUFBWSxFQUFFO0FBQ2xDMUMsb0JBQWNrQyxJQUFJbkMsY0FBYyxFQUFFRSxNQUFNLEdBQUdDLE9BQU8sSUFBSUMsT0FBTyxHQUFHQyxZQUFZLEVBQUUsQ0FBQztBQUMvRUUsaUJBQVc0QixJQUFJN0IsV0FBVyxFQUFFRixPQUFPLEdBQUdJLGVBQWUsRUFBRSxDQUFDO0FBQUEsSUFDMUQsU0FBU29DLEtBQUs7QUFDWmhDLGVBQVNnQyxJQUFJQyxXQUFXLGlDQUFpQztBQUFBLElBQzNELFVBQUM7QUFDQ25DLGlCQUFXLEtBQUs7QUFBQSxJQUNsQjtBQUFBLEVBQ0YsR0FBRyxDQUFDZixnQkFBZ0J3QixjQUFjRSxpQkFBaUJFLFlBQVlFLGVBQWVFLFFBQVF6QixJQUFJLENBQUM7QUFHM0YsUUFBTTRDLGVBQWV2RSxZQUFZLFlBQVk7QUFDM0N5QyxzQkFBa0IsSUFBSTtBQUN0QkUsb0JBQWdCLEVBQUU7QUFDbEIsUUFBSTtBQUNGLFlBQU1pQixNQUFNLE1BQU1sRCxhQUFhOEQsbUJBQW1CO0FBQUEsUUFDaERuRCxVQUFVRCxtQkFBbUIsUUFBUTBDLFNBQVkxQztBQUFBQSxRQUNqRDhDLFNBQVNoQixpQkFBaUJZO0FBQUFBLE1BQzVCLENBQUM7QUFDRHZCLHFCQUFlcUIsSUFBSWEsV0FBVyxJQUFJO0FBQUEsSUFDcEMsU0FBU0osS0FBSztBQUNaMUIsc0JBQWdCMEIsSUFBSUMsV0FBVyxxQ0FBcUM7QUFBQSxJQUN0RSxVQUFDO0FBQ0M3Qix3QkFBa0IsS0FBSztBQUFBLElBQ3pCO0FBQUEsRUFDRixHQUFHLENBQUNyQixnQkFBZ0I4QixhQUFhLENBQUM7QUFHbENuRCxZQUFVLE1BQU07QUFDZDRELGtCQUFjO0FBQUEsRUFDaEIsR0FBRyxDQUFDQSxhQUFhLENBQUM7QUFFbEI1RCxZQUFVLE1BQU07QUFDZHdFLGlCQUFhO0FBQUEsRUFDZixHQUFHLENBQUNBLFlBQVksQ0FBQztBQUdqQnhFLFlBQVUsTUFBTTtBQUNkLG1CQUFlMkUsZUFBZTtBQUM1QixVQUFJO0FBQ0YsY0FBTUMsUUFBUXZELG1CQUFtQixRQUFRLENBQUMsSUFBSSxFQUFFQyxVQUFVRCxlQUFlO0FBQ3pFLGNBQU13QyxNQUFNLE1BQU1qRCxlQUFlaUUsYUFBYUQsS0FBSztBQUNuRG5CLG9CQUFZSSxJQUFJTCxZQUFZLEVBQUU7QUFBQSxNQUNoQyxTQUFTYyxLQUFLO0FBQ1pRLGdCQUFRekMsTUFBTSx1Q0FBdUNpQyxHQUFHO0FBQUEsTUFDMUQ7QUFBQSxJQUNGO0FBQ0FLLGlCQUFhO0FBQUEsRUFDZixHQUFHLENBQUN0RCxjQUFjLENBQUM7QUFHbkIsUUFBTTBELGNBQWNBLENBQUNmLFdBQVc7QUFDOUIsVUFBTWdCLFFBQVE7QUFDZCxhQUFTQyxJQUFJLEdBQUdBLEtBQUssR0FBR0EsS0FBSztBQUMzQkQsWUFBTUU7QUFBQUEsUUFDSjtBQUFBLFVBQUM7QUFBQTtBQUFBLFlBRUMsV0FBVyxvQkFBb0JELEtBQUtqQixTQUFTLGlCQUFpQixZQUFZO0FBQUEsWUFDMUUsT0FBTyxFQUFFbUIsVUFBVSxVQUFVO0FBQUE7QUFBQSxVQUZ4QkY7QUFBQUEsVUFEUDtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLFFBSUM7QUFBQSxNQUNIO0FBQUEsSUFDRjtBQUNBLFdBQU8sdUJBQUMsVUFBSyxXQUFXakUsT0FBT29FLGdCQUFpQkosbUJBQXpDO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FBK0M7QUFBQSxFQUN4RDtBQUVBLFFBQU1LLFVBQVU7QUFBQSxJQUNkO0FBQUEsTUFDRUMsUUFBUTtBQUFBLE1BQ1JDLFFBQVFBLENBQUNDLFNBQ1AsdUJBQUMsU0FDQztBQUFBLCtCQUFDLFNBQUksV0FBVSx5QkFBeUJBLGVBQUtDLFNBQVNDLFlBQVkseUJBQWxFO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBd0Y7QUFBQSxRQUN4Rix1QkFBQyxTQUFJLFdBQVUsb0JBQW9CRixlQUFLQyxTQUFTRSxTQUFTLGtCQUExRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQXlFO0FBQUEsV0FGM0U7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUdBO0FBQUEsSUFFSjtBQUFBLElBQ0E7QUFBQSxNQUNFTCxRQUFRO0FBQUEsTUFDUkMsUUFBUUEsQ0FBQ0MsU0FDUCx1QkFBQyxTQUNDO0FBQUEsK0JBQUMsU0FBSSxXQUFVLHVCQUF1QkEsZUFBS3JCLFNBQVN5QixTQUFTLHFCQUE3RDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQStFO0FBQUEsUUFDL0UsdUJBQUMsU0FBSSxXQUFVLG9CQUNaSjtBQUFBQSxlQUFLSyxRQUFRQztBQUFBQSxVQUFhO0FBQUEsVUFBR04sS0FBS2xFLFVBQVV5RSxRQUFRLEtBQUssR0FBRztBQUFBLFVBQUU7QUFBQSxhQURqRTtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBRUE7QUFBQSxXQUpGO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFLQTtBQUFBLElBRUo7QUFBQSxJQUNBO0FBQUEsTUFDRVQsUUFBUTtBQUFBLE1BQ1JDLFFBQVFBLENBQUNDLFNBQ1AsdUJBQUMsU0FDQztBQUFBLCtCQUFDLFNBQUtULHNCQUFZUyxLQUFLeEIsTUFBTSxLQUE3QjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQStCO0FBQUEsUUFDL0I7QUFBQSxVQUFDO0FBQUE7QUFBQSxZQUNDLFdBQVcsY0FDVHdCLEtBQUt2QixjQUFjLGFBQ2YsZUFDQXVCLEtBQUt2QixjQUFjLGFBQ25CLGNBQ0EsY0FBYztBQUFBLFlBRXBCLE9BQU8sRUFBRWtCLFVBQVUsU0FBUztBQUFBLFlBRTNCSyxlQUFLdkI7QUFBQUE7QUFBQUEsVUFWUjtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsUUFXQTtBQUFBLFdBYkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQWNBO0FBQUEsSUFFSjtBQUFBLElBQ0E7QUFBQSxNQUNFcUIsUUFBUTtBQUFBLE1BQ1JDLFFBQVFBLENBQUNDLFNBQ1AsdUJBQUMsVUFBSyxXQUFVLG1DQUNiQSxlQUFLdEIsY0FBYzZCLFFBQVEsS0FBSyxHQUFHLEtBRHRDO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFFQTtBQUFBLElBRUo7QUFBQSxJQUNBO0FBQUEsTUFDRVQsUUFBUTtBQUFBLE1BQ1JDLFFBQVFBLENBQUNDLFNBQ1AsdUJBQUMsU0FBSSxPQUFPLEVBQUVRLFVBQVUsUUFBUSxHQUM5QjtBQUFBLCtCQUFDLFNBQUksV0FBVSxpQ0FBaUNSLGVBQUtTLFlBQXJEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBOEQ7QUFBQSxRQUM3RFQsS0FBS1UsYUFDSix1QkFBQyxTQUFJLFdBQVUsb0NBQ2I7QUFBQSxpQ0FBQyxZQUFPLGlCQUFSO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQVM7QUFBQSxVQUFTO0FBQUEsVUFBRVYsS0FBS1U7QUFBQUEsYUFEM0I7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUVBO0FBQUEsV0FMSjtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBT0E7QUFBQSxJQUVKO0FBQUEsSUFDQTtBQUFBLE1BQ0VaLFFBQVE7QUFBQSxNQUNSQyxRQUFRQSxDQUFDQyxTQUNQLHVCQUFDLFVBQUssV0FBVSx3QkFDYixjQUFJVyxLQUFLWCxLQUFLWSxlQUFlWixLQUFLYSxTQUFTLEVBQUVDLG1CQUFtQixLQURuRTtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBRUE7QUFBQSxJQUVKO0FBQUEsSUFDQTtBQUFBLE1BQ0VoQixRQUFRO0FBQUEsTUFDUkMsUUFBUUEsQ0FBQ0MsU0FDUDtBQUFBLFFBQUM7QUFBQTtBQUFBLFVBQ0MsTUFBSztBQUFBLFVBQ0wsV0FBVTtBQUFBLFVBQ1YsU0FBUyxNQUFNN0Isb0JBQW9CNkIsSUFBSTtBQUFBLFVBQ3ZDLElBQUkscUJBQXFCQSxLQUFLZSxHQUFHO0FBQUEsVUFFakM7QUFBQSxtQ0FBQyxPQUFFLFdBQVUsMEJBQWI7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFBb0M7QUFBQSxZQUFJO0FBQUE7QUFBQTtBQUFBLFFBTjFDO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxNQU9BO0FBQUEsSUFFSjtBQUFBLEVBQUM7QUFHSCxRQUFNQyxnQkFDSm5GLG1CQUFtQixRQUNmLGtCQUNBTixnQkFBZ0JNLGNBQWMsS0FBS0E7QUFFekMsU0FDRSx1QkFBQyxTQUFJLFdBQVdMLE9BQU95RixXQUNyQjtBQUFBO0FBQUEsTUFBQztBQUFBO0FBQUEsUUFDQyxPQUFPLEdBQUdELGFBQWE7QUFBQSxRQUN2QixVQUFTO0FBQUEsUUFDVCxTQUNFO0FBQUEsVUFBQztBQUFBO0FBQUEsWUFDQyxNQUFLO0FBQUEsWUFDTCxXQUFVO0FBQUEsWUFDVixJQUFHO0FBQUEsWUFDSCxTQUFTaEM7QUFBQUEsWUFDVCxVQUFVL0I7QUFBQUEsWUFFVjtBQUFBLHFDQUFDLE9BQUUsV0FBVyw2QkFBNkJBLGlCQUFpQixZQUFZLEVBQUUsTUFBMUU7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBOEU7QUFBQSxjQUM5RSx1QkFBQyxVQUFLLGdDQUFOO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQXNCO0FBQUE7QUFBQTtBQUFBLFVBUnhCO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxRQVNBO0FBQUE7QUFBQSxNQWJKO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxJQWNHO0FBQUEsSUFJSCx1QkFBQyxTQUFJLFdBQVd6QixPQUFPMEYsV0FDckI7QUFBQSw2QkFBQyxZQUFTLE9BQU0sNEJBQTJCLE9BQU8xRSxRQUFRRixTQUFTSixXQUFXSSxPQUFPLE1BQUssaUJBQTFGO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFBdUc7QUFBQSxNQUN2RztBQUFBLFFBQUM7QUFBQTtBQUFBLFVBQ0MsT0FBTTtBQUFBLFVBQ04sT0FBT0UsUUFBUUUsZ0JBQWdCLEdBQUdGLFFBQVFFLGFBQWEsV0FBVztBQUFBLFVBQ2xFLE1BQUs7QUFBQTtBQUFBLFFBSFA7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLE1BR2dCO0FBQUEsTUFFaEI7QUFBQSxRQUFDO0FBQUE7QUFBQSxVQUNDLE9BQU07QUFBQSxVQUNOLE9BQ0VLLGFBQWFvRSxxQkFDVCxHQUFHcEUsWUFBWW9FLG1CQUFtQkMsWUFBWSxDQUFDLEtBQUtDLEtBQUtDO0FBQUFBLGFBQ3JEdkUsWUFBWW9FLG1CQUFtQkMsWUFBWSxNQUFNckUsWUFBWXdFLGlCQUFpQixLQUFNO0FBQUEsVUFDeEYsQ0FBQyxPQUNEO0FBQUEsVUFFTixNQUFLO0FBQUE7QUFBQSxRQVRQO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxNQVNzQjtBQUFBLE1BRXRCO0FBQUEsUUFBQztBQUFBO0FBQUEsVUFDQyxPQUFNO0FBQUEsVUFDTixPQUNFeEUsYUFBYW9FLHFCQUNULEdBQUdwRSxZQUFZb0UsbUJBQW1CSyxZQUFZLENBQUMsZUFDL0M7QUFBQSxVQUVOLE1BQUs7QUFBQTtBQUFBLFFBUFA7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLE1BT2dDO0FBQUEsU0F6QmxDO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0EyQkE7QUFBQSxJQUdBLHVCQUFDLFNBQUksV0FBV2hHLE9BQU9pRyxjQUNyQjtBQUFBLDZCQUFDLFNBQUksV0FBV2pHLE9BQU9rRyxnQkFDckI7QUFBQSwrQkFBQyxTQUFJLFdBQVdsRyxPQUFPbUcsZUFDckI7QUFBQSxpQ0FBQyxPQUFFLFdBQVUsK0NBQWI7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBeUQ7QUFBQSxVQUN6RCx1QkFBQyxVQUFLLHlDQUFOO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQStCO0FBQUEsVUFDL0IsdUJBQUMsVUFBSyxXQUFXbkcsT0FBT29HLGVBQ3JCN0UsdUJBQWE4RSxVQUFVQyxTQUFTLFFBQVEsSUFDckMsNEJBQ0Esd0NBSE47QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFJQTtBQUFBLGFBUEY7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQVFBO0FBQUEsUUFFQSx1QkFBQyxTQUFJLFdBQVUsb0RBQ2I7QUFBQSxpQ0FBQyxPQUFFLFdBQVUsMEJBQWI7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBb0M7QUFBQSxVQUNwQyx1QkFBQyxVQUNFL0U7QUFBQUEseUJBQWF3RSxpQkFBaUI7QUFBQSxZQUFFO0FBQUEsWUFBdUM7QUFBQSxZQUN4RSx1QkFBQyxZQUFReEU7QUFBQUEsMkJBQWFMLGlCQUFpQjtBQUFBLGNBQUU7QUFBQSxpQkFBekM7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFBK0M7QUFBQSxlQUZqRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQUdBO0FBQUEsYUFMRjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBTUE7QUFBQSxXQWpCRjtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBa0JBO0FBQUEsTUFFQ08saUJBQ0MsdUJBQUMsU0FBSSxXQUFVLG9CQUNiO0FBQUEsK0JBQUMsU0FBSSxXQUFVLGlDQUFnQyxNQUFLLFlBQXBEO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBNkQ7QUFBQSxRQUM3RCx1QkFBQyxTQUFJLFdBQVUsb0JBQW1CLDhEQUFsQztBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWdGO0FBQUEsV0FGbEY7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUdBLElBQ0VFLGVBQ0YsdUJBQUMsU0FBSSxXQUFVLHNDQUFzQ0EsMEJBQXJEO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFBa0UsSUFDaEUsQ0FBQ0osZUFBZUEsWUFBWXdFLGtCQUFrQixJQUNoRCx1QkFBQyxTQUFJLFdBQVUscUNBQW1DLHVGQUFsRDtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBRUEsSUFFQSx1QkFBQyxTQUVFeEU7QUFBQUEsb0JBQVlnRixxQkFDWCx1QkFBQyxTQUFJLFdBQVUsa0dBQ2I7QUFBQSxpQ0FBQyxPQUFFLFdBQVUsNENBQWI7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBc0Q7QUFBQSxVQUNyRGhGLFlBQVlnRjtBQUFBQSxhQUZmO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFHQTtBQUFBLFFBSURoRixZQUFZaUYsYUFBYWpGLFlBQVlpRixVQUFVQyxTQUFTLEtBQ3ZELHVCQUFDLFNBQUksV0FBVSxRQUNiO0FBQUEsaUNBQUMsU0FBSSxXQUFVLCtDQUE4QyxvQ0FBN0Q7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBaUY7QUFBQSxVQUNqRix1QkFBQyxTQUFJLFdBQVd6RyxPQUFPMEcsaUJBQ3BCbkYsc0JBQVlpRixVQUFVRztBQUFBQSxZQUFJLENBQUNDLE9BQU8zQyxNQUNqQyx1QkFBQyxVQUFhLFdBQVdqRSxPQUFPNkcsV0FDOUI7QUFBQSxxQ0FBQyxPQUFFLFdBQVUsMEJBQWI7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBb0M7QUFBQSxjQUFJO0FBQUEsY0FBRUQ7QUFBQUEsaUJBRGpDM0MsR0FBWDtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUVBO0FBQUEsVUFDRCxLQUxIO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBTUE7QUFBQSxhQVJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFTQTtBQUFBLFFBSUYsdUJBQUMsU0FBSSxXQUFXakUsT0FBTzhHLGNBRXJCO0FBQUEsaUNBQUMsU0FBSSxXQUFXOUcsT0FBTytHLGdCQUNyQjtBQUFBLG1DQUFDLFNBQUksV0FBVy9HLE9BQU9nSCxjQUNyQjtBQUFBLHFDQUFDLE9BQUUsV0FBVSwyQ0FBYjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUFxRDtBQUFBLGNBQ3JELHVCQUFDLFVBQUssd0NBQU47QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBOEI7QUFBQSxpQkFGaEM7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFHQTtBQUFBLFlBQ0EsdUJBQUMsUUFBRyxXQUFXaEgsT0FBT2lILGFBQ25CMUYsc0JBQVkyRix3QkFBd0JQO0FBQUFBLGNBQUksQ0FBQ1EsS0FBS2xELE1BQzdDLHVCQUFDLFFBQVcsV0FBV2pFLE9BQU9vSCxhQUFjRCxpQkFBbkNsRCxHQUFUO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQWdEO0FBQUEsWUFDakQsS0FISDtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUlBO0FBQUEsZUFURjtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQVVBO0FBQUEsVUFHQSx1QkFBQyxTQUFJLFdBQVdqRSxPQUFPK0csZ0JBQ3JCO0FBQUEsbUNBQUMsU0FBSSxXQUFXL0csT0FBT2dILGNBQ3JCO0FBQUEscUNBQUMsT0FBRSxXQUFVLG1EQUFiO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQTZEO0FBQUEsY0FDN0QsdUJBQUMsVUFBSyxxQ0FBTjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUEyQjtBQUFBLGlCQUY3QjtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUdBO0FBQUEsWUFDQSx1QkFBQyxRQUFHLFdBQVdoSCxPQUFPaUgsYUFDbkIxRixzQkFBWThGLHFCQUFxQlY7QUFBQUEsY0FBSSxDQUFDVyxLQUFLckQsTUFDMUMsdUJBQUMsUUFBVyxXQUFXakUsT0FBT29ILGFBQWNFLGlCQUFuQ3JELEdBQVQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBZ0Q7QUFBQSxZQUNqRCxLQUhIO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBSUE7QUFBQSxlQVRGO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBVUE7QUFBQSxVQUdBLHVCQUFDLFNBQUksV0FBV2pFLE9BQU8rRyxnQkFDckI7QUFBQSxtQ0FBQyxTQUFJLFdBQVcvRyxPQUFPZ0gsY0FDckI7QUFBQSxxQ0FBQyxPQUFFLFdBQVUscUNBQWI7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBK0M7QUFBQSxjQUMvQyx1QkFBQyxVQUFLLGtDQUFOO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQXdCO0FBQUEsaUJBRjFCO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBR0E7QUFBQSxZQUNBLHVCQUFDLFFBQUcsV0FBV2hILE9BQU9pSCxhQUNuQjFGLHNCQUFZZ0csbUJBQW1CWjtBQUFBQSxjQUFJLENBQUNhLEtBQUt2RCxNQUN4Qyx1QkFBQyxRQUFXLFdBQVdqRSxPQUFPb0gsYUFBY0ksaUJBQW5DdkQsR0FBVDtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUFnRDtBQUFBLFlBQ2pELEtBSEg7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFJQTtBQUFBLGVBVEY7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFVQTtBQUFBLFVBR0EsdUJBQUMsU0FBSSxXQUFXakUsT0FBTytHLGdCQUNyQjtBQUFBLG1DQUFDLFNBQUksV0FBVy9HLE9BQU9nSCxjQUNyQjtBQUFBLHFDQUFDLE9BQUUsV0FBVSxrQ0FBYjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUE0QztBQUFBLGNBQzVDLHVCQUFDLFVBQUssaUNBQU47QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBdUI7QUFBQSxpQkFGekI7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFHQTtBQUFBLFlBQ0EsdUJBQUMsUUFBRyxXQUFXaEgsT0FBT2lILGFBQ25CMUYsc0JBQVlrRyxrQkFBa0JkO0FBQUFBLGNBQUksQ0FBQ2UsS0FBS3pELE1BQ3ZDLHVCQUFDLFFBQVcsV0FBV2pFLE9BQU9vSCxhQUFjTSxpQkFBbkN6RCxHQUFUO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQWdEO0FBQUEsWUFDakQsS0FISDtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUlBO0FBQUEsZUFURjtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQVVBO0FBQUEsYUFuREY7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQW9EQTtBQUFBLFFBR0MxQyxZQUFZb0csMEJBQTBCcEcsWUFBWW9HLHVCQUF1QmxCLFNBQVMsS0FDakYsdUJBQUMsU0FBSSxXQUFVLHVEQUNiO0FBQUEsaUNBQUMsU0FBSSxXQUFVLCtDQUE4QyxnREFBN0Q7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBNkY7QUFBQSxVQUM3Rix1QkFBQyxTQUFJLFdBQVd6RyxPQUFPNEgsaUJBQ3BCckcsc0JBQVlvRyx1QkFBdUJoQjtBQUFBQSxZQUFJLENBQUNrQixPQUFPNUQsTUFDOUMsdUJBQUMsU0FBWSxXQUFXakUsT0FBTzhILFdBQVU7QUFBQTtBQUFBLGNBQ3JDRDtBQUFBQSxjQUFNO0FBQUEsaUJBREE1RCxHQUFWO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBRUE7QUFBQSxVQUNELEtBTEg7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFNQTtBQUFBLGFBUkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQVNBO0FBQUEsV0F6Rko7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQTJGQTtBQUFBLFNBNUhKO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0E4SEE7QUFBQSxJQUdBLHVCQUFDLFNBQUksV0FBV2pFLE9BQU8rSCxTQUNyQjtBQUFBLDZCQUFDLFNBQUksV0FBVy9ILE9BQU9nSSxXQUNyQjtBQUFBLFFBQUM7QUFBQTtBQUFBLFVBQ0MsTUFBSztBQUFBLFVBQ0wsV0FBVTtBQUFBLFVBQ1YsYUFBWTtBQUFBLFVBQ1osT0FBTzNGO0FBQUFBLFVBQ1AsVUFBVSxDQUFDNEYsTUFBTTtBQUNmM0Ysc0JBQVUyRixFQUFFQyxPQUFPQyxLQUFLO0FBQ3hCNUYsb0JBQVEsQ0FBQztBQUFBLFVBQ1g7QUFBQSxVQUNBLElBQUc7QUFBQTtBQUFBLFFBVEw7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLE1BUzRCLEtBVjlCO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFZQTtBQUFBLE1BRUEsdUJBQUMsU0FBSSxXQUFXdkMsT0FBT29JLFNBQ3JCO0FBQUE7QUFBQSxVQUFDO0FBQUE7QUFBQSxZQUNDLFdBQVdwSSxPQUFPcUk7QUFBQUEsWUFDbEIsT0FBT3hHO0FBQUFBLFlBQ1AsVUFBVSxDQUFDb0csTUFBTTtBQUNmbkcsOEJBQWdCbUcsRUFBRUMsT0FBT0MsS0FBSztBQUM5QjVGLHNCQUFRLENBQUM7QUFBQSxZQUNYO0FBQUEsWUFDQSxJQUFHO0FBQUEsWUFFSDtBQUFBLHFDQUFDLFlBQU8sT0FBTSxJQUFHLDJCQUFqQjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUE0QjtBQUFBLGNBQzVCLHVCQUFDLFlBQU8sT0FBTSxLQUFJLHVCQUFsQjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUF5QjtBQUFBLGNBQ3pCLHVCQUFDLFlBQU8sT0FBTSxLQUFJLHVCQUFsQjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUF5QjtBQUFBLGNBQ3pCLHVCQUFDLFlBQU8sT0FBTSxLQUFJLHVCQUFsQjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUF5QjtBQUFBLGNBQ3pCLHVCQUFDLFlBQU8sT0FBTSxLQUFJLHVCQUFsQjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUF5QjtBQUFBLGNBQ3pCLHVCQUFDLFlBQU8sT0FBTSxLQUFJLHNCQUFsQjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUF3QjtBQUFBO0FBQUE7QUFBQSxVQWQxQjtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsUUFlQTtBQUFBLFFBRUE7QUFBQSxVQUFDO0FBQUE7QUFBQSxZQUNDLFdBQVd2QyxPQUFPcUk7QUFBQUEsWUFDbEIsT0FBT3RHO0FBQUFBLFlBQ1AsVUFBVSxDQUFDa0csTUFBTTtBQUNmakcsaUNBQW1CaUcsRUFBRUMsT0FBT0MsS0FBSztBQUNqQzVGLHNCQUFRLENBQUM7QUFBQSxZQUNYO0FBQUEsWUFDQSxJQUFHO0FBQUEsWUFFSDtBQUFBLHFDQUFDLFlBQU8sT0FBTSxJQUFHLDhCQUFqQjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUErQjtBQUFBLGNBQy9CLHVCQUFDLFlBQU8sT0FBTSxZQUFXLHdCQUF6QjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUFpQztBQUFBLGNBQ2pDLHVCQUFDLFlBQU8sT0FBTSxXQUFVLHVCQUF4QjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUErQjtBQUFBLGNBQy9CLHVCQUFDLFlBQU8sT0FBTSxZQUFXLHdCQUF6QjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUFpQztBQUFBO0FBQUE7QUFBQSxVQVpuQztBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsUUFhQTtBQUFBLFFBRUE7QUFBQSxVQUFDO0FBQUE7QUFBQSxZQUNDLFdBQVd2QyxPQUFPcUk7QUFBQUEsWUFDbEIsT0FBT3BHO0FBQUFBLFlBQ1AsVUFBVSxDQUFDZ0csTUFBTTtBQUNmL0YsNEJBQWMrRixFQUFFQyxPQUFPQyxLQUFLO0FBQzVCNUYsc0JBQVEsQ0FBQztBQUFBLFlBQ1g7QUFBQSxZQUNBLElBQUc7QUFBQSxZQUVIO0FBQUEscUNBQUMsWUFBTyxPQUFNLElBQUcseUJBQWpCO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQTBCO0FBQUEsY0FDMUIsdUJBQUMsWUFBTyxPQUFNLGtCQUFpQiw4QkFBL0I7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBNkM7QUFBQSxjQUM3Qyx1QkFBQyxZQUFPLE9BQU0sY0FBYSwwQkFBM0I7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBcUM7QUFBQSxjQUNyQyx1QkFBQyxZQUFPLE9BQU0sWUFBVyw4QkFBekI7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBdUM7QUFBQSxjQUN2Qyx1QkFBQyxZQUFPLE9BQU0sWUFBVyxrQ0FBekI7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBMkM7QUFBQSxjQUMzQyx1QkFBQyxZQUFPLE9BQU0sV0FBVSx1QkFBeEI7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBK0I7QUFBQTtBQUFBO0FBQUEsVUFkakM7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLFFBZUE7QUFBQSxRQUVBO0FBQUEsVUFBQztBQUFBO0FBQUEsWUFDQyxXQUFXdkMsT0FBT3FJO0FBQUFBLFlBQ2xCLE9BQU9sRztBQUFBQSxZQUNQLFVBQVUsQ0FBQzhGLE1BQU07QUFDZjdGLCtCQUFpQjZGLEVBQUVDLE9BQU9DLEtBQUs7QUFDL0I1RixzQkFBUSxDQUFDO0FBQUEsWUFDWDtBQUFBLFlBQ0EsSUFBRztBQUFBLFlBRUg7QUFBQSxxQ0FBQyxZQUFPLE9BQU0sSUFBRyw0QkFBakI7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBNkI7QUFBQSxjQUM1QkMsU0FBU21FO0FBQUFBLGdCQUFJLENBQUMyQixNQUNiLHVCQUFDLFlBQW1CLE9BQU9BLEVBQUUvQyxLQUMxQitDLFlBQUUxRCxTQURRMEQsRUFBRS9DLEtBQWY7QUFBQTtBQUFBO0FBQUE7QUFBQSx1QkFFQTtBQUFBLGNBQ0Q7QUFBQTtBQUFBO0FBQUEsVUFkSDtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsUUFlQTtBQUFBLFdBakVGO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFrRUE7QUFBQSxTQWpGRjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBa0ZBO0FBQUEsSUFHQ3BFLFVBQ0MsdUJBQUMsZ0JBQWEsU0FBUSxpQ0FBdEI7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQUFtRCxJQUNqREUsUUFDRix1QkFBQyxjQUFXLFNBQVNBLE9BQU8sU0FBU3VCLGlCQUFyQztBQUFBO0FBQUE7QUFBQTtBQUFBLFdBQW1ELElBQ2pEcEMsYUFBYWlHLFdBQVcsSUFDMUI7QUFBQSxNQUFDO0FBQUE7QUFBQSxRQUNDLE9BQU07QUFBQSxRQUNOLFNBQVE7QUFBQTtBQUFBLE1BRlY7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLElBRWdKLElBR2hKO0FBQUEsTUFBQztBQUFBO0FBQUEsUUFDQztBQUFBLFFBQ0EsTUFBTWpHO0FBQUFBLFFBQ047QUFBQSxRQUNBLGNBQWMsQ0FBQzhILE1BQU0vRixRQUFRK0YsQ0FBQztBQUFBLFFBQzlCLElBQUc7QUFBQTtBQUFBLE1BTEw7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLElBSzZCO0FBQUEsSUFLOUI1RixvQkFDQztBQUFBLE1BQUM7QUFBQTtBQUFBLFFBQ0MsUUFBUTZGLFFBQVE3RixnQkFBZ0I7QUFBQSxRQUNoQyxTQUFTLE1BQU1DLG9CQUFvQixJQUFJO0FBQUEsUUFDdkMsT0FBTTtBQUFBLFFBQ04sTUFBSztBQUFBLFFBRUw7QUFBQSxpQ0FBQyxTQUFJLFdBQVUsMERBQ2I7QUFBQSxtQ0FBQyxTQUNDO0FBQUEscUNBQUMsU0FBSSxXQUFVLHFCQUFxQkQsMkJBQWlCK0IsU0FBU0MsWUFBWSx1QkFBMUU7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBOEY7QUFBQSxjQUM5Rix1QkFBQyxTQUFJLFdBQVUsb0JBQW9CaEMsMkJBQWlCK0IsU0FBU0UsU0FBN0Q7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBbUU7QUFBQSxpQkFGckU7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFHQTtBQUFBLFlBQ0EsdUJBQUMsU0FBSSxXQUFVLFlBQ2I7QUFBQSxxQ0FBQyxTQUFLWixzQkFBWXJCLGlCQUFpQk0sTUFBTSxLQUF6QztBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUEyQztBQUFBLGNBQzNDO0FBQUEsZ0JBQUM7QUFBQTtBQUFBLGtCQUNDLFdBQVcsY0FDVE4saUJBQWlCTyxjQUFjLGFBQzNCLGVBQ0FQLGlCQUFpQk8sY0FBYyxhQUMvQixjQUNBLGNBQWM7QUFBQSxrQkFHbkJQLDJCQUFpQk87QUFBQUE7QUFBQUEsZ0JBVHBCO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxjQVVBO0FBQUEsaUJBWkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFhQTtBQUFBLGVBbEJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBbUJBO0FBQUEsVUFFQSx1QkFBQyxTQUFJLFdBQVUsMENBQ2IsaUNBQUMsU0FBSSxXQUFVLFdBQ2I7QUFBQSxtQ0FBQyxTQUFJLFdBQVUsWUFDYjtBQUFBLHFDQUFDLFVBQUssV0FBVSw4QkFBNkIsd0JBQTdDO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQXFEO0FBQUEsY0FDckQsdUJBQUMsU0FBSSxXQUFVLHVCQUF1QlAsMkJBQWlCUyxTQUFTeUIsU0FBaEU7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBc0U7QUFBQSxpQkFGeEU7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFHQTtBQUFBLFlBQ0EsdUJBQUMsU0FBSSxXQUFVLFlBQ2I7QUFBQSxxQ0FBQyxVQUFLLFdBQVUsOEJBQTZCLHVCQUE3QztBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUFvRDtBQUFBLGNBQ3BELHVCQUFDLFNBQUksV0FBVSx1QkFBdUJsQztBQUFBQSxpQ0FBaUJtQyxRQUFRQztBQUFBQSxnQkFBYTtBQUFBLGdCQUFHcEMsaUJBQWlCcEMsVUFBVXlFLFFBQVEsS0FBSyxHQUFHO0FBQUEsZ0JBQUU7QUFBQSxtQkFBNUg7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBNkg7QUFBQSxpQkFGL0g7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFHQTtBQUFBLFlBQ0EsdUJBQUMsU0FBSSxXQUFVLFlBQ2I7QUFBQSxxQ0FBQyxVQUFLLFdBQVUsOEJBQTZCLDhCQUE3QztBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUEyRDtBQUFBLGNBQzNELHVCQUFDLFNBQUksV0FBVSx1QkFBdUJyQywyQkFBaUJRLGNBQWM2QixRQUFRLEtBQUssR0FBRyxLQUFyRjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQUF1RjtBQUFBLGlCQUZ6RjtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUdBO0FBQUEsWUFDQSx1QkFBQyxTQUFJLFdBQVUsWUFDYjtBQUFBLHFDQUFDLFVBQUssV0FBVSw4QkFBNkIsZ0NBQTdDO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQTZEO0FBQUEsY0FDN0QsdUJBQUMsU0FBSSxXQUFVLHVCQUF1QixjQUFJSSxLQUFLekMsaUJBQWlCMEMsZUFBZTFDLGlCQUFpQjJDLFNBQVMsRUFBRW1ELGVBQWUsS0FBMUg7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBNEg7QUFBQSxpQkFGOUg7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFHQTtBQUFBLGVBaEJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBaUJBLEtBbEJGO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBbUJBO0FBQUEsVUFFQSx1QkFBQyxTQUFJLFdBQVUsUUFDYjtBQUFBLG1DQUFDLFdBQU0sV0FBVSxzQ0FBcUMseUNBQXREO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQStFO0FBQUEsWUFDL0UsdUJBQUMsU0FBSSxXQUFVLCtDQUE4QyxPQUFPLEVBQUVDLFdBQVcsUUFBUUMsWUFBWSxJQUFJLEdBQ3RHaEcsMkJBQWlCdUMsWUFEcEI7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQTtBQUFBLGVBSkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFLQTtBQUFBLFVBRUN2QyxpQkFBaUJ3QyxhQUNoQix1QkFBQyxTQUFJLFdBQVUsUUFDYjtBQUFBLG1DQUFDLFdBQU0sV0FBVSx5Q0FBd0MsK0JBQXpEO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQXdFO0FBQUEsWUFDeEUsdUJBQUMsU0FBSSxXQUFVLGdHQUNaeEMsMkJBQWlCd0MsYUFEcEI7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQTtBQUFBLGVBSkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFLQTtBQUFBLFVBR0R4QyxpQkFBaUJpRyxnQkFDaEIsdUJBQUMsU0FBSSxXQUFVLFFBQ2I7QUFBQSxtQ0FBQyxXQUFNLFdBQVUseUNBQXdDLHNDQUF6RDtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUErRTtBQUFBLFlBQy9FLHVCQUFDLFNBQUksV0FBVSxnR0FDWmpHLDJCQUFpQmlHLGdCQURwQjtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUVBO0FBQUEsZUFKRjtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQUtBO0FBQUEsVUFHRix1QkFBQyxTQUFJLFdBQVUsOENBQ2I7QUFBQSxZQUFDO0FBQUE7QUFBQSxjQUNDLE1BQUs7QUFBQSxjQUNMLFdBQVU7QUFBQSxjQUNWLFNBQVMsTUFBTWhHLG9CQUFvQixJQUFJO0FBQUEsY0FBRTtBQUFBO0FBQUEsWUFIM0M7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLFVBTUEsS0FQRjtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQVFBO0FBQUE7QUFBQTtBQUFBLE1BakZGO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxJQWtGQTtBQUFBLE9BOVdKO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0FnWEE7QUFFSjtBQUFDekMsR0EzakJ1QkQsY0FBWTtBQUFBLFVBQ2pCSixTQUNGWCxTQUFTO0FBQUE7QUFBQSxLQUZGZTtBQUFZLElBQUEySTtBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VTdGF0ZSIsInVzZUVmZmVjdCIsInVzZUNhbGxiYWNrIiwidXNlUGFyYW1zIiwiUGFnZUhlYWRlciIsIlN0YXRDYXJkIiwiRGF0YVRhYmxlIiwiU3RhdHVzQmFkZ2UiLCJNb2RhbCIsIkxvYWRpbmdTdGF0ZSIsIkVtcHR5U3RhdGUiLCJFcnJvclN0YXRlIiwiYWRtaW5TZXJ2aWNlIiwicHJvZ3JhbVNlcnZpY2UiLCJ1c2VBdXRoIiwiUk9MRV9UT19ESVZJU0lPTiIsIkRJVklTSU9OX0xBQkVMUyIsInN0eWxlcyIsIkZlZWRiYWNrUGFnZSIsIl9zIiwidXNlciIsInBhcmFtcyIsImFjdGl2ZURpdmlzaW9uIiwiZGl2aXNpb24iLCJyb2xlIiwiZmVlZGJhY2tMaXN0Iiwic2V0RmVlZGJhY2tMaXN0IiwicGFnaW5hdGlvbiIsInNldFBhZ2luYXRpb24iLCJwYWdlIiwibGltaXQiLCJ0b3RhbCIsInRvdGFsUGFnZXMiLCJtZXRyaWNzIiwic2V0TWV0cmljcyIsImF2ZXJhZ2VSYXRpbmciLCJsb2FkaW5nIiwic2V0TG9hZGluZyIsImVycm9yIiwic2V0RXJyb3IiLCJzdW1tYXJ5RGF0YSIsInNldFN1bW1hcnlEYXRhIiwic3VtbWFyeUxvYWRpbmciLCJzZXRTdW1tYXJ5TG9hZGluZyIsInN1bW1hcnlFcnJvciIsInNldFN1bW1hcnlFcnJvciIsInJhdGluZ0ZpbHRlciIsInNldFJhdGluZ0ZpbHRlciIsInNlbnRpbWVudEZpbHRlciIsInNldFNlbnRpbWVudEZpbHRlciIsInR5cGVGaWx0ZXIiLCJzZXRUeXBlRmlsdGVyIiwicHJvZ3JhbUZpbHRlciIsInNldFByb2dyYW1GaWx0ZXIiLCJzZWFyY2giLCJzZXRTZWFyY2giLCJzZXRQYWdlIiwicHJvZ3JhbXMiLCJzZXRQcm9ncmFtcyIsInNlbGVjdGVkRmVlZGJhY2siLCJzZXRTZWxlY3RlZEZlZWRiYWNrIiwiZmV0Y2hGZWVkYmFjayIsInJlcyIsImxpc3RGZWVkYmFjayIsInVuZGVmaW5lZCIsInJhdGluZyIsInNlbnRpbWVudCIsImZlZWRiYWNrVHlwZSIsInByb2dyYW0iLCJ0cmltIiwiZmVlZGJhY2siLCJlcnIiLCJtZXNzYWdlIiwiZmV0Y2hTdW1tYXJ5IiwiZ2V0RmVlZGJhY2tTdW1tYXJ5Iiwic3VtbWFyeSIsImxvYWRQcm9ncmFtcyIsInF1ZXJ5IiwibGlzdFByb2dyYW1zIiwiY29uc29sZSIsInJlbmRlclN0YXJzIiwic3RhcnMiLCJpIiwicHVzaCIsImZvbnRTaXplIiwiZmVlZGJhY2tSYXRpbmciLCJjb2x1bW5zIiwiaGVhZGVyIiwicmVuZGVyIiwiaXRlbSIsInN0dWRlbnQiLCJmdWxsTmFtZSIsImVtYWlsIiwidGl0bGUiLCJjb2hvcnQiLCJjb2hvcnROdW1iZXIiLCJyZXBsYWNlIiwibWF4V2lkdGgiLCJjb21tZW50cyIsInN0cmVuZ3RocyIsIkRhdGUiLCJzdWJtaXR0ZWRBdCIsImNyZWF0ZWRBdCIsInRvTG9jYWxlRGF0ZVN0cmluZyIsIl9pZCIsImRpdmlzaW9uVGl0bGUiLCJjb250YWluZXIiLCJzdGF0c0dyaWQiLCJzZW50aW1lbnRCcmVha2Rvd24iLCJQT1NJVElWRSIsIk1hdGgiLCJyb3VuZCIsInRvdGFsQW5hbHl6ZWQiLCJORUdBVElWRSIsImluc2lnaHRzQ2FyZCIsImluc2lnaHRzSGVhZGVyIiwiaW5zaWdodHNUaXRsZSIsImluc2lnaHRzQmFkZ2UiLCJwcm92aWRlciIsImluY2x1ZGVzIiwiZXhlY3V0aXZlT3ZlcnZpZXciLCJrZXlUaGVtZXMiLCJsZW5ndGgiLCJ0aGVtZXNDb250YWluZXIiLCJtYXAiLCJ0aGVtZSIsInRoZW1lQ2hpcCIsImluc2lnaHRzR3JpZCIsImluc2lnaHRTZWN0aW9uIiwic2VjdGlvblRpdGxlIiwiaW5zaWdodExpc3QiLCJtb3N0TWVudGlvbmVkU3RyZW5ndGhzIiwic3RyIiwiaW5zaWdodEl0ZW0iLCJtb3N0TWVudGlvbmVkSXNzdWVzIiwiaXNzIiwiY29tbW9uU3VnZ2VzdGlvbnMiLCJzdWciLCJpbXBvcnRhbnRTaWduYWxzIiwic2lnIiwicmVwcmVzZW50YXRpdmVGZWVkYmFjayIsInF1b3Rlc0NvbnRhaW5lciIsInF1b3RlIiwicXVvdGVJdGVtIiwidG9vbGJhciIsInNlYXJjaEJveCIsImUiLCJ0YXJnZXQiLCJ2YWx1ZSIsImZpbHRlcnMiLCJzZWxlY3RJbnB1dCIsInAiLCJCb29sZWFuIiwidG9Mb2NhbGVTdHJpbmciLCJtaW5IZWlnaHQiLCJsaW5lSGVpZ2h0IiwiaW1wcm92ZW1lbnRzIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiRmVlZGJhY2tQYWdlLmpzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VTdGF0ZSwgdXNlRWZmZWN0LCB1c2VDYWxsYmFjayB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IHVzZVBhcmFtcyB9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xuaW1wb3J0IFBhZ2VIZWFkZXIgZnJvbSAnLi4vLi4vY29tcG9uZW50cy9jb21tb24vUGFnZUhlYWRlcic7XG5pbXBvcnQgU3RhdENhcmQgZnJvbSAnLi4vLi4vY29tcG9uZW50cy9jb21tb24vU3RhdENhcmQnO1xuaW1wb3J0IERhdGFUYWJsZSBmcm9tICcuLi8uLi9jb21wb25lbnRzL2NvbW1vbi9EYXRhVGFibGUnO1xuaW1wb3J0IFN0YXR1c0JhZGdlIGZyb20gJy4uLy4uL2NvbXBvbmVudHMvY29tbW9uL1N0YXR1c0JhZGdlJztcbmltcG9ydCBNb2RhbCBmcm9tICcuLi8uLi9jb21wb25lbnRzL2NvbW1vbi9Nb2RhbCc7XG5pbXBvcnQgTG9hZGluZ1N0YXRlIGZyb20gJy4uLy4uL2NvbXBvbmVudHMvY29tbW9uL0xvYWRpbmdTdGF0ZSc7XG5pbXBvcnQgRW1wdHlTdGF0ZSBmcm9tICcuLi8uLi9jb21wb25lbnRzL2NvbW1vbi9FbXB0eVN0YXRlJztcbmltcG9ydCBFcnJvclN0YXRlIGZyb20gJy4uLy4uL2NvbXBvbmVudHMvY29tbW9uL0Vycm9yU3RhdGUnO1xuaW1wb3J0IGFkbWluU2VydmljZSBmcm9tICcuLi8uLi9zZXJ2aWNlcy9hcGkvYWRtaW5TZXJ2aWNlJztcbmltcG9ydCBwcm9ncmFtU2VydmljZSBmcm9tICcuLi8uLi9zZXJ2aWNlcy9hcGkvcHJvZ3JhbVNlcnZpY2UnO1xuaW1wb3J0IHsgdXNlQXV0aCB9IGZyb20gJy4uLy4uL2hvb2tzL3VzZUF1dGgnO1xuaW1wb3J0IHsgUk9MRV9UT19ESVZJU0lPTiwgRElWSVNJT05fTEFCRUxTIH0gZnJvbSAnLi4vLi4vY29uc3RhbnRzL2RpdmlzaW9ucyc7XG5pbXBvcnQgc3R5bGVzIGZyb20gJy4vRmVlZGJhY2tQYWdlLm1vZHVsZS5jc3MnO1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBGZWVkYmFja1BhZ2UoKSB7XG4gIGNvbnN0IHsgdXNlciB9ID0gdXNlQXV0aCgpO1xuICBjb25zdCBwYXJhbXMgPSB1c2VQYXJhbXMoKTtcbiAgY29uc3QgYWN0aXZlRGl2aXNpb24gPSBwYXJhbXMuZGl2aXNpb24gfHwgUk9MRV9UT19ESVZJU0lPTlt1c2VyPy5yb2xlXSB8fCAnQUxMJztcblxuICAvLyBGZWVkYmFjayBUYWJsZSBTdGF0ZVxuICBjb25zdCBbZmVlZGJhY2tMaXN0LCBzZXRGZWVkYmFja0xpc3RdID0gdXNlU3RhdGUoW10pO1xuICBjb25zdCBbcGFnaW5hdGlvbiwgc2V0UGFnaW5hdGlvbl0gPSB1c2VTdGF0ZSh7IHBhZ2U6IDEsIGxpbWl0OiAyMCwgdG90YWw6IDAsIHRvdGFsUGFnZXM6IDEgfSk7XG4gIGNvbnN0IFttZXRyaWNzLCBzZXRNZXRyaWNzXSA9IHVzZVN0YXRlKHsgdG90YWw6IDAsIGF2ZXJhZ2VSYXRpbmc6IDAgfSk7XG4gIGNvbnN0IFtsb2FkaW5nLCBzZXRMb2FkaW5nXSA9IHVzZVN0YXRlKHRydWUpO1xuICBjb25zdCBbZXJyb3IsIHNldEVycm9yXSA9IHVzZVN0YXRlKCcnKTtcblxuICAvLyBBSSAvIFRoZW1hdGljIFN1bW1hcnkgU3RhdGVcbiAgY29uc3QgW3N1bW1hcnlEYXRhLCBzZXRTdW1tYXJ5RGF0YV0gPSB1c2VTdGF0ZShudWxsKTtcbiAgY29uc3QgW3N1bW1hcnlMb2FkaW5nLCBzZXRTdW1tYXJ5TG9hZGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFtzdW1tYXJ5RXJyb3IsIHNldFN1bW1hcnlFcnJvcl0gPSB1c2VTdGF0ZSgnJyk7XG5cbiAgLy8gRmlsdGVyc1xuICBjb25zdCBbcmF0aW5nRmlsdGVyLCBzZXRSYXRpbmdGaWx0ZXJdID0gdXNlU3RhdGUoJycpO1xuICBjb25zdCBbc2VudGltZW50RmlsdGVyLCBzZXRTZW50aW1lbnRGaWx0ZXJdID0gdXNlU3RhdGUoJycpO1xuICBjb25zdCBbdHlwZUZpbHRlciwgc2V0VHlwZUZpbHRlcl0gPSB1c2VTdGF0ZSgnJyk7XG4gIGNvbnN0IFtwcm9ncmFtRmlsdGVyLCBzZXRQcm9ncmFtRmlsdGVyXSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW3NlYXJjaCwgc2V0U2VhcmNoXSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW3BhZ2UsIHNldFBhZ2VdID0gdXNlU3RhdGUoMSk7XG4gIGNvbnN0IFtwcm9ncmFtcywgc2V0UHJvZ3JhbXNdID0gdXNlU3RhdGUoW10pO1xuXG4gIC8vIERldGFpbCBNb2RhbFxuICBjb25zdCBbc2VsZWN0ZWRGZWVkYmFjaywgc2V0U2VsZWN0ZWRGZWVkYmFja10gPSB1c2VTdGF0ZShudWxsKTtcblxuICAvLyBGZXRjaCBGZWVkYmFjayBMaXN0XG4gIGNvbnN0IGZldGNoRmVlZGJhY2sgPSB1c2VDYWxsYmFjayhhc3luYyAoKSA9PiB7XG4gICAgc2V0TG9hZGluZyh0cnVlKTtcbiAgICBzZXRFcnJvcignJyk7XG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHJlcyA9IGF3YWl0IGFkbWluU2VydmljZS5saXN0RmVlZGJhY2soe1xuICAgICAgICBkaXZpc2lvbjogYWN0aXZlRGl2aXNpb24gPT09ICdBTEwnID8gdW5kZWZpbmVkIDogYWN0aXZlRGl2aXNpb24sXG4gICAgICAgIHJhdGluZzogcmF0aW5nRmlsdGVyIHx8IHVuZGVmaW5lZCxcbiAgICAgICAgc2VudGltZW50OiBzZW50aW1lbnRGaWx0ZXIgfHwgdW5kZWZpbmVkLFxuICAgICAgICBmZWVkYmFja1R5cGU6IHR5cGVGaWx0ZXIgfHwgdW5kZWZpbmVkLFxuICAgICAgICBwcm9ncmFtOiBwcm9ncmFtRmlsdGVyIHx8IHVuZGVmaW5lZCxcbiAgICAgICAgc2VhcmNoOiBzZWFyY2gudHJpbSgpIHx8IHVuZGVmaW5lZCxcbiAgICAgICAgcGFnZSxcbiAgICAgICAgbGltaXQ6IDIwLFxuICAgICAgfSk7XG5cbiAgICAgIHNldEZlZWRiYWNrTGlzdChyZXMuZmVlZGJhY2sgfHwgW10pO1xuICAgICAgc2V0UGFnaW5hdGlvbihyZXMucGFnaW5hdGlvbiB8fCB7IHBhZ2U6IDEsIGxpbWl0OiAyMCwgdG90YWw6IDAsIHRvdGFsUGFnZXM6IDEgfSk7XG4gICAgICBzZXRNZXRyaWNzKHJlcy5tZXRyaWNzIHx8IHsgdG90YWw6IDAsIGF2ZXJhZ2VSYXRpbmc6IDAgfSk7XG4gICAgfSBjYXRjaCAoZXJyKSB7XG4gICAgICBzZXRFcnJvcihlcnIubWVzc2FnZSB8fCAnRmFpbGVkIHRvIGxvYWQgc3R1ZGVudCBmZWVkYmFjaycpO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRMb2FkaW5nKGZhbHNlKTtcbiAgICB9XG4gIH0sIFthY3RpdmVEaXZpc2lvbiwgcmF0aW5nRmlsdGVyLCBzZW50aW1lbnRGaWx0ZXIsIHR5cGVGaWx0ZXIsIHByb2dyYW1GaWx0ZXIsIHNlYXJjaCwgcGFnZV0pO1xuXG4gIC8vIEZldGNoIEFJL1RoZW1hdGljIFN1bW1hcnlcbiAgY29uc3QgZmV0Y2hTdW1tYXJ5ID0gdXNlQ2FsbGJhY2soYXN5bmMgKCkgPT4ge1xuICAgIHNldFN1bW1hcnlMb2FkaW5nKHRydWUpO1xuICAgIHNldFN1bW1hcnlFcnJvcignJyk7XG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHJlcyA9IGF3YWl0IGFkbWluU2VydmljZS5nZXRGZWVkYmFja1N1bW1hcnkoe1xuICAgICAgICBkaXZpc2lvbjogYWN0aXZlRGl2aXNpb24gPT09ICdBTEwnID8gdW5kZWZpbmVkIDogYWN0aXZlRGl2aXNpb24sXG4gICAgICAgIHByb2dyYW06IHByb2dyYW1GaWx0ZXIgfHwgdW5kZWZpbmVkLFxuICAgICAgfSk7XG4gICAgICBzZXRTdW1tYXJ5RGF0YShyZXMuc3VtbWFyeSB8fCBudWxsKTtcbiAgICB9IGNhdGNoIChlcnIpIHtcbiAgICAgIHNldFN1bW1hcnlFcnJvcihlcnIubWVzc2FnZSB8fCAnRmFpbGVkIHRvIGdlbmVyYXRlIGZlZWRiYWNrIHN1bW1hcnknKTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0U3VtbWFyeUxvYWRpbmcoZmFsc2UpO1xuICAgIH1cbiAgfSwgW2FjdGl2ZURpdmlzaW9uLCBwcm9ncmFtRmlsdGVyXSk7XG5cbiAgLy8gSW5pdGlhbCAmIEZpbHRlciBUcmlnZ2Vyc1xuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGZldGNoRmVlZGJhY2soKTtcbiAgfSwgW2ZldGNoRmVlZGJhY2tdKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGZldGNoU3VtbWFyeSgpO1xuICB9LCBbZmV0Y2hTdW1tYXJ5XSk7XG5cbiAgLy8gTG9hZCBwcm9ncmFtcyBkcm9wZG93blxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGFzeW5jIGZ1bmN0aW9uIGxvYWRQcm9ncmFtcygpIHtcbiAgICAgIHRyeSB7XG4gICAgICAgIGNvbnN0IHF1ZXJ5ID0gYWN0aXZlRGl2aXNpb24gPT09ICdBTEwnID8ge30gOiB7IGRpdmlzaW9uOiBhY3RpdmVEaXZpc2lvbiB9O1xuICAgICAgICBjb25zdCByZXMgPSBhd2FpdCBwcm9ncmFtU2VydmljZS5saXN0UHJvZ3JhbXMocXVlcnkpO1xuICAgICAgICBzZXRQcm9ncmFtcyhyZXMucHJvZ3JhbXMgfHwgW10pO1xuICAgICAgfSBjYXRjaCAoZXJyKSB7XG4gICAgICAgIGNvbnNvbGUuZXJyb3IoJ0ZhaWxlZCB0byBsb2FkIHByb2dyYW1zIGZvciBmaWx0ZXI6JywgZXJyKTtcbiAgICAgIH1cbiAgICB9XG4gICAgbG9hZFByb2dyYW1zKCk7XG4gIH0sIFthY3RpdmVEaXZpc2lvbl0pO1xuXG4gIC8vIFJlbmRlciBTdGFyc1xuICBjb25zdCByZW5kZXJTdGFycyA9IChyYXRpbmcpID0+IHtcbiAgICBjb25zdCBzdGFycyA9IFtdO1xuICAgIGZvciAobGV0IGkgPSAxOyBpIDw9IDU7IGkrKykge1xuICAgICAgc3RhcnMucHVzaChcbiAgICAgICAgPGlcbiAgICAgICAgICBrZXk9e2l9XG4gICAgICAgICAgY2xhc3NOYW1lPXtgZmEtc29saWQgZmEtc3RhciAke2kgPD0gcmF0aW5nID8gJ3RleHQtd2FybmluZycgOiAndGV4dC1tdXRlZCd9YH1cbiAgICAgICAgICBzdHlsZT17eyBmb250U2l6ZTogJzAuODVyZW0nIH19XG4gICAgICAgID48L2k+XG4gICAgICApO1xuICAgIH1cbiAgICByZXR1cm4gPHNwYW4gY2xhc3NOYW1lPXtzdHlsZXMuZmVlZGJhY2tSYXRpbmd9PntzdGFyc308L3NwYW4+O1xuICB9O1xuXG4gIGNvbnN0IGNvbHVtbnMgPSBbXG4gICAge1xuICAgICAgaGVhZGVyOiAnU3R1ZGVudCcsXG4gICAgICByZW5kZXI6IChpdGVtKSA9PiAoXG4gICAgICAgIDxkaXY+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmdy1zZW1pYm9sZCB0ZXh0LWRhcmtcIj57aXRlbS5zdHVkZW50Py5mdWxsTmFtZSB8fCAnQW5vbnltb3VzIC8gU3R1ZGVudCd9PC9kaXY+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkIHNtYWxsXCI+e2l0ZW0uc3R1ZGVudD8uZW1haWwgfHwgJ0NvbmZpZGVudGlhbCd9PC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgKSxcbiAgICB9LFxuICAgIHtcbiAgICAgIGhlYWRlcjogJ1Byb2dyYW0gJiBDb2hvcnQnLFxuICAgICAgcmVuZGVyOiAoaXRlbSkgPT4gKFxuICAgICAgICA8ZGl2PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZnctbWVkaXVtIHRleHQtZGFya1wiPntpdGVtLnByb2dyYW0/LnRpdGxlIHx8ICdBY2FkZW15IFByb2dyYW0nfTwvZGl2PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1tdXRlZCBzbWFsbFwiPlxuICAgICAgICAgICAge2l0ZW0uY29ob3J0Py5jb2hvcnROdW1iZXJ9ICh7aXRlbS5kaXZpc2lvbj8ucmVwbGFjZSgnXycsICcgJyl9KVxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L2Rpdj5cbiAgICAgICksXG4gICAgfSxcbiAgICB7XG4gICAgICBoZWFkZXI6ICdSYXRpbmcgJiBTZW50aW1lbnQnLFxuICAgICAgcmVuZGVyOiAoaXRlbSkgPT4gKFxuICAgICAgICA8ZGl2PlxuICAgICAgICAgIDxkaXY+e3JlbmRlclN0YXJzKGl0ZW0ucmF0aW5nKX08L2Rpdj5cbiAgICAgICAgICA8c3BhblxuICAgICAgICAgICAgY2xhc3NOYW1lPXtgYmFkZ2UgbXQtMSAke1xuICAgICAgICAgICAgICBpdGVtLnNlbnRpbWVudCA9PT0gJ1BPU0lUSVZFJ1xuICAgICAgICAgICAgICAgID8gJ2JnLXN1Y2Nlc3MnXG4gICAgICAgICAgICAgICAgOiBpdGVtLnNlbnRpbWVudCA9PT0gJ05FR0FUSVZFJ1xuICAgICAgICAgICAgICAgID8gJ2JnLWRhbmdlcidcbiAgICAgICAgICAgICAgICA6ICdiZy1zZWNvbmRhcnknXG4gICAgICAgICAgICB9YH1cbiAgICAgICAgICAgIHN0eWxlPXt7IGZvbnRTaXplOiAnMC43cmVtJyB9fVxuICAgICAgICAgID5cbiAgICAgICAgICAgIHtpdGVtLnNlbnRpbWVudH1cbiAgICAgICAgICA8L3NwYW4+XG4gICAgICAgIDwvZGl2PlxuICAgICAgKSxcbiAgICB9LFxuICAgIHtcbiAgICAgIGhlYWRlcjogJ1R5cGUnLFxuICAgICAgcmVuZGVyOiAoaXRlbSkgPT4gKFxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJiYWRnZSBiZy1saWdodCB0ZXh0LWRhcmsgYm9yZGVyXCI+XG4gICAgICAgICAge2l0ZW0uZmVlZGJhY2tUeXBlPy5yZXBsYWNlKCdfJywgJyAnKX1cbiAgICAgICAgPC9zcGFuPlxuICAgICAgKSxcbiAgICB9LFxuICAgIHtcbiAgICAgIGhlYWRlcjogJ0NvbW1lbnRzIFN1bW1hcnknLFxuICAgICAgcmVuZGVyOiAoaXRlbSkgPT4gKFxuICAgICAgICA8ZGl2IHN0eWxlPXt7IG1heFdpZHRoOiAnMzQwcHgnIH19PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC10cnVuY2F0ZSB0ZXh0LWRhcmsgc21hbGxcIj57aXRlbS5jb21tZW50c308L2Rpdj5cbiAgICAgICAgICB7aXRlbS5zdHJlbmd0aHMgJiYgKFxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXN1Y2Nlc3Mgc21hbGwgdGV4dC10cnVuY2F0ZVwiPlxuICAgICAgICAgICAgICA8c3Ryb25nPis8L3N0cm9uZz4ge2l0ZW0uc3RyZW5ndGhzfVxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cbiAgICAgICAgPC9kaXY+XG4gICAgICApLFxuICAgIH0sXG4gICAge1xuICAgICAgaGVhZGVyOiAnRGF0ZScsXG4gICAgICByZW5kZXI6IChpdGVtKSA9PiAoXG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInNtYWxsIHRleHQtc2Vjb25kYXJ5XCI+XG4gICAgICAgICAge25ldyBEYXRlKGl0ZW0uc3VibWl0dGVkQXQgfHwgaXRlbS5jcmVhdGVkQXQpLnRvTG9jYWxlRGF0ZVN0cmluZygpfVxuICAgICAgICA8L3NwYW4+XG4gICAgICApLFxuICAgIH0sXG4gICAge1xuICAgICAgaGVhZGVyOiAnQWN0aW9ucycsXG4gICAgICByZW5kZXI6IChpdGVtKSA9PiAoXG4gICAgICAgIDxidXR0b25cbiAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICBjbGFzc05hbWU9XCJidG4gYnRuLW91dGxpbmUtcHJpbWFyeSBidG4tc20gcHktMCBweC0yXCJcbiAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRTZWxlY3RlZEZlZWRiYWNrKGl0ZW0pfVxuICAgICAgICAgIGlkPXtgYnRuLXZpZXctZmVlZGJhY2stJHtpdGVtLl9pZH1gfVxuICAgICAgICA+XG4gICAgICAgICAgPGkgY2xhc3NOYW1lPVwiZmEtc29saWQgZmEtZXllIG1lLTFcIj48L2k+IFZpZXdcbiAgICAgICAgPC9idXR0b24+XG4gICAgICApLFxuICAgIH0sXG4gIF07XG5cbiAgY29uc3QgZGl2aXNpb25UaXRsZSA9XG4gICAgYWN0aXZlRGl2aXNpb24gPT09ICdBTEwnXG4gICAgICA/ICdBbGwgRGl2aXNpb25zJ1xuICAgICAgOiBESVZJU0lPTl9MQUJFTFNbYWN0aXZlRGl2aXNpb25dIHx8IGFjdGl2ZURpdmlzaW9uO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5jb250YWluZXJ9PlxuICAgICAgPFBhZ2VIZWFkZXJcbiAgICAgICAgdGl0bGU9e2Ake2RpdmlzaW9uVGl0bGV9IFN0dWRlbnQgRmVlZGJhY2sgQ2VudGVyYH1cbiAgICAgICAgc3VidGl0bGU9XCJSZXZpZXcgcmVhbCBzdHVkZW50IHNlbnRpbWVudCwgZXZhbHVhdGUgdHJhaW5pbmcgZXhwZXJpZW5jZSwgYW5kIGxldmVyYWdlIEFJLWFzc2lzdGVkIGZlZWRiYWNrIGFuYWx5dGljcyBncm91bmRlZCBpbiB2ZXJpZmllZCBzdWJtaXNzaW9ucy5cIlxuICAgICAgICBhY3Rpb25zPXtcbiAgICAgICAgICA8YnV0dG9uXG4gICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImJ0biBidG4tb3V0bGluZS1wcmltYXJ5IGQtZmxleCBhbGlnbi1pdGVtcy1jZW50ZXIgZ2FwLTJcIlxuICAgICAgICAgICAgaWQ9XCJidG4tcmVmcmVzaC1zdW1tYXJ5XCJcbiAgICAgICAgICAgIG9uQ2xpY2s9e2ZldGNoU3VtbWFyeX1cbiAgICAgICAgICAgIGRpc2FibGVkPXtzdW1tYXJ5TG9hZGluZ31cbiAgICAgICAgICA+XG4gICAgICAgICAgICA8aSBjbGFzc05hbWU9e2BmYS1zb2xpZCBmYS1hcnJvd3Mtcm90YXRlICR7c3VtbWFyeUxvYWRpbmcgPyAnZmEtc3BpbicgOiAnJ31gfT48L2k+XG4gICAgICAgICAgICA8c3Bhbj5SZWZyZXNoIEluc2lnaHRzPC9zcGFuPlxuICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICB9XG4gICAgICAvPlxuXG4gICAgICB7LyogU1RBVCBDQVJEUyAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuc3RhdHNHcmlkfT5cbiAgICAgICAgPFN0YXRDYXJkIGxhYmVsPVwiVG90YWwgRmVlZGJhY2sgUmVzcG9uc2VzXCIgdmFsdWU9e21ldHJpY3MudG90YWwgfHwgcGFnaW5hdGlvbi50b3RhbH0gaWNvbj1cImZhLWNvbW1lbnRzXCIgLz5cbiAgICAgICAgPFN0YXRDYXJkXG4gICAgICAgICAgbGFiZWw9XCJBdmVyYWdlIEFjYWRlbXkgUmF0aW5nXCJcbiAgICAgICAgICB2YWx1ZT17bWV0cmljcy5hdmVyYWdlUmF0aW5nID8gYCR7bWV0cmljcy5hdmVyYWdlUmF0aW5nfSAvIDUuMGAgOiAnTi9BJ31cbiAgICAgICAgICBpY29uPVwiZmEtc3RhclwiXG4gICAgICAgIC8+XG4gICAgICAgIDxTdGF0Q2FyZFxuICAgICAgICAgIGxhYmVsPVwiUG9zaXRpdmUgU2VudGltZW50XCJcbiAgICAgICAgICB2YWx1ZT17XG4gICAgICAgICAgICBzdW1tYXJ5RGF0YT8uc2VudGltZW50QnJlYWtkb3duXG4gICAgICAgICAgICAgID8gYCR7c3VtbWFyeURhdGEuc2VudGltZW50QnJlYWtkb3duLlBPU0lUSVZFIHx8IDB9ICgke01hdGgucm91bmQoXG4gICAgICAgICAgICAgICAgICAoKHN1bW1hcnlEYXRhLnNlbnRpbWVudEJyZWFrZG93bi5QT1NJVElWRSB8fCAwKSAvIChzdW1tYXJ5RGF0YS50b3RhbEFuYWx5emVkIHx8IDEpKSAqIDEwMFxuICAgICAgICAgICAgICAgICl9JSlgXG4gICAgICAgICAgICAgIDogJ04vQSdcbiAgICAgICAgICB9XG4gICAgICAgICAgaWNvbj1cImZhLWZhY2Utc21pbGVcIlxuICAgICAgICAvPlxuICAgICAgICA8U3RhdENhcmRcbiAgICAgICAgICBsYWJlbD1cIkFyZWFzIGZvciBJbXByb3ZlbWVudFwiXG4gICAgICAgICAgdmFsdWU9e1xuICAgICAgICAgICAgc3VtbWFyeURhdGE/LnNlbnRpbWVudEJyZWFrZG93blxuICAgICAgICAgICAgICA/IGAke3N1bW1hcnlEYXRhLnNlbnRpbWVudEJyZWFrZG93bi5ORUdBVElWRSB8fCAwfSByZXNwb25zZXNgXG4gICAgICAgICAgICAgIDogJzAnXG4gICAgICAgICAgfVxuICAgICAgICAgIGljb249XCJmYS10cmlhbmdsZS1leGNsYW1hdGlvblwiXG4gICAgICAgIC8+XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIEFJIC8gU01BUlQgRkVFREJBQ0sgSU5TSUdIVFMgUEFORUwgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLmluc2lnaHRzQ2FyZH0+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuaW5zaWdodHNIZWFkZXJ9PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuaW5zaWdodHNUaXRsZX0+XG4gICAgICAgICAgICA8aSBjbGFzc05hbWU9XCJmYS1zb2xpZCBmYS13YW5kLW1hZ2ljLXNwYXJrbGVzIHRleHQtaW5mb1wiPjwvaT5cbiAgICAgICAgICAgIDxzcGFuPlNUVURFTlQgRkVFREJBQ0sgSU5TSUdIVFM8L3NwYW4+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9e3N0eWxlcy5pbnNpZ2h0c0JhZGdlfT5cbiAgICAgICAgICAgICAge3N1bW1hcnlEYXRhPy5wcm92aWRlcj8uaW5jbHVkZXMoJ0dFTUlOSScpXG4gICAgICAgICAgICAgICAgPyAnR29vZ2xlIEdlbWluaSAxLjUgRmxhc2gnXG4gICAgICAgICAgICAgICAgOiAnRVNBIFRoZW1hdGljICYgR3JvdW5kZWQgTkxQIEVuZ2luZSd9XG4gICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImQtZmxleCBhbGlnbi1pdGVtcy1jZW50ZXIgZ2FwLTIgc21hbGwgdGV4dC1saWdodFwiPlxuICAgICAgICAgICAgPGkgY2xhc3NOYW1lPVwiZmEtc29saWQgZmEtZGF0YWJhc2VcIj48L2k+XG4gICAgICAgICAgICA8c3Bhbj5cbiAgICAgICAgICAgICAge3N1bW1hcnlEYXRhPy50b3RhbEFuYWx5emVkIHx8IDB9IHJlYWwgcmVzcG9uc2VzIGFuYWx5emVkIMK3IEF2ZyBSYXRpbmc6eycgJ31cbiAgICAgICAgICAgICAgPHN0cm9uZz57c3VtbWFyeURhdGE/LmF2ZXJhZ2VSYXRpbmcgfHwgMH0gLyA1LjA8L3N0cm9uZz5cbiAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG5cbiAgICAgICAge3N1bW1hcnlMb2FkaW5nID8gKFxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1jZW50ZXIgcHktNFwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGlubmVyLWJvcmRlciB0ZXh0LWluZm8gbWItMlwiIHJvbGU9XCJzdGF0dXNcIj48L2Rpdj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic21hbGwgdGV4dC1saWdodFwiPlN5bnRoZXNpemluZyBpbnN0aXR1dGlvbmFsIHN0dWRlbnQgZmVlZGJhY2suLi48L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKSA6IHN1bW1hcnlFcnJvciA/IChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFsZXJ0IGFsZXJ0LWRhbmdlciBweS0yIHNtYWxsIG1iLTBcIj57c3VtbWFyeUVycm9yfTwvZGl2PlxuICAgICAgICApIDogIXN1bW1hcnlEYXRhIHx8IHN1bW1hcnlEYXRhLnRvdGFsQW5hbHl6ZWQgPT09IDAgPyAoXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlciBweS0zIHRleHQtbGlnaHQgc21hbGxcIj5cbiAgICAgICAgICAgIE5vIHN0dWRlbnQgZmVlZGJhY2sgcmVjb3JkcyBhdmFpbGFibGUgZm9yIGF1dG9tYXRlZCB0aGVtYXRpYyBzeW50aGVzaXMuXG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICkgOiAoXG4gICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgIHsvKiBFeGVjdXRpdmUgT3ZlcnZpZXcgKi99XG4gICAgICAgICAgICB7c3VtbWFyeURhdGEuZXhlY3V0aXZlT3ZlcnZpZXcgJiYgKFxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1iLTMgcC0yIHJvdW5kZWQgYmctd2hpdGUgYmctb3BhY2l0eS0xMCBzbWFsbCB0ZXh0LWxpZ2h0IGJvcmRlciBib3JkZXItd2hpdGUgYm9yZGVyLW9wYWNpdHktMTBcIj5cbiAgICAgICAgICAgICAgICA8aSBjbGFzc05hbWU9XCJmYS1zb2xpZCBmYS1jaXJjbGUtaW5mbyBtZS0yIHRleHQtaW5mb1wiPjwvaT5cbiAgICAgICAgICAgICAgICB7c3VtbWFyeURhdGEuZXhlY3V0aXZlT3ZlcnZpZXd9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgKX1cblxuICAgICAgICAgICAgey8qIEtleSBUaGVtZXMgQ2hpcHMgKi99XG4gICAgICAgICAgICB7c3VtbWFyeURhdGEua2V5VGhlbWVzICYmIHN1bW1hcnlEYXRhLmtleVRoZW1lcy5sZW5ndGggPiAwICYmIChcbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYi0zXCI+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzbWFsbCB0ZXh0LXVwcGVyY2FzZSBmdy1ib2xkIHRleHQtaW5mbyBtYi0yXCI+S2V5IFRoZW1lcyBEZXRlY3RlZDo8L2Rpdj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLnRoZW1lc0NvbnRhaW5lcn0+XG4gICAgICAgICAgICAgICAgICB7c3VtbWFyeURhdGEua2V5VGhlbWVzLm1hcCgodGhlbWUsIGkpID0+IChcbiAgICAgICAgICAgICAgICAgICAgPHNwYW4ga2V5PXtpfSBjbGFzc05hbWU9e3N0eWxlcy50aGVtZUNoaXB9PlxuICAgICAgICAgICAgICAgICAgICAgIDxpIGNsYXNzTmFtZT1cImZhLXNvbGlkIGZhLXRhZyBtZS0xXCI+PC9pPiB7dGhlbWV9XG4gICAgICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICl9XG5cbiAgICAgICAgICAgIHsvKiA0LUNvbHVtbiAvIEdyaWQgb2YgR3JvdW5kZWQgSW5zaWdodHMgKi99XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLmluc2lnaHRzR3JpZH0+XG4gICAgICAgICAgICAgIHsvKiBTdHJlbmd0aHMgKi99XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuaW5zaWdodFNlY3Rpb259PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuc2VjdGlvblRpdGxlfT5cbiAgICAgICAgICAgICAgICAgIDxpIGNsYXNzTmFtZT1cImZhLXNvbGlkIGZhLWNpcmNsZS1jaGVjayB0ZXh0LXN1Y2Nlc3NcIj48L2k+XG4gICAgICAgICAgICAgICAgICA8c3Bhbj5Nb3N0IE1lbnRpb25lZCBTdHJlbmd0aHM8L3NwYW4+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPHVsIGNsYXNzTmFtZT17c3R5bGVzLmluc2lnaHRMaXN0fT5cbiAgICAgICAgICAgICAgICAgIHtzdW1tYXJ5RGF0YS5tb3N0TWVudGlvbmVkU3RyZW5ndGhzPy5tYXAoKHN0ciwgaSkgPT4gKFxuICAgICAgICAgICAgICAgICAgICA8bGkga2V5PXtpfSBjbGFzc05hbWU9e3N0eWxlcy5pbnNpZ2h0SXRlbX0+e3N0cn08L2xpPlxuICAgICAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICAgICAgPC91bD5cbiAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgey8qIElzc3VlcyAqL31cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5pbnNpZ2h0U2VjdGlvbn0+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5zZWN0aW9uVGl0bGV9PlxuICAgICAgICAgICAgICAgICAgPGkgY2xhc3NOYW1lPVwiZmEtc29saWQgZmEtdHJpYW5nbGUtZXhjbGFtYXRpb24gdGV4dC13YXJuaW5nXCI+PC9pPlxuICAgICAgICAgICAgICAgICAgPHNwYW4+TW9zdCBNZW50aW9uZWQgSXNzdWVzPC9zcGFuPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDx1bCBjbGFzc05hbWU9e3N0eWxlcy5pbnNpZ2h0TGlzdH0+XG4gICAgICAgICAgICAgICAgICB7c3VtbWFyeURhdGEubW9zdE1lbnRpb25lZElzc3Vlcz8ubWFwKChpc3MsIGkpID0+IChcbiAgICAgICAgICAgICAgICAgICAgPGxpIGtleT17aX0gY2xhc3NOYW1lPXtzdHlsZXMuaW5zaWdodEl0ZW19Pntpc3N9PC9saT5cbiAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgIDwvdWw+XG4gICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgIHsvKiBTdWdnZXN0aW9ucyAqL31cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5pbnNpZ2h0U2VjdGlvbn0+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5zZWN0aW9uVGl0bGV9PlxuICAgICAgICAgICAgICAgICAgPGkgY2xhc3NOYW1lPVwiZmEtc29saWQgZmEtbGlnaHRidWxiIHRleHQtaW5mb1wiPjwvaT5cbiAgICAgICAgICAgICAgICAgIDxzcGFuPkNvbW1vbiBTdWdnZXN0aW9uczwvc3Bhbj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8dWwgY2xhc3NOYW1lPXtzdHlsZXMuaW5zaWdodExpc3R9PlxuICAgICAgICAgICAgICAgICAge3N1bW1hcnlEYXRhLmNvbW1vblN1Z2dlc3Rpb25zPy5tYXAoKHN1ZywgaSkgPT4gKFxuICAgICAgICAgICAgICAgICAgICA8bGkga2V5PXtpfSBjbGFzc05hbWU9e3N0eWxlcy5pbnNpZ2h0SXRlbX0+e3N1Z308L2xpPlxuICAgICAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICAgICAgPC91bD5cbiAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgey8qIEltcG9ydGFudCBTaWduYWxzICovfVxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLmluc2lnaHRTZWN0aW9ufT5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLnNlY3Rpb25UaXRsZX0+XG4gICAgICAgICAgICAgICAgICA8aSBjbGFzc05hbWU9XCJmYS1zb2xpZCBmYS1iZWxsIHRleHQtZGFuZ2VyXCI+PC9pPlxuICAgICAgICAgICAgICAgICAgPHNwYW4+SW1wb3J0YW50IFNpZ25hbHM8L3NwYW4+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPHVsIGNsYXNzTmFtZT17c3R5bGVzLmluc2lnaHRMaXN0fT5cbiAgICAgICAgICAgICAgICAgIHtzdW1tYXJ5RGF0YS5pbXBvcnRhbnRTaWduYWxzPy5tYXAoKHNpZywgaSkgPT4gKFxuICAgICAgICAgICAgICAgICAgICA8bGkga2V5PXtpfSBjbGFzc05hbWU9e3N0eWxlcy5pbnNpZ2h0SXRlbX0+e3NpZ308L2xpPlxuICAgICAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICAgICAgPC91bD5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgey8qIFJlcHJlc2VudGF0aXZlIEdyb3VuZGVkIEZlZWRiYWNrICovfVxuICAgICAgICAgICAge3N1bW1hcnlEYXRhLnJlcHJlc2VudGF0aXZlRmVlZGJhY2sgJiYgc3VtbWFyeURhdGEucmVwcmVzZW50YXRpdmVGZWVkYmFjay5sZW5ndGggPiAwICYmIChcbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0zIHB0LTMgYm9yZGVyLXRvcCBib3JkZXItd2hpdGUgYm9yZGVyLW9wYWNpdHktMTBcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNtYWxsIHRleHQtdXBwZXJjYXNlIGZ3LWJvbGQgdGV4dC1pbmZvIG1iLTJcIj5SZXByZXNlbnRhdGl2ZSBTdHVkZW50IEZlZWRiYWNrOjwvZGl2PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMucXVvdGVzQ29udGFpbmVyfT5cbiAgICAgICAgICAgICAgICAgIHtzdW1tYXJ5RGF0YS5yZXByZXNlbnRhdGl2ZUZlZWRiYWNrLm1hcCgocXVvdGUsIGkpID0+IChcbiAgICAgICAgICAgICAgICAgICAgPGRpdiBrZXk9e2l9IGNsYXNzTmFtZT17c3R5bGVzLnF1b3RlSXRlbX0+XG4gICAgICAgICAgICAgICAgICAgICAgXCJ7cXVvdGV9XCJcbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICApfVxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICApfVxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBUT09MQkFSICYgRklMVEVSUyAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMudG9vbGJhcn0+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuc2VhcmNoQm94fT5cbiAgICAgICAgICA8aW5wdXRcbiAgICAgICAgICAgIHR5cGU9XCJ0ZXh0XCJcbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImZvcm0tY29udHJvbCBmb3JtLWNvbnRyb2wtc21cIlxuICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCJTZWFyY2ggZmVlZGJhY2sgY29tbWVudHMsIHN0cmVuZ3Rocywgb3Igc3R1ZGVudCBuYW1lcy4uLlwiXG4gICAgICAgICAgICB2YWx1ZT17c2VhcmNofVxuICAgICAgICAgICAgb25DaGFuZ2U9eyhlKSA9PiB7XG4gICAgICAgICAgICAgIHNldFNlYXJjaChlLnRhcmdldC52YWx1ZSk7XG4gICAgICAgICAgICAgIHNldFBhZ2UoMSk7XG4gICAgICAgICAgICB9fVxuICAgICAgICAgICAgaWQ9XCJpbnB1dC1zZWFyY2gtZmVlZGJhY2tcIlxuICAgICAgICAgIC8+XG4gICAgICAgIDwvZGl2PlxuXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuZmlsdGVyc30+XG4gICAgICAgICAgPHNlbGVjdFxuICAgICAgICAgICAgY2xhc3NOYW1lPXtzdHlsZXMuc2VsZWN0SW5wdXR9XG4gICAgICAgICAgICB2YWx1ZT17cmF0aW5nRmlsdGVyfVxuICAgICAgICAgICAgb25DaGFuZ2U9eyhlKSA9PiB7XG4gICAgICAgICAgICAgIHNldFJhdGluZ0ZpbHRlcihlLnRhcmdldC52YWx1ZSk7XG4gICAgICAgICAgICAgIHNldFBhZ2UoMSk7XG4gICAgICAgICAgICB9fVxuICAgICAgICAgICAgaWQ9XCJzZWxlY3QtZmVlZGJhY2stcmF0aW5nXCJcbiAgICAgICAgICA+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiXCI+QWxsIFJhdGluZ3M8L29wdGlvbj5cbiAgICAgICAgICAgIDxvcHRpb24gdmFsdWU9XCI1XCI+NSBTdGFyczwvb3B0aW9uPlxuICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cIjRcIj40IFN0YXJzPC9vcHRpb24+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiM1wiPjMgU3RhcnM8L29wdGlvbj5cbiAgICAgICAgICAgIDxvcHRpb24gdmFsdWU9XCIyXCI+MiBTdGFyczwvb3B0aW9uPlxuICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cIjFcIj4xIFN0YXI8L29wdGlvbj5cbiAgICAgICAgICA8L3NlbGVjdD5cblxuICAgICAgICAgIDxzZWxlY3RcbiAgICAgICAgICAgIGNsYXNzTmFtZT17c3R5bGVzLnNlbGVjdElucHV0fVxuICAgICAgICAgICAgdmFsdWU9e3NlbnRpbWVudEZpbHRlcn1cbiAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4ge1xuICAgICAgICAgICAgICBzZXRTZW50aW1lbnRGaWx0ZXIoZS50YXJnZXQudmFsdWUpO1xuICAgICAgICAgICAgICBzZXRQYWdlKDEpO1xuICAgICAgICAgICAgfX1cbiAgICAgICAgICAgIGlkPVwic2VsZWN0LWZlZWRiYWNrLXNlbnRpbWVudFwiXG4gICAgICAgICAgPlxuICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cIlwiPkFsbCBTZW50aW1lbnRzPC9vcHRpb24+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiUE9TSVRJVkVcIj5Qb3NpdGl2ZTwvb3B0aW9uPlxuICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cIk5FVVRSQUxcIj5OZXV0cmFsPC9vcHRpb24+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiTkVHQVRJVkVcIj5OZWdhdGl2ZTwvb3B0aW9uPlxuICAgICAgICAgIDwvc2VsZWN0PlxuXG4gICAgICAgICAgPHNlbGVjdFxuICAgICAgICAgICAgY2xhc3NOYW1lPXtzdHlsZXMuc2VsZWN0SW5wdXR9XG4gICAgICAgICAgICB2YWx1ZT17dHlwZUZpbHRlcn1cbiAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4ge1xuICAgICAgICAgICAgICBzZXRUeXBlRmlsdGVyKGUudGFyZ2V0LnZhbHVlKTtcbiAgICAgICAgICAgICAgc2V0UGFnZSgxKTtcbiAgICAgICAgICAgIH19XG4gICAgICAgICAgICBpZD1cInNlbGVjdC1mZWVkYmFjay10eXBlXCJcbiAgICAgICAgICA+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiXCI+QWxsIFR5cGVzPC9vcHRpb24+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiQ09VUlNFX0NPTlRFTlRcIj5Db3Vyc2UgQ29udGVudDwvb3B0aW9uPlxuICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cIklOU1RSVUNUT1JcIj5JbnN0cnVjdG9yPC9vcHRpb24+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiRkFDSUxJVFlcIj5GYWNpbGl0eSAmIExhYjwvb3B0aW9uPlxuICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cIlBMQVRGT1JNXCI+UGxhdGZvcm0gJiBTeXN0ZW1zPC9vcHRpb24+XG4gICAgICAgICAgICA8b3B0aW9uIHZhbHVlPVwiR0VORVJBTFwiPkdlbmVyYWw8L29wdGlvbj5cbiAgICAgICAgICA8L3NlbGVjdD5cblxuICAgICAgICAgIDxzZWxlY3RcbiAgICAgICAgICAgIGNsYXNzTmFtZT17c3R5bGVzLnNlbGVjdElucHV0fVxuICAgICAgICAgICAgdmFsdWU9e3Byb2dyYW1GaWx0ZXJ9XG4gICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHtcbiAgICAgICAgICAgICAgc2V0UHJvZ3JhbUZpbHRlcihlLnRhcmdldC52YWx1ZSk7XG4gICAgICAgICAgICAgIHNldFBhZ2UoMSk7XG4gICAgICAgICAgICB9fVxuICAgICAgICAgICAgaWQ9XCJzZWxlY3QtZmVlZGJhY2stcHJvZ3JhbVwiXG4gICAgICAgICAgPlxuICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cIlwiPkFsbCBQcm9ncmFtczwvb3B0aW9uPlxuICAgICAgICAgICAge3Byb2dyYW1zLm1hcCgocCkgPT4gKFxuICAgICAgICAgICAgICA8b3B0aW9uIGtleT17cC5faWR9IHZhbHVlPXtwLl9pZH0+XG4gICAgICAgICAgICAgICAge3AudGl0bGV9XG4gICAgICAgICAgICAgIDwvb3B0aW9uPlxuICAgICAgICAgICAgKSl9XG4gICAgICAgICAgPC9zZWxlY3Q+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBGRUVEQkFDSyBUQUJMRSAqL31cbiAgICAgIHtsb2FkaW5nID8gKFxuICAgICAgICA8TG9hZGluZ1N0YXRlIG1lc3NhZ2U9XCJMb2FkaW5nIHN0dWRlbnQgZmVlZGJhY2suLi5cIiAvPlxuICAgICAgKSA6IGVycm9yID8gKFxuICAgICAgICA8RXJyb3JTdGF0ZSBtZXNzYWdlPXtlcnJvcn0gb25SZXRyeT17ZmV0Y2hGZWVkYmFja30gLz5cbiAgICAgICkgOiBmZWVkYmFja0xpc3QubGVuZ3RoID09PSAwID8gKFxuICAgICAgICA8RW1wdHlTdGF0ZVxuICAgICAgICAgIHRpdGxlPVwiTm8gU3R1ZGVudCBGZWVkYmFjayBSZWNvcmRzXCJcbiAgICAgICAgICBtZXNzYWdlPVwiTm8gc3R1ZGVudCBmZWVkYmFjayBtYXRjaGVzIHRoZSBhY3RpdmUgZmlsdGVycy4gRmVlZGJhY2sgaXMgY29sbGVjdGVkIGRpcmVjdGx5IGZyb20gZW5yb2xsZWQgY2FuZGlkYXRlcyBmb2xsb3dpbmcgY291cnNlIGNvbXBsZXRpb24uXCJcbiAgICAgICAgLz5cbiAgICAgICkgOiAoXG4gICAgICAgIDxEYXRhVGFibGVcbiAgICAgICAgICBjb2x1bW5zPXtjb2x1bW5zfVxuICAgICAgICAgIGRhdGE9e2ZlZWRiYWNrTGlzdH1cbiAgICAgICAgICBwYWdpbmF0aW9uPXtwYWdpbmF0aW9ufVxuICAgICAgICAgIG9uUGFnZUNoYW5nZT17KHApID0+IHNldFBhZ2UocCl9XG4gICAgICAgICAgaWQ9XCJ0YWJsZS1zdHVkZW50LWZlZWRiYWNrXCJcbiAgICAgICAgLz5cbiAgICAgICl9XG5cbiAgICAgIHsvKiBGRUVEQkFDSyBERVRBSUwgTU9EQUwgKi99XG4gICAgICB7c2VsZWN0ZWRGZWVkYmFjayAmJiAoXG4gICAgICAgIDxNb2RhbFxuICAgICAgICAgIGlzT3Blbj17Qm9vbGVhbihzZWxlY3RlZEZlZWRiYWNrKX1cbiAgICAgICAgICBvbkNsb3NlPXsoKSA9PiBzZXRTZWxlY3RlZEZlZWRiYWNrKG51bGwpfVxuICAgICAgICAgIHRpdGxlPVwiU3R1ZGVudCBGZWVkYmFjayBSZWNvcmRcIlxuICAgICAgICAgIHNpemU9XCJtZFwiXG4gICAgICAgID5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImQtZmxleCBqdXN0aWZ5LWNvbnRlbnQtYmV0d2VlbiBhbGlnbi1pdGVtcy1jZW50ZXIgbWItM1wiPlxuICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmdy1ib2xkIHRleHQtZGFya1wiPntzZWxlY3RlZEZlZWRiYWNrLnN0dWRlbnQ/LmZ1bGxOYW1lIHx8ICdBbm9ueW1vdXMgU3R1ZGVudCd9PC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1tdXRlZCBzbWFsbFwiPntzZWxlY3RlZEZlZWRiYWNrLnN0dWRlbnQ/LmVtYWlsfTwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtZW5kXCI+XG4gICAgICAgICAgICAgIDxkaXY+e3JlbmRlclN0YXJzKHNlbGVjdGVkRmVlZGJhY2sucmF0aW5nKX08L2Rpdj5cbiAgICAgICAgICAgICAgPHNwYW5cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2BiYWRnZSBtdC0xICR7XG4gICAgICAgICAgICAgICAgICBzZWxlY3RlZEZlZWRiYWNrLnNlbnRpbWVudCA9PT0gJ1BPU0lUSVZFJ1xuICAgICAgICAgICAgICAgICAgICA/ICdiZy1zdWNjZXNzJ1xuICAgICAgICAgICAgICAgICAgICA6IHNlbGVjdGVkRmVlZGJhY2suc2VudGltZW50ID09PSAnTkVHQVRJVkUnXG4gICAgICAgICAgICAgICAgICAgID8gJ2JnLWRhbmdlcidcbiAgICAgICAgICAgICAgICAgICAgOiAnYmctc2Vjb25kYXJ5J1xuICAgICAgICAgICAgICAgIH1gfVxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAge3NlbGVjdGVkRmVlZGJhY2suc2VudGltZW50fVxuICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicC0zIGJnLWxpZ2h0IHJvdW5kZWQgYm9yZGVyIG1iLTMgc21hbGxcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm93IGctMlwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImNvbC1zbS02XCI+XG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1zZWNvbmRhcnkgZnctc2VtaWJvbGRcIj5Qcm9ncmFtOjwvc3Bhbj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZ3LW1lZGl1bSB0ZXh0LWRhcmtcIj57c2VsZWN0ZWRGZWVkYmFjay5wcm9ncmFtPy50aXRsZX08L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiY29sLXNtLTZcIj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNlY29uZGFyeSBmdy1zZW1pYm9sZFwiPkNvaG9ydDo8L3NwYW4+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmdy1tZWRpdW0gdGV4dC1kYXJrXCI+e3NlbGVjdGVkRmVlZGJhY2suY29ob3J0Py5jb2hvcnROdW1iZXJ9ICh7c2VsZWN0ZWRGZWVkYmFjay5kaXZpc2lvbj8ucmVwbGFjZSgnXycsICcgJyl9KTwvZGl2PlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJjb2wtc20tNlwiPlxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc2Vjb25kYXJ5IGZ3LXNlbWlib2xkXCI+RmVlZGJhY2sgVHlwZTo8L3NwYW4+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmdy1tZWRpdW0gdGV4dC1kYXJrXCI+e3NlbGVjdGVkRmVlZGJhY2suZmVlZGJhY2tUeXBlPy5yZXBsYWNlKCdfJywgJyAnKX08L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiY29sLXNtLTZcIj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNlY29uZGFyeSBmdy1zZW1pYm9sZFwiPlN1Ym1pc3Npb24gRGF0ZTo8L3NwYW4+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmdy1tZWRpdW0gdGV4dC1kYXJrXCI+e25ldyBEYXRlKHNlbGVjdGVkRmVlZGJhY2suc3VibWl0dGVkQXQgfHwgc2VsZWN0ZWRGZWVkYmFjay5jcmVhdGVkQXQpLnRvTG9jYWxlU3RyaW5nKCl9PC9kaXY+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1iLTNcIj5cbiAgICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJmb3JtLWxhYmVsIGZ3LWJvbGQgdGV4dC1kYXJrIHNtYWxsXCI+U3R1ZGVudCBDb21tZW50cyAmIFJldmlldzwvbGFiZWw+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInAtMyBiZy13aGl0ZSBib3JkZXIgcm91bmRlZCBzbWFsbCB0ZXh0LWRhcmtcIiBzdHlsZT17eyBtaW5IZWlnaHQ6ICc4MHB4JywgbGluZUhlaWdodDogMS41IH19PlxuICAgICAgICAgICAgICB7c2VsZWN0ZWRGZWVkYmFjay5jb21tZW50c31cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAge3NlbGVjdGVkRmVlZGJhY2suc3RyZW5ndGhzICYmIChcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWItM1wiPlxuICAgICAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwiZm9ybS1sYWJlbCBmdy1ib2xkIHRleHQtc3VjY2VzcyBzbWFsbFwiPk5vdGVkIFN0cmVuZ3RoczwvbGFiZWw+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicC0yIGJnLXN1Y2Nlc3MgYmctb3BhY2l0eS0xMCBib3JkZXIgYm9yZGVyLXN1Y2Nlc3MgYm9yZGVyLW9wYWNpdHktMjUgcm91bmRlZCBzbWFsbCB0ZXh0LWRhcmtcIj5cbiAgICAgICAgICAgICAgICB7c2VsZWN0ZWRGZWVkYmFjay5zdHJlbmd0aHN9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cblxuICAgICAgICAgIHtzZWxlY3RlZEZlZWRiYWNrLmltcHJvdmVtZW50cyAmJiAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1iLTNcIj5cbiAgICAgICAgICAgICAgPGxhYmVsIGNsYXNzTmFtZT1cImZvcm0tbGFiZWwgZnctYm9sZCB0ZXh0LXdhcm5pbmcgc21hbGxcIj5TdWdnZXN0ZWQgSW1wcm92ZW1lbnRzPC9sYWJlbD5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTIgYmctd2FybmluZyBiZy1vcGFjaXR5LTEwIGJvcmRlciBib3JkZXItd2FybmluZyBib3JkZXItb3BhY2l0eS0yNSByb3VuZGVkIHNtYWxsIHRleHQtZGFya1wiPlxuICAgICAgICAgICAgICAgIHtzZWxlY3RlZEZlZWRiYWNrLmltcHJvdmVtZW50c31cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApfVxuXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJkLWZsZXgganVzdGlmeS1jb250ZW50LWVuZCBwdC0yIGJvcmRlci10b3BcIj5cbiAgICAgICAgICAgIDxidXR0b25cbiAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cImJ0biBidG4tc2Vjb25kYXJ5IGJ0bi1zbVwiXG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHNldFNlbGVjdGVkRmVlZGJhY2sobnVsbCl9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIENsb3NlXG4gICAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9Nb2RhbD5cbiAgICAgICl9XG4gICAgPC9kaXY+XG4gICk7XG59XG4iXSwiZmlsZSI6IkM6L1VzZXJzL21pcm5hL0Rvd25sb2Fkcy9lc2EtYWNhZGVteS1wbGF0Zm9ybS9lc2EtcGxhdGZvcm0vZnJvbnRlbmQvc3JjL3BhZ2VzL2FkbWluL0ZlZWRiYWNrUGFnZS5qc3gifQ==

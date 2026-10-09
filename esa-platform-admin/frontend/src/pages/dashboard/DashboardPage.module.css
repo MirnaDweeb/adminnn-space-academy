@@ -1,0 +1,18 @@
+.welcome {
+  background: var(--esa-navy-900);
+  color: var(--esa-text-inverse);
+  border-radius: var(--esa-radius-lg);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.welcome h1 {
+  font-size: 1.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.welcome p {
+  color: #b7c0d1;
+  margin: 0;
+  font-size: 0.9rem;
+}

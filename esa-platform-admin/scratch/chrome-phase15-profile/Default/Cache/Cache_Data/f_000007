@@ -1,0 +1,533 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/App.jsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=12dbc091"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { BrowserRouter, Routes, Route } from "/node_modules/.vite/deps/react-router-dom.js?v=12dbc091";
+import { AuthProvider } from "/src/contexts/AuthContext.jsx";
+import AuthLayout from "/src/layouts/AuthLayout.jsx";
+import MainLayout from "/src/layouts/MainLayout.jsx";
+import AdminLayout from "/src/layouts/AdminLayout.jsx";
+import ProtectedRoute from "/src/routes/ProtectedRoute.jsx";
+import RoleGuard from "/src/routes/RoleGuard.jsx";
+import DivisionGuard from "/src/routes/DivisionGuard.jsx";
+import HomeRedirect from "/src/routes/HomeRedirect.jsx";
+import LoginPage from "/src/pages/auth/LoginPage.jsx";
+import RegisterPage from "/src/pages/auth/RegisterPage.jsx";
+import DashboardPage from "/src/pages/dashboard/DashboardPage.jsx";
+import AdminGatewayPage from "/src/pages/admin/AdminGatewayPage.jsx";
+import AdminManagementPage from "/src/pages/admin/AdminManagementPage.jsx";
+import DivisionOverviewPage from "/src/pages/admin/DivisionOverviewPage.jsx";
+import StudentsListPage from "/src/pages/admin/StudentsListPage.jsx";
+import StudentDetailPage from "/src/pages/admin/StudentDetailPage.jsx";
+import ProgramsPage from "/src/pages/admin/ProgramsPage.jsx";
+import InstructorManagementPage from "/src/pages/admin/InstructorManagementPage.jsx";
+import ApplicationsPage from "/src/pages/admin/ApplicationsPage.jsx";
+import AuditLogsPage from "/src/pages/admin/AuditLogsPage.jsx";
+import FinancePage from "/src/pages/admin/FinancePage.jsx";
+import CohortsPage from "/src/pages/admin/CohortsPage.jsx";
+import InstructorCohortsPage from "/src/pages/instructor/InstructorCohortsPage.jsx";
+import StudentInvoicesPage from "/src/pages/student/StudentInvoicesPage.jsx";
+import PaymentReturnPage from "/src/pages/student/PaymentReturnPage.jsx";
+import StudentCohortsPage from "/src/pages/student/StudentCohortsPage.jsx";
+import StudentCertificatesPage from "/src/pages/student/StudentCertificatesPage.jsx";
+import CertificatesPage from "/src/pages/admin/CertificatesPage.jsx";
+import NotificationsPage from "/src/pages/notifications/NotificationsPage.jsx";
+import AdminNotificationsPage from "/src/pages/admin/AdminNotificationsPage.jsx";
+import ReportsPage from "/src/pages/admin/ReportsPage.jsx";
+import PublicVerifyPage from "/src/pages/public/PublicVerifyPage.jsx";
+import NotFoundPage from "/src/pages/NotFoundPage.jsx";
+import UnauthorizedPage from "/src/pages/UnauthorizedPage.jsx";
+import { ROLES } from "/src/constants/roles.js";
+export default function App() {
+  return /* @__PURE__ */ jsxDEV(BrowserRouter, { children: /* @__PURE__ */ jsxDEV(AuthProvider, { children: /* @__PURE__ */ jsxDEV(Routes, { children: [
+    /* @__PURE__ */ jsxDEV(Route, { path: "/verify/:token", element: /* @__PURE__ */ jsxDEV(PublicVerifyPage, {}, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 69,
+      columnNumber: 49
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 69,
+      columnNumber: 11
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/verify-certificate", element: /* @__PURE__ */ jsxDEV(PublicVerifyPage, {}, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 70,
+      columnNumber: 54
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 70,
+      columnNumber: 11
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/verify", element: /* @__PURE__ */ jsxDEV(PublicVerifyPage, {}, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 71,
+      columnNumber: 42
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 71,
+      columnNumber: 11
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(AuthLayout, {}, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 74,
+      columnNumber: 27
+    }, this), children: [
+      /* @__PURE__ */ jsxDEV(Route, { path: "/login", element: /* @__PURE__ */ jsxDEV(LoginPage, {}, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 75,
+        columnNumber: 43
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 75,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/register", element: /* @__PURE__ */ jsxDEV(RegisterPage, {}, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 76,
+        columnNumber: 46
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 76,
+        columnNumber: 13
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 74,
+      columnNumber: 11
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(ProtectedRoute, {}, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 80,
+      columnNumber: 27
+    }, this), children: [
+      /* @__PURE__ */ jsxDEV(Route, { path: "/", element: /* @__PURE__ */ jsxDEV(HomeRedirect, {}, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 81,
+        columnNumber: 38
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 81,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/unauthorized", element: /* @__PURE__ */ jsxDEV(UnauthorizedPage, {}, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 82,
+        columnNumber: 50
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 82,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(MainLayout, {}, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 85,
+        columnNumber: 29
+      }, this), children: [
+        /* @__PURE__ */ jsxDEV(Route, { path: "/notifications", element: /* @__PURE__ */ jsxDEV(NotificationsPage, {}, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 86,
+          columnNumber: 53
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 86,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(RoleGuard, { allowedRoles: [ROLES.STUDENT, ROLES.INSTRUCTOR] }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 87,
+          columnNumber: 31
+        }, this), children: /* @__PURE__ */ jsxDEV(Route, { path: "/dashboard", element: /* @__PURE__ */ jsxDEV(DashboardPage, {}, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 88,
+          columnNumber: 51
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 88,
+          columnNumber: 17
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 87,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(RoleGuard, { allowedRoles: [ROLES.INSTRUCTOR] }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 90,
+          columnNumber: 31
+        }, this), children: /* @__PURE__ */ jsxDEV(Route, { path: "/instructor/cohorts", element: /* @__PURE__ */ jsxDEV(InstructorCohortsPage, {}, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 91,
+          columnNumber: 60
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 91,
+          columnNumber: 17
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 90,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(RoleGuard, { allowedRoles: [ROLES.STUDENT] }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 93,
+          columnNumber: 31
+        }, this), children: [
+          /* @__PURE__ */ jsxDEV(Route, { path: "/student/cohorts", element: /* @__PURE__ */ jsxDEV(StudentCohortsPage, {}, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 94,
+            columnNumber: 57
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 94,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV(Route, { path: "/student/certificates", element: /* @__PURE__ */ jsxDEV(StudentCertificatesPage, {}, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 95,
+            columnNumber: 62
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 95,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV(Route, { path: "/student/invoices", element: /* @__PURE__ */ jsxDEV(StudentInvoicesPage, {}, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 96,
+            columnNumber: 58
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 96,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV(Route, { path: "/student/payments/return", element: /* @__PURE__ */ jsxDEV(PaymentReturnPage, {}, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 97,
+            columnNumber: 65
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 97,
+            columnNumber: 17
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 93,
+          columnNumber: 15
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+        lineNumber: 85,
+        columnNumber: 13
+      }, this),
+      /* @__PURE__ */ jsxDEV(
+        Route,
+        {
+          element: /* @__PURE__ */ jsxDEV(RoleGuard, { allowedRoles: [ROLES.SUPER_ADMIN, ROLES.PRE_UNIVERSITY_ADMIN, ROLES.UNIVERSITY_ADMIN] }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 104,
+            columnNumber: 15
+          }, this),
+          children: /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(AdminLayout, {}, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 107,
+            columnNumber: 31
+          }, this), children: [
+            /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(RoleGuard, { allowedRoles: [ROLES.SUPER_ADMIN] }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+              lineNumber: 109,
+              columnNumber: 33
+            }, this), children: [
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin", element: /* @__PURE__ */ jsxDEV(AdminGatewayPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 110,
+                columnNumber: 49
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 110,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/administrators", element: /* @__PURE__ */ jsxDEV(AdminManagementPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 111,
+                columnNumber: 64
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 111,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/instructors", element: /* @__PURE__ */ jsxDEV(InstructorManagementPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 112,
+                columnNumber: 61
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 112,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/programs", element: /* @__PURE__ */ jsxDEV(ProgramsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 113,
+                columnNumber: 58
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 113,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/cohorts", element: /* @__PURE__ */ jsxDEV(CohortsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 114,
+                columnNumber: 57
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 114,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/applications", element: /* @__PURE__ */ jsxDEV(ApplicationsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 115,
+                columnNumber: 62
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 115,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/invoices", element: /* @__PURE__ */ jsxDEV(FinancePage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 116,
+                columnNumber: 58
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 116,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/certificates", element: /* @__PURE__ */ jsxDEV(CertificatesPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 117,
+                columnNumber: 62
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 117,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/notifications", element: /* @__PURE__ */ jsxDEV(AdminNotificationsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 118,
+                columnNumber: 63
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 118,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/audit-logs", element: /* @__PURE__ */ jsxDEV(AuditLogsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 119,
+                columnNumber: 60
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 119,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "/admin/reports", element: /* @__PURE__ */ jsxDEV(ReportsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 120,
+                columnNumber: 57
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 120,
+                columnNumber: 19
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+              lineNumber: 109,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDEV(Route, { path: "/admin/:division", element: /* @__PURE__ */ jsxDEV(DivisionGuard, {}, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+              lineNumber: 124,
+              columnNumber: 57
+            }, this), children: [
+              /* @__PURE__ */ jsxDEV(Route, { index: true, element: /* @__PURE__ */ jsxDEV(DivisionOverviewPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 125,
+                columnNumber: 41
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 125,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "students", element: /* @__PURE__ */ jsxDEV(StudentsListPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 126,
+                columnNumber: 51
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 126,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "students/:id", element: /* @__PURE__ */ jsxDEV(StudentDetailPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 127,
+                columnNumber: 55
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 127,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "instructors", element: /* @__PURE__ */ jsxDEV(InstructorManagementPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 128,
+                columnNumber: 54
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 128,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "programs", element: /* @__PURE__ */ jsxDEV(ProgramsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 129,
+                columnNumber: 51
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 129,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "cohorts", element: /* @__PURE__ */ jsxDEV(CohortsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 130,
+                columnNumber: 50
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 130,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "applications", element: /* @__PURE__ */ jsxDEV(ApplicationsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 131,
+                columnNumber: 55
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 131,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "invoices", element: /* @__PURE__ */ jsxDEV(FinancePage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 132,
+                columnNumber: 51
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 132,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "certificates", element: /* @__PURE__ */ jsxDEV(CertificatesPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 133,
+                columnNumber: 55
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 133,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "notifications", element: /* @__PURE__ */ jsxDEV(AdminNotificationsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 134,
+                columnNumber: 56
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 134,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "audit-logs", element: /* @__PURE__ */ jsxDEV(AuditLogsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 135,
+                columnNumber: 53
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 135,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV(Route, { path: "reports", element: /* @__PURE__ */ jsxDEV(ReportsPage, {}, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 136,
+                columnNumber: 50
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+                lineNumber: 136,
+                columnNumber: 19
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+              lineNumber: 124,
+              columnNumber: 17
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+            lineNumber: 107,
+            columnNumber: 15
+          }, this)
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+          lineNumber: 102,
+          columnNumber: 13
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 80,
+      columnNumber: 11
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "*", element: /* @__PURE__ */ jsxDEV(NotFoundPage, {}, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 143,
+      columnNumber: 36
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+      lineNumber: 143,
+      columnNumber: 11
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+    lineNumber: 67,
+    columnNumber: 9
+  }, this) }, void 0, false, {
+    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+    lineNumber: 66,
+    columnNumber: 7
+  }, this) }, void 0, false, {
+    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx",
+    lineNumber: 65,
+    columnNumber: 5
+  }, this);
+}
+_c = App;
+var _c;
+$RefreshReg$(_c, "App");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/App.jsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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LElBQUEiLCJuYW1lcyI6WyJCcm93c2VyUm91dGVyIiwiUm91dGVzIiwiUm91dGUiLCJBdXRoUHJvdmlkZXIiLCJBdXRoTGF5b3V0IiwiTWFpbkxheW91dCIsIkFkbWluTGF5b3V0IiwiUHJvdGVjdGVkUm91dGUiLCJSb2xlR3VhcmQiLCJEaXZpc2lvbkd1YXJkIiwiSG9tZVJlZGlyZWN0IiwiTG9naW5QYWdlIiwiUmVnaXN0ZXJQYWdlIiwiRGFzaGJvYXJkUGFnZSIsIkFkbWluR2F0ZXdheVBhZ2UiLCJBZG1pbk1hbmFnZW1lbnRQYWdlIiwiRGl2aXNpb25PdmVydmlld1BhZ2UiLCJTdHVkZW50c0xpc3RQYWdlIiwiU3R1ZGVudERldGFpbFBhZ2UiLCJQcm9ncmFtc1BhZ2UiLCJJbnN0cnVjdG9yTWFuYWdlbWVudFBhZ2UiLCJBcHBsaWNhdGlvbnNQYWdlIiwiQXVkaXRMb2dzUGFnZSIsIkZpbmFuY2VQYWdlIiwiQ29ob3J0c1BhZ2UiLCJJbnN0cnVjdG9yQ29ob3J0c1BhZ2UiLCJTdHVkZW50SW52b2ljZXNQYWdlIiwiUGF5bWVudFJldHVyblBhZ2UiLCJTdHVkZW50Q29ob3J0c1BhZ2UiLCJTdHVkZW50Q2VydGlmaWNhdGVzUGFnZSIsIkNlcnRpZmljYXRlc1BhZ2UiLCJOb3RpZmljYXRpb25zUGFnZSIsIkFkbWluTm90aWZpY2F0aW9uc1BhZ2UiLCJSZXBvcnRzUGFnZSIsIlB1YmxpY1ZlcmlmeVBhZ2UiLCJOb3RGb3VuZFBhZ2UiLCJVbmF1dGhvcml6ZWRQYWdlIiwiUk9MRVMiLCJBcHAiLCJTVFVERU5UIiwiSU5TVFJVQ1RPUiIsIlNVUEVSX0FETUlOIiwiUFJFX1VOSVZFUlNJVFlfQURNSU4iLCJVTklWRVJTSVRZX0FETUlOIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiQXBwLmpzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBCcm93c2VyUm91dGVyLCBSb3V0ZXMsIFJvdXRlIH0gZnJvbSAncmVhY3Qtcm91dGVyLWRvbSc7XG5pbXBvcnQgeyBBdXRoUHJvdmlkZXIgfSBmcm9tICcuL2NvbnRleHRzL0F1dGhDb250ZXh0JztcblxuaW1wb3J0IEF1dGhMYXlvdXQgZnJvbSAnLi9sYXlvdXRzL0F1dGhMYXlvdXQnO1xuaW1wb3J0IE1haW5MYXlvdXQgZnJvbSAnLi9sYXlvdXRzL01haW5MYXlvdXQnO1xuaW1wb3J0IEFkbWluTGF5b3V0IGZyb20gJy4vbGF5b3V0cy9BZG1pbkxheW91dCc7XG5cbmltcG9ydCBQcm90ZWN0ZWRSb3V0ZSBmcm9tICcuL3JvdXRlcy9Qcm90ZWN0ZWRSb3V0ZSc7XG5pbXBvcnQgUm9sZUd1YXJkIGZyb20gJy4vcm91dGVzL1JvbGVHdWFyZCc7XG5pbXBvcnQgRGl2aXNpb25HdWFyZCBmcm9tICcuL3JvdXRlcy9EaXZpc2lvbkd1YXJkJztcbmltcG9ydCBIb21lUmVkaXJlY3QgZnJvbSAnLi9yb3V0ZXMvSG9tZVJlZGlyZWN0JztcblxuaW1wb3J0IExvZ2luUGFnZSBmcm9tICcuL3BhZ2VzL2F1dGgvTG9naW5QYWdlJztcbmltcG9ydCBSZWdpc3RlclBhZ2UgZnJvbSAnLi9wYWdlcy9hdXRoL1JlZ2lzdGVyUGFnZSc7XG5pbXBvcnQgRGFzaGJvYXJkUGFnZSBmcm9tICcuL3BhZ2VzL2Rhc2hib2FyZC9EYXNoYm9hcmRQYWdlJztcbmltcG9ydCBBZG1pbkdhdGV3YXlQYWdlIGZyb20gJy4vcGFnZXMvYWRtaW4vQWRtaW5HYXRld2F5UGFnZSc7XG5pbXBvcnQgQWRtaW5NYW5hZ2VtZW50UGFnZSBmcm9tICcuL3BhZ2VzL2FkbWluL0FkbWluTWFuYWdlbWVudFBhZ2UnO1xuaW1wb3J0IERpdmlzaW9uT3ZlcnZpZXdQYWdlIGZyb20gJy4vcGFnZXMvYWRtaW4vRGl2aXNpb25PdmVydmlld1BhZ2UnO1xuaW1wb3J0IFN0dWRlbnRzTGlzdFBhZ2UgZnJvbSAnLi9wYWdlcy9hZG1pbi9TdHVkZW50c0xpc3RQYWdlJztcbmltcG9ydCBTdHVkZW50RGV0YWlsUGFnZSBmcm9tICcuL3BhZ2VzL2FkbWluL1N0dWRlbnREZXRhaWxQYWdlJztcbmltcG9ydCBQcm9ncmFtc1BhZ2UgZnJvbSAnLi9wYWdlcy9hZG1pbi9Qcm9ncmFtc1BhZ2UnO1xuaW1wb3J0IEluc3RydWN0b3JNYW5hZ2VtZW50UGFnZSBmcm9tICcuL3BhZ2VzL2FkbWluL0luc3RydWN0b3JNYW5hZ2VtZW50UGFnZSc7XG5pbXBvcnQgQXBwbGljYXRpb25zUGFnZSBmcm9tICcuL3BhZ2VzL2FkbWluL0FwcGxpY2F0aW9uc1BhZ2UnO1xuaW1wb3J0IEF1ZGl0TG9nc1BhZ2UgZnJvbSAnLi9wYWdlcy9hZG1pbi9BdWRpdExvZ3NQYWdlJztcbmltcG9ydCBGaW5hbmNlUGFnZSBmcm9tICcuL3BhZ2VzL2FkbWluL0ZpbmFuY2VQYWdlJztcbmltcG9ydCBDb2hvcnRzUGFnZSBmcm9tICcuL3BhZ2VzL2FkbWluL0NvaG9ydHNQYWdlJztcbmltcG9ydCBJbnN0cnVjdG9yQ29ob3J0c1BhZ2UgZnJvbSAnLi9wYWdlcy9pbnN0cnVjdG9yL0luc3RydWN0b3JDb2hvcnRzUGFnZSc7XG5pbXBvcnQgU3R1ZGVudEludm9pY2VzUGFnZSBmcm9tICcuL3BhZ2VzL3N0dWRlbnQvU3R1ZGVudEludm9pY2VzUGFnZSc7XG5pbXBvcnQgUGF5bWVudFJldHVyblBhZ2UgZnJvbSAnLi9wYWdlcy9zdHVkZW50L1BheW1lbnRSZXR1cm5QYWdlJztcbmltcG9ydCBTdHVkZW50Q29ob3J0c1BhZ2UgZnJvbSAnLi9wYWdlcy9zdHVkZW50L1N0dWRlbnRDb2hvcnRzUGFnZSc7XG5pbXBvcnQgU3R1ZGVudENlcnRpZmljYXRlc1BhZ2UgZnJvbSAnLi9wYWdlcy9zdHVkZW50L1N0dWRlbnRDZXJ0aWZpY2F0ZXNQYWdlJztcbmltcG9ydCBDZXJ0aWZpY2F0ZXNQYWdlIGZyb20gJy4vcGFnZXMvYWRtaW4vQ2VydGlmaWNhdGVzUGFnZSc7XG5pbXBvcnQgTm90aWZpY2F0aW9uc1BhZ2UgZnJvbSAnLi9wYWdlcy9ub3RpZmljYXRpb25zL05vdGlmaWNhdGlvbnNQYWdlJztcbmltcG9ydCBBZG1pbk5vdGlmaWNhdGlvbnNQYWdlIGZyb20gJy4vcGFnZXMvYWRtaW4vQWRtaW5Ob3RpZmljYXRpb25zUGFnZSc7XG5pbXBvcnQgUmVwb3J0c1BhZ2UgZnJvbSAnLi9wYWdlcy9hZG1pbi9SZXBvcnRzUGFnZSc7XG5cbmltcG9ydCBQdWJsaWNWZXJpZnlQYWdlIGZyb20gJy4vcGFnZXMvcHVibGljL1B1YmxpY1ZlcmlmeVBhZ2UnO1xuaW1wb3J0IE5vdEZvdW5kUGFnZSBmcm9tICcuL3BhZ2VzL05vdEZvdW5kUGFnZSc7XG5pbXBvcnQgVW5hdXRob3JpemVkUGFnZSBmcm9tICcuL3BhZ2VzL1VuYXV0aG9yaXplZFBhZ2UnO1xuXG5pbXBvcnQgeyBST0xFUyB9IGZyb20gJy4vY29uc3RhbnRzL3JvbGVzJztcblxuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBBcHAoKSB7XG4gIHJldHVybiAoXG4gICAgPEJyb3dzZXJSb3V0ZXI+XG4gICAgICA8QXV0aFByb3ZpZGVyPlxuICAgICAgICA8Um91dGVzPlxuICAgICAgICAgIHsvKiBQdWJsaWMgdmVyaWZpY2F0aW9uIHJvdXRlcyAodW5hdXRoZW50aWNhdGVkKSAqL31cbiAgICAgICAgICA8Um91dGUgcGF0aD1cIi92ZXJpZnkvOnRva2VuXCIgZWxlbWVudD17PFB1YmxpY1ZlcmlmeVBhZ2UgLz59IC8+XG4gICAgICAgICAgPFJvdXRlIHBhdGg9XCIvdmVyaWZ5LWNlcnRpZmljYXRlXCIgZWxlbWVudD17PFB1YmxpY1ZlcmlmeVBhZ2UgLz59IC8+XG4gICAgICAgICAgPFJvdXRlIHBhdGg9XCIvdmVyaWZ5XCIgZWxlbWVudD17PFB1YmxpY1ZlcmlmeVBhZ2UgLz59IC8+XG5cbiAgICAgICAgICB7LyogUHVibGljIGF1dGggcm91dGVzICovfVxuICAgICAgICAgIDxSb3V0ZSBlbGVtZW50PXs8QXV0aExheW91dCAvPn0+XG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9sb2dpblwiIGVsZW1lbnQ9ezxMb2dpblBhZ2UgLz59IC8+XG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9yZWdpc3RlclwiIGVsZW1lbnQ9ezxSZWdpc3RlclBhZ2UgLz59IC8+XG4gICAgICAgICAgPC9Sb3V0ZT5cblxuICAgICAgICAgIHsvKiBBdXRoZW50aWNhdGVkIHJvdXRlcyAqL31cbiAgICAgICAgICA8Um91dGUgZWxlbWVudD17PFByb3RlY3RlZFJvdXRlIC8+fT5cbiAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL1wiIGVsZW1lbnQ9ezxIb21lUmVkaXJlY3QgLz59IC8+XG4gICAgICAgICAgICA8Um91dGUgcGF0aD1cIi91bmF1dGhvcml6ZWRcIiBlbGVtZW50PXs8VW5hdXRob3JpemVkUGFnZSAvPn0gLz5cblxuICAgICAgICAgICAgey8qIFN0dWRlbnQgLyBJbnN0cnVjdG9yIGRhc2hib2FyZCAmIFVzZXIgTm90aWZpY2F0aW9ucyAqL31cbiAgICAgICAgICAgIDxSb3V0ZSBlbGVtZW50PXs8TWFpbkxheW91dCAvPn0+XG4gICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL25vdGlmaWNhdGlvbnNcIiBlbGVtZW50PXs8Tm90aWZpY2F0aW9uc1BhZ2UgLz59IC8+XG4gICAgICAgICAgICAgIDxSb3V0ZSBlbGVtZW50PXs8Um9sZUd1YXJkIGFsbG93ZWRSb2xlcz17W1JPTEVTLlNUVURFTlQsIFJPTEVTLklOU1RSVUNUT1JdfSAvPn0+XG4gICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvZGFzaGJvYXJkXCIgZWxlbWVudD17PERhc2hib2FyZFBhZ2UgLz59IC8+XG4gICAgICAgICAgICAgIDwvUm91dGU+XG4gICAgICAgICAgICAgIDxSb3V0ZSBlbGVtZW50PXs8Um9sZUd1YXJkIGFsbG93ZWRSb2xlcz17W1JPTEVTLklOU1RSVUNUT1JdfSAvPn0+XG4gICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvaW5zdHJ1Y3Rvci9jb2hvcnRzXCIgZWxlbWVudD17PEluc3RydWN0b3JDb2hvcnRzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgPC9Sb3V0ZT5cbiAgICAgICAgICAgICAgPFJvdXRlIGVsZW1lbnQ9ezxSb2xlR3VhcmQgYWxsb3dlZFJvbGVzPXtbUk9MRVMuU1RVREVOVF19IC8+fT5cbiAgICAgICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9zdHVkZW50L2NvaG9ydHNcIiBlbGVtZW50PXs8U3R1ZGVudENvaG9ydHNQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL3N0dWRlbnQvY2VydGlmaWNhdGVzXCIgZWxlbWVudD17PFN0dWRlbnRDZXJ0aWZpY2F0ZXNQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL3N0dWRlbnQvaW52b2ljZXNcIiBlbGVtZW50PXs8U3R1ZGVudEludm9pY2VzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9zdHVkZW50L3BheW1lbnRzL3JldHVyblwiIGVsZW1lbnQ9ezxQYXltZW50UmV0dXJuUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgPC9Sb3V0ZT5cbiAgICAgICAgICAgIDwvUm91dGU+XG5cbiAgICAgICAgICAgIHsvKiBBZG1pbiBhcmVhICovfVxuICAgICAgICAgICAgPFJvdXRlXG4gICAgICAgICAgICAgIGVsZW1lbnQ9e1xuICAgICAgICAgICAgICAgIDxSb2xlR3VhcmQgYWxsb3dlZFJvbGVzPXtbUk9MRVMuU1VQRVJfQURNSU4sIFJPTEVTLlBSRV9VTklWRVJTSVRZX0FETUlOLCBST0xFUy5VTklWRVJTSVRZX0FETUlOXX0gLz5cbiAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8Um91dGUgZWxlbWVudD17PEFkbWluTGF5b3V0IC8+fT5cbiAgICAgICAgICAgICAgICB7LyogU3VwZXIgQWRtaW4gZ2F0ZXdheSAqL31cbiAgICAgICAgICAgICAgICA8Um91dGUgZWxlbWVudD17PFJvbGVHdWFyZCBhbGxvd2VkUm9sZXM9e1tST0xFUy5TVVBFUl9BRE1JTl19IC8+fT5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2FkbWluXCIgZWxlbWVudD17PEFkbWluR2F0ZXdheVBhZ2UgLz59IC8+XG4gICAgICAgICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9hZG1pbi9hZG1pbmlzdHJhdG9yc1wiIGVsZW1lbnQ9ezxBZG1pbk1hbmFnZW1lbnRQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vaW5zdHJ1Y3RvcnNcIiBlbGVtZW50PXs8SW5zdHJ1Y3Rvck1hbmFnZW1lbnRQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vcHJvZ3JhbXNcIiBlbGVtZW50PXs8UHJvZ3JhbXNQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vY29ob3J0c1wiIGVsZW1lbnQ9ezxDb2hvcnRzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2FkbWluL2FwcGxpY2F0aW9uc1wiIGVsZW1lbnQ9ezxBcHBsaWNhdGlvbnNQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vaW52b2ljZXNcIiBlbGVtZW50PXs8RmluYW5jZVBhZ2UgLz59IC8+XG4gICAgICAgICAgICAgICAgICA8Um91dGUgcGF0aD1cIi9hZG1pbi9jZXJ0aWZpY2F0ZXNcIiBlbGVtZW50PXs8Q2VydGlmaWNhdGVzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2FkbWluL25vdGlmaWNhdGlvbnNcIiBlbGVtZW50PXs8QWRtaW5Ob3RpZmljYXRpb25zUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2FkbWluL2F1ZGl0LWxvZ3NcIiBlbGVtZW50PXs8QXVkaXRMb2dzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiL2FkbWluL3JlcG9ydHNcIiBlbGVtZW50PXs8UmVwb3J0c1BhZ2UgLz59IC8+XG4gICAgICAgICAgICAgICAgPC9Sb3V0ZT5cblxuICAgICAgICAgICAgICAgIHsvKiBEaXZpc2lvbi1zY29wZWQgYWRtaW5pc3RyYXRpb24gKi99XG4gICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vOmRpdmlzaW9uXCIgZWxlbWVudD17PERpdmlzaW9uR3VhcmQgLz59PlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIGluZGV4IGVsZW1lbnQ9ezxEaXZpc2lvbk92ZXJ2aWV3UGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwic3R1ZGVudHNcIiBlbGVtZW50PXs8U3R1ZGVudHNMaXN0UGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwic3R1ZGVudHMvOmlkXCIgZWxlbWVudD17PFN0dWRlbnREZXRhaWxQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCJpbnN0cnVjdG9yc1wiIGVsZW1lbnQ9ezxJbnN0cnVjdG9yTWFuYWdlbWVudFBhZ2UgLz59IC8+XG4gICAgICAgICAgICAgICAgICA8Um91dGUgcGF0aD1cInByb2dyYW1zXCIgZWxlbWVudD17PFByb2dyYW1zUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiY29ob3J0c1wiIGVsZW1lbnQ9ezxDb2hvcnRzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwiYXBwbGljYXRpb25zXCIgZWxlbWVudD17PEFwcGxpY2F0aW9uc1BhZ2UgLz59IC8+XG4gICAgICAgICAgICAgICAgICA8Um91dGUgcGF0aD1cImludm9pY2VzXCIgZWxlbWVudD17PEZpbmFuY2VQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCJjZXJ0aWZpY2F0ZXNcIiBlbGVtZW50PXs8Q2VydGlmaWNhdGVzUGFnZSAvPn0gLz5cbiAgICAgICAgICAgICAgICAgIDxSb3V0ZSBwYXRoPVwibm90aWZpY2F0aW9uc1wiIGVsZW1lbnQ9ezxBZG1pbk5vdGlmaWNhdGlvbnNQYWdlIC8+fSAvPlxuICAgICAgICAgICAgICAgICAgPFJvdXRlIHBhdGg9XCJhdWRpdC1sb2dzXCIgZWxlbWVudD17PEF1ZGl0TG9nc1BhZ2UgLz59IC8+XG4gICAgICAgICAgICAgICAgICA8Um91dGUgcGF0aD1cInJlcG9ydHNcIiBlbGVtZW50PXs8UmVwb3J0c1BhZ2UgLz59IC8+XG4gICAgICAgICAgICAgICAgPC9Sb3V0ZT5cbiAgICAgICAgICAgICAgPC9Sb3V0ZT5cbiAgICAgICAgICAgIDwvUm91dGU+XG5cbiAgICAgICAgICA8L1JvdXRlPlxuXG4gICAgICAgICAgPFJvdXRlIHBhdGg9XCIqXCIgZWxlbWVudD17PE5vdEZvdW5kUGFnZSAvPn0gLz5cbiAgICAgICAgPC9Sb3V0ZXM+XG4gICAgICA8L0F1dGhQcm92aWRlcj5cbiAgICA8L0Jyb3dzZXJSb3V0ZXI+XG4gICk7XG59XG4iXSwiZmlsZSI6IkM6L1VzZXJzL21pcm5hL0Rvd25sb2Fkcy9lc2EtYWNhZGVteS1wbGF0Zm9ybS9lc2EtcGxhdGZvcm0vZnJvbnRlbmQvc3JjL0FwcC5qc3gifQ==

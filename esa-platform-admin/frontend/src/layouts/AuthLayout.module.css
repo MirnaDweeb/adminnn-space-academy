@@ -1,0 +1,43 @@
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--esa-navy-950);
+  padding: 1.5rem;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--esa-surface);
+  border-radius: var(--esa-radius-lg);
+  padding: 2rem;
+  box-shadow: var(--esa-shadow-md);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  color: var(--esa-navy-900);
+}
+
+.brand i {
+  color: var(--esa-gold-500);
+  font-size: 1.4rem;
+}
+
+.brandText {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.brandText small {
+  display: block;
+  font-weight: 400;
+  color: var(--esa-text-muted);
+  font-size: 0.75rem;
+}

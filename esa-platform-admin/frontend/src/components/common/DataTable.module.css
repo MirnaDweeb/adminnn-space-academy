@@ -1,0 +1,35 @@
+.tableWrap {
+  overflow-x: auto;
+  background: var(--esa-surface);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-md);
+}
+
+table.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background: var(--esa-surface-alt);
+  color: var(--esa-text-secondary);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--esa-border);
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--esa-border);
+  font-size: 0.85rem;
+  color: var(--esa-text-secondary);
+}

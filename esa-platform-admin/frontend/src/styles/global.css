@@ -1,0 +1,38 @@
+@import './variables.css';
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--esa-font-sans);
+  color: var(--esa-text-primary);
+  background-color: var(--esa-surface-alt);
+}
+
+a { text-decoration: none; }
+
+.esa-page {
+  min-height: 100vh;
+}
+
+.esa-container {
+  padding: 1.5rem;
+}
+
+@media (max-width: 576px) {
+  .esa-container {
+    padding: 1rem;
+  }
+}
+
+.esa-brand-text {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.esa-text-muted {
+  color: var(--esa-text-muted);
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--esa-border); border-radius: 8px; }

@@ -1,0 +1,16 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+.neutral { background: #eef1f5; color: var(--esa-text-secondary); }
+.success { background: #e7f5ec; color: var(--esa-success); }
+.warning { background: #fbf1e2; color: var(--esa-warning); }
+.danger { background: #fbeceb; color: var(--esa-danger); }
+.info { background: var(--esa-cyan-100); color: var(--esa-cyan-600); }

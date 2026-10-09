@@ -1,0 +1,213 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/charts/DonutChart.jsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=12dbc091"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=12dbc091"; const React = __vite__cjsImport3_react.__esModule ? __vite__cjsImport3_react.default : __vite__cjsImport3_react;
+import styles from "/src/components/charts/charts.module.css";
+export default function DonutChart({ items = [], title, size = 180, strokeWidth = 24, centerLabel, centerValue }) {
+  const validItems = items.filter((it) => it.value > 0);
+  const total = validItems.reduce((sum, it) => sum + it.value, 0);
+  if (total === 0) {
+    return /* @__PURE__ */ jsxDEV("div", { className: styles.emptyChart, children: [
+      /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-chart-pie text-muted mb-2 fs-3" }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+        lineNumber: 34,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "text-muted small", children: "No data available" }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+        lineNumber: 35,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+      lineNumber: 33,
+      columnNumber: 7
+    }, this);
+  }
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  let accumulatedPercent = 0;
+  const defaultColors = [
+    "#3b82f6",
+    // blue
+    "#10b981",
+    // emerald
+    "#f59e0b",
+    // amber
+    "#ef4444",
+    // red
+    "#8b5cf6",
+    // purple
+    "#06b6d4",
+    // cyan
+    "#ec4899",
+    // pink
+    "#64748b"
+    // slate
+  ];
+  return /* @__PURE__ */ jsxDEV("div", { className: styles.donutWrap, children: [
+    title && /* @__PURE__ */ jsxDEV("h6", { className: styles.chartTitle, children: title }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+      lineNumber: 57,
+      columnNumber: 17
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: styles.donutInner, children: [
+      /* @__PURE__ */ jsxDEV("svg", { width: size, height: size, viewBox: `0 0 ${size} ${size}`, className: styles.donutSvg, children: [
+        /* @__PURE__ */ jsxDEV(
+          "circle",
+          {
+            cx: size / 2,
+            cy: size / 2,
+            r: radius,
+            fill: "transparent",
+            stroke: "var(--esa-border, #e2e8f0)",
+            strokeWidth
+          },
+          void 0,
+          false,
+          {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+            lineNumber: 60,
+            columnNumber: 11
+          },
+          this
+        ),
+        validItems.map((item, idx) => {
+          const percent = item.value / total;
+          const strokeDasharray = `${percent * circumference} ${circumference}`;
+          const strokeDashoffset = -accumulatedPercent * circumference;
+          accumulatedPercent += percent;
+          const color = item.color || defaultColors[idx % defaultColors.length];
+          return /* @__PURE__ */ jsxDEV(
+            "circle",
+            {
+              cx: size / 2,
+              cy: size / 2,
+              r: radius,
+              fill: "transparent",
+              stroke: color,
+              strokeWidth,
+              strokeDasharray,
+              strokeDashoffset,
+              className: styles.donutSegment,
+              children: /* @__PURE__ */ jsxDEV("title", { children: `${item.label}: ${item.value} (${Math.round(percent * 100)}%)` }, void 0, false, {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+                lineNumber: 88,
+                columnNumber: 17
+              }, this)
+            },
+            item.label || idx,
+            false,
+            {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+              lineNumber: 76,
+              columnNumber: 15
+            },
+            this
+          );
+        })
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+        lineNumber: 59,
+        columnNumber: 9
+      }, this),
+      (centerValue !== void 0 || centerLabel) && /* @__PURE__ */ jsxDEV("div", { className: styles.donutCenter, children: [
+        /* @__PURE__ */ jsxDEV("div", { className: styles.donutCenterValue, children: centerValue ?? total }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+          lineNumber: 95,
+          columnNumber: 13
+        }, this),
+        centerLabel && /* @__PURE__ */ jsxDEV("div", { className: styles.donutCenterLabel, children: centerLabel }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+          lineNumber: 96,
+          columnNumber: 29
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+        lineNumber: 94,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+      lineNumber: 58,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: styles.donutLegend, children: items.map((item, idx) => {
+      const color = item.color || defaultColors[idx % defaultColors.length];
+      const pct = total > 0 && item.value > 0 ? Math.round(item.value / total * 100) : 0;
+      return /* @__PURE__ */ jsxDEV("div", { className: styles.legendItem, children: [
+        /* @__PURE__ */ jsxDEV("span", { className: styles.legendDot, style: { backgroundColor: color } }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+          lineNumber: 107,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: styles.legendLabel, children: item.label }, void 0, false, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+          lineNumber: 108,
+          columnNumber: 15
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: styles.legendValue, children: [
+          item.value,
+          " ",
+          /* @__PURE__ */ jsxDEV("span", { className: styles.legendPct, children: [
+            "(",
+            pct,
+            "%)"
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+            lineNumber: 110,
+            columnNumber: 30
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+          lineNumber: 109,
+          columnNumber: 15
+        }, this)
+      ] }, item.label || idx, true, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+        lineNumber: 106,
+        columnNumber: 13
+      }, this);
+    }) }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+      lineNumber: 101,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx",
+    lineNumber: 56,
+    columnNumber: 5
+  }, this);
+}
+_c = DonutChart;
+var _c;
+$RefreshReg$(_c, "DonutChart");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/charts/DonutChart.jsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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QXpDO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQTJDO0FBQUEsYUFEMUQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUVBO0FBQUEsV0FMUWYsS0FBS1EsU0FBU1AsS0FBeEI7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQU1BO0FBQUEsSUFFSixDQUFDLEtBYkg7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQWNBO0FBQUEsT0EzREY7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQTREQTtBQUVKO0FBQUNxQixLQTNGdUJoRDtBQUFVLElBQUFnRDtBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJSZWFjdCIsInN0eWxlcyIsIkRvbnV0Q2hhcnQiLCJpdGVtcyIsInRpdGxlIiwic2l6ZSIsInN0cm9rZVdpZHRoIiwiY2VudGVyTGFiZWwiLCJjZW50ZXJWYWx1ZSIsInZhbGlkSXRlbXMiLCJmaWx0ZXIiLCJpdCIsInZhbHVlIiwidG90YWwiLCJyZWR1Y2UiLCJzdW0iLCJlbXB0eUNoYXJ0IiwicmFkaXVzIiwiY2lyY3VtZmVyZW5jZSIsIk1hdGgiLCJQSSIsImFjY3VtdWxhdGVkUGVyY2VudCIsImRlZmF1bHRDb2xvcnMiLCJkb251dFdyYXAiLCJjaGFydFRpdGxlIiwiZG9udXRJbm5lciIsImRvbnV0U3ZnIiwibWFwIiwiaXRlbSIsImlkeCIsInBlcmNlbnQiLCJzdHJva2VEYXNoYXJyYXkiLCJzdHJva2VEYXNob2Zmc2V0IiwiY29sb3IiLCJsZW5ndGgiLCJkb251dFNlZ21lbnQiLCJsYWJlbCIsInJvdW5kIiwidW5kZWZpbmVkIiwiZG9udXRDZW50ZXIiLCJkb251dENlbnRlclZhbHVlIiwiZG9udXRDZW50ZXJMYWJlbCIsImRvbnV0TGVnZW5kIiwicGN0IiwibGVnZW5kSXRlbSIsImxlZ2VuZERvdCIsImJhY2tncm91bmRDb2xvciIsImxlZ2VuZExhYmVsIiwibGVnZW5kVmFsdWUiLCJsZWdlbmRQY3QiLCJfYyJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJEb251dENoYXJ0LmpzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xuaW1wb3J0IHN0eWxlcyBmcm9tICcuL2NoYXJ0cy5tb2R1bGUuY3NzJztcblxuLyoqXG4gKiBMaWdodHdlaWdodCBTVkcgRG9udXQgQ2hhcnRcbiAqIGl0ZW1zOiBbeyBsYWJlbCwgdmFsdWUsIGNvbG9yIH1dXG4gKi9cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIERvbnV0Q2hhcnQoeyBpdGVtcyA9IFtdLCB0aXRsZSwgc2l6ZSA9IDE4MCwgc3Ryb2tlV2lkdGggPSAyNCwgY2VudGVyTGFiZWwsIGNlbnRlclZhbHVlIH0pIHtcbiAgY29uc3QgdmFsaWRJdGVtcyA9IGl0ZW1zLmZpbHRlcigoaXQpID0+IGl0LnZhbHVlID4gMCk7XG4gIGNvbnN0IHRvdGFsID0gdmFsaWRJdGVtcy5yZWR1Y2UoKHN1bSwgaXQpID0+IHN1bSArIGl0LnZhbHVlLCAwKTtcblxuICBpZiAodG90YWwgPT09IDApIHtcbiAgICByZXR1cm4gKFxuICAgICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5lbXB0eUNoYXJ0fT5cbiAgICAgICAgPGkgY2xhc3NOYW1lPVwiZmEtc29saWQgZmEtY2hhcnQtcGllIHRleHQtbXV0ZWQgbWItMiBmcy0zXCI+PC9pPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtbXV0ZWQgc21hbGxcIj5ObyBkYXRhIGF2YWlsYWJsZTwvZGl2PlxuICAgICAgPC9kaXY+XG4gICAgKTtcbiAgfVxuXG4gIGNvbnN0IHJhZGl1cyA9IChzaXplIC0gc3Ryb2tlV2lkdGgpIC8gMjtcbiAgY29uc3QgY2lyY3VtZmVyZW5jZSA9IDIgKiBNYXRoLlBJICogcmFkaXVzO1xuICBsZXQgYWNjdW11bGF0ZWRQZXJjZW50ID0gMDtcblxuICBjb25zdCBkZWZhdWx0Q29sb3JzID0gW1xuICAgICcjM2I4MmY2JywgLy8gYmx1ZVxuICAgICcjMTBiOTgxJywgLy8gZW1lcmFsZFxuICAgICcjZjU5ZTBiJywgLy8gYW1iZXJcbiAgICAnI2VmNDQ0NCcsIC8vIHJlZFxuICAgICcjOGI1Y2Y2JywgLy8gcHVycGxlXG4gICAgJyMwNmI2ZDQnLCAvLyBjeWFuXG4gICAgJyNlYzQ4OTknLCAvLyBwaW5rXG4gICAgJyM2NDc0OGInLCAvLyBzbGF0ZVxuICBdO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5kb251dFdyYXB9PlxuICAgICAge3RpdGxlICYmIDxoNiBjbGFzc05hbWU9e3N0eWxlcy5jaGFydFRpdGxlfT57dGl0bGV9PC9oNj59XG4gICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLmRvbnV0SW5uZXJ9PlxuICAgICAgICA8c3ZnIHdpZHRoPXtzaXplfSBoZWlnaHQ9e3NpemV9IHZpZXdCb3g9e2AwIDAgJHtzaXplfSAke3NpemV9YH0gY2xhc3NOYW1lPXtzdHlsZXMuZG9udXRTdmd9PlxuICAgICAgICAgIDxjaXJjbGVcbiAgICAgICAgICAgIGN4PXtzaXplIC8gMn1cbiAgICAgICAgICAgIGN5PXtzaXplIC8gMn1cbiAgICAgICAgICAgIHI9e3JhZGl1c31cbiAgICAgICAgICAgIGZpbGw9XCJ0cmFuc3BhcmVudFwiXG4gICAgICAgICAgICBzdHJva2U9XCJ2YXIoLS1lc2EtYm9yZGVyLCAjZTJlOGYwKVwiXG4gICAgICAgICAgICBzdHJva2VXaWR0aD17c3Ryb2tlV2lkdGh9XG4gICAgICAgICAgLz5cbiAgICAgICAgICB7dmFsaWRJdGVtcy5tYXAoKGl0ZW0sIGlkeCkgPT4ge1xuICAgICAgICAgICAgY29uc3QgcGVyY2VudCA9IGl0ZW0udmFsdWUgLyB0b3RhbDtcbiAgICAgICAgICAgIGNvbnN0IHN0cm9rZURhc2hhcnJheSA9IGAke3BlcmNlbnQgKiBjaXJjdW1mZXJlbmNlfSAke2NpcmN1bWZlcmVuY2V9YDtcbiAgICAgICAgICAgIGNvbnN0IHN0cm9rZURhc2hvZmZzZXQgPSAtYWNjdW11bGF0ZWRQZXJjZW50ICogY2lyY3VtZmVyZW5jZTtcbiAgICAgICAgICAgIGFjY3VtdWxhdGVkUGVyY2VudCArPSBwZXJjZW50O1xuICAgICAgICAgICAgY29uc3QgY29sb3IgPSBpdGVtLmNvbG9yIHx8IGRlZmF1bHRDb2xvcnNbaWR4ICUgZGVmYXVsdENvbG9ycy5sZW5ndGhdO1xuXG4gICAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgICA8Y2lyY2xlXG4gICAgICAgICAgICAgICAga2V5PXtpdGVtLmxhYmVsIHx8IGlkeH1cbiAgICAgICAgICAgICAgICBjeD17c2l6ZSAvIDJ9XG4gICAgICAgICAgICAgICAgY3k9e3NpemUgLyAyfVxuICAgICAgICAgICAgICAgIHI9e3JhZGl1c31cbiAgICAgICAgICAgICAgICBmaWxsPVwidHJhbnNwYXJlbnRcIlxuICAgICAgICAgICAgICAgIHN0cm9rZT17Y29sb3J9XG4gICAgICAgICAgICAgICAgc3Ryb2tlV2lkdGg9e3N0cm9rZVdpZHRofVxuICAgICAgICAgICAgICAgIHN0cm9rZURhc2hhcnJheT17c3Ryb2tlRGFzaGFycmF5fVxuICAgICAgICAgICAgICAgIHN0cm9rZURhc2hvZmZzZXQ9e3N0cm9rZURhc2hvZmZzZXR9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtzdHlsZXMuZG9udXRTZWdtZW50fVxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPHRpdGxlPntgJHtpdGVtLmxhYmVsfTogJHtpdGVtLnZhbHVlfSAoJHtNYXRoLnJvdW5kKHBlcmNlbnQgKiAxMDApfSUpYH08L3RpdGxlPlxuICAgICAgICAgICAgICA8L2NpcmNsZT5cbiAgICAgICAgICAgICk7XG4gICAgICAgICAgfSl9XG4gICAgICAgIDwvc3ZnPlxuICAgICAgICB7KGNlbnRlclZhbHVlICE9PSB1bmRlZmluZWQgfHwgY2VudGVyTGFiZWwpICYmIChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLmRvbnV0Q2VudGVyfT5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuZG9udXRDZW50ZXJWYWx1ZX0+e2NlbnRlclZhbHVlID8/IHRvdGFsfTwvZGl2PlxuICAgICAgICAgICAge2NlbnRlckxhYmVsICYmIDxkaXYgY2xhc3NOYW1lPXtzdHlsZXMuZG9udXRDZW50ZXJMYWJlbH0+e2NlbnRlckxhYmVsfTwvZGl2Pn1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKX1cbiAgICAgIDwvZGl2PlxuXG4gICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLmRvbnV0TGVnZW5kfT5cbiAgICAgICAge2l0ZW1zLm1hcCgoaXRlbSwgaWR4KSA9PiB7XG4gICAgICAgICAgY29uc3QgY29sb3IgPSBpdGVtLmNvbG9yIHx8IGRlZmF1bHRDb2xvcnNbaWR4ICUgZGVmYXVsdENvbG9ycy5sZW5ndGhdO1xuICAgICAgICAgIGNvbnN0IHBjdCA9IHRvdGFsID4gMCAmJiBpdGVtLnZhbHVlID4gMCA/IE1hdGgucm91bmQoKGl0ZW0udmFsdWUgLyB0b3RhbCkgKiAxMDApIDogMDtcbiAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgPGRpdiBrZXk9e2l0ZW0ubGFiZWwgfHwgaWR4fSBjbGFzc05hbWU9e3N0eWxlcy5sZWdlbmRJdGVtfT5cbiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPXtzdHlsZXMubGVnZW5kRG90fSBzdHlsZT17eyBiYWNrZ3JvdW5kQ29sb3I6IGNvbG9yIH19IC8+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT17c3R5bGVzLmxlZ2VuZExhYmVsfT57aXRlbS5sYWJlbH08L3NwYW4+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT17c3R5bGVzLmxlZ2VuZFZhbHVlfT5cbiAgICAgICAgICAgICAgICB7aXRlbS52YWx1ZX0gPHNwYW4gY2xhc3NOYW1lPXtzdHlsZXMubGVnZW5kUGN0fT4oe3BjdH0lKTwvc3Bhbj5cbiAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKTtcbiAgICAgICAgfSl9XG4gICAgICA8L2Rpdj5cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJmaWxlIjoiQzovVXNlcnMvbWlybmEvRG93bmxvYWRzL2VzYS1hY2FkZW15LXBsYXRmb3JtL2VzYS1wbGF0Zm9ybS9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9jaGFydHMvRG9udXRDaGFydC5qc3gifQ==

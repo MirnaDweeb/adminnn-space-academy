@@ -1,0 +1,41 @@
+/* Egyptian Space Agency Academy — design tokens.
+   Institutional aerospace theme: deep navy, space black, controlled cyan,
+   subtle gold accents, neutral surfaces. No gradients-as-decoration, no
+   glowing borders, no gaming-HUD styling. */
+:root {
+  --esa-navy-950: #060b16;
+  --esa-navy-900: #0a1428;
+  --esa-navy-800: #0f1e3d;
+  --esa-navy-700: #16295a;
+  --esa-navy-600: #1c3570;
+
+  --esa-cyan-600: #0f7ea6;
+  --esa-cyan-500: #1391bd;
+  --esa-cyan-100: #e4f4f8;
+
+  --esa-gold-500: #b8934a;
+  --esa-gold-100: #f6efdf;
+
+  --esa-surface: #ffffff;
+  --esa-surface-alt: #f4f6f9;
+  --esa-border: #e1e5eb;
+
+  --esa-text-primary: #101828;
+  --esa-text-secondary: #4b5566;
+  --esa-text-muted: #8a94a6;
+  --esa-text-inverse: #f5f7fa;
+
+  --esa-success: #1c7c4d;
+  --esa-warning: #a3660c;
+  --esa-danger: #b3261e;
+  --esa-info: var(--esa-cyan-600);
+
+  --esa-radius-sm: 6px;
+  --esa-radius-md: 10px;
+  --esa-radius-lg: 14px;
+
+  --esa-shadow-sm: 0 1px 2px rgba(10, 20, 40, 0.06);
+  --esa-shadow-md: 0 4px 12px rgba(10, 20, 40, 0.08);
+
+  --esa-font-sans: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+}

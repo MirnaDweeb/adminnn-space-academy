@@ -1,0 +1,189 @@
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summaryCard {
+  background: var(--esa-surface);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--esa-shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.summaryCard:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--esa-shadow-md);
+}
+
+.summaryIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--esa-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.iconNavy { background: #e8ecf4; color: var(--esa-navy-800); }
+.iconSuccess { background: #e7f5ec; color: var(--esa-success); }
+.iconDanger { background: #fbeceb; color: var(--esa-danger); }
+.iconCyan { background: var(--esa-cyan-100); color: var(--esa-cyan-600); }
+.iconGold { background: var(--esa-gold-100); color: var(--esa-gold-500); }
+
+.summaryLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--esa-text-muted);
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.summaryVal {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--esa-text-primary);
+  line-height: 1.1;
+}
+
+.controlsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.searchWrap {
+  flex: 1;
+  min-width: 260px;
+  max-width: 420px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--esa-navy-800);
+  color: var(--esa-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.userName {
+  font-weight: 600;
+  color: var(--esa-text-primary);
+  line-height: 1.2;
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: var(--esa-text-secondary);
+}
+
+.divisionTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--esa-text-secondary);
+  font-weight: 500;
+}
+
+.roleTag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--esa-radius-sm);
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.actionBtns {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.detailSection {
+  margin-bottom: 1.5rem;
+}
+
+.detailTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--esa-text-muted);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--esa-border);
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  padding: 0.35rem 0;
+  font-size: 0.9rem;
+}
+
+.detailKey {
+  color: var(--esa-text-secondary);
+  font-weight: 500;
+}
+
+.detailValue {
+  color: var(--esa-text-primary);
+  font-weight: 600;
+}
+
+.auditTable {
+  width: 100%;
+  font-size: 0.82rem;
+  border-collapse: collapse;
+}
+
+.auditTable th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background: var(--esa-surface-alt);
+  color: var(--esa-text-secondary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--esa-border);
+}
+
+.auditTable td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--esa-border);
+  color: var(--esa-text-primary);
+  vertical-align: top;
+}

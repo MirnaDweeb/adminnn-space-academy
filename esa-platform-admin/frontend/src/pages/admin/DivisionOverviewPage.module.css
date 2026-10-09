@@ -1,0 +1,37 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (max-width: 768px) {
+  .statsGrid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: 1fr; }
+}
+
+.sectionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .sectionsGrid { grid-template-columns: 1fr; }
+}
+
+.section {
+  background: var(--esa-surface);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-md);
+  padding: 1.25rem;
+}
+
+.sectionTitle {
+  font-weight: 700;
+  color: var(--esa-navy-900);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}

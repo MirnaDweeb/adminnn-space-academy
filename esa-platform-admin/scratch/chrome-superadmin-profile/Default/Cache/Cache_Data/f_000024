@@ -1,0 +1,216 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/layout/Sidebar.jsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=12dbc091"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=12dbc091"; const useState = __vite__cjsImport3_react["useState"];
+import { NavLink } from "/node_modules/.vite/deps/react-router-dom.js?v=12dbc091";
+import styles from "/src/components/layout/Sidebar.module.css";
+export default function Sidebar({ items, sections, label }) {
+  _s();
+  const [openSections, setOpenSections] = useState(() => {
+    if (!sections) return {};
+    const initial = {};
+    sections.forEach((sec) => {
+      initial[sec.title] = sec.defaultOpen !== false;
+    });
+    return initial;
+  });
+  const toggleSection = (title) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
+  if (sections && sections.length > 0) {
+    return /* @__PURE__ */ jsxDEV("aside", { className: styles.sidebar, children: [
+      label && /* @__PURE__ */ jsxDEV("div", { className: styles.sectionLabel, children: label }, void 0, false, {
+        fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+        lineNumber: 47,
+        columnNumber: 19
+      }, this),
+      sections.map((section) => {
+        const isOpen = openSections[section.title] !== false;
+        const isCollapsible = section.collapsible !== false;
+        return /* @__PURE__ */ jsxDEV("div", { className: styles.sectionGroup, children: [
+          isCollapsible ? /* @__PURE__ */ jsxDEV(
+            "button",
+            {
+              type: "button",
+              className: styles.sectionHeader,
+              onClick: () => toggleSection(section.title),
+              "aria-expanded": isOpen,
+              children: [
+                /* @__PURE__ */ jsxDEV("span", { className: styles.sectionTitleWrap, children: [
+                  section.icon && /* @__PURE__ */ jsxDEV("i", { className: `fa-solid ${section.icon}`, "aria-hidden": "true" }, void 0, false, {
+                    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+                    lineNumber: 62,
+                    columnNumber: 38
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("span", { children: section.title }, void 0, false, {
+                    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+                    lineNumber: 63,
+                    columnNumber: 21
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+                  lineNumber: 61,
+                  columnNumber: 19
+                }, this),
+                /* @__PURE__ */ jsxDEV(
+                  "i",
+                  {
+                    className: `fa-solid fa-chevron-down ${styles.chevron} ${isOpen ? styles.chevronOpen : styles.chevronClosed}`,
+                    "aria-hidden": "true"
+                  },
+                  void 0,
+                  false,
+                  {
+                    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+                    lineNumber: 65,
+                    columnNumber: 19
+                  },
+                  this
+                )
+              ]
+            },
+            void 0,
+            true,
+            {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+              lineNumber: 55,
+              columnNumber: 15
+            },
+            this
+          ) : /* @__PURE__ */ jsxDEV("div", { className: styles.sectionLabel, children: [
+            section.icon && /* @__PURE__ */ jsxDEV("i", { className: `fa-solid ${section.icon} me-1`, "aria-hidden": "true" }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+              lineNumber: 74,
+              columnNumber: 36
+            }, this),
+            section.title
+          ] }, void 0, true, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+            lineNumber: 73,
+            columnNumber: 15
+          }, this),
+          isOpen && /* @__PURE__ */ jsxDEV("div", { className: styles.sectionBody, children: section.items.map(
+            (item) => /* @__PURE__ */ jsxDEV(
+              NavLink,
+              {
+                to: item.to,
+                end: item.end,
+                className: ({ isActive }) => `${styles.link} ${isCollapsible ? styles.subLink : ""} ${isActive ? styles.linkActive : ""}`,
+                children: [
+                  /* @__PURE__ */ jsxDEV("i", { className: `fa-solid ${item.icon}`, "aria-hidden": "true" }, void 0, false, {
+                    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+                    lineNumber: 92,
+                    columnNumber: 23
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("span", { children: item.label }, void 0, false, {
+                    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+                    lineNumber: 93,
+                    columnNumber: 23
+                  }, this)
+                ]
+              },
+              item.to,
+              true,
+              {
+                fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+                lineNumber: 82,
+                columnNumber: 17
+              },
+              this
+            )
+          ) }, void 0, false, {
+            fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+            lineNumber: 80,
+            columnNumber: 15
+          }, this)
+        ] }, section.title, true, {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+          lineNumber: 53,
+          columnNumber: 13
+        }, this);
+      })
+    ] }, void 0, true, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+      lineNumber: 46,
+      columnNumber: 7
+    }, this);
+  }
+  return /* @__PURE__ */ jsxDEV("aside", { className: styles.sidebar, children: [
+    label && /* @__PURE__ */ jsxDEV("div", { className: styles.sectionLabel, children: label }, void 0, false, {
+      fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+      lineNumber: 108,
+      columnNumber: 17
+    }, this),
+    items && items.map(
+      (item) => /* @__PURE__ */ jsxDEV(
+        NavLink,
+        {
+          to: item.to,
+          end: item.end,
+          className: ({ isActive }) => `${styles.link} ${isActive ? styles.linkActive : ""}`,
+          children: [
+            /* @__PURE__ */ jsxDEV("i", { className: `fa-solid ${item.icon}`, "aria-hidden": "true" }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+              lineNumber: 117,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: item.label }, void 0, false, {
+              fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+              lineNumber: 118,
+              columnNumber: 13
+            }, this)
+          ]
+        },
+        item.to,
+        true,
+        {
+          fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+          lineNumber: 111,
+          columnNumber: 7
+        },
+        this
+      )
+    )
+  ] }, void 0, true, {
+    fileName: "C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx",
+    lineNumber: 107,
+    columnNumber: 5
+  }, this);
+}
+_s(Sidebar, "QWAedWuiotAneEFiHfX+C25sxOY=");
+_c = Sidebar;
+var _c;
+$RefreshReg$(_c, "Sidebar");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/mirna/Downloads/esa-academy-platform/esa-platform/frontend/src/components/layout/Sidebar.jsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IkFBMkJrQjs7Ozs7Ozs7Ozs7Ozs7Ozs7QUEzQmxCLFNBQVNBLGdCQUFnQjtBQUN6QixTQUFTQyxlQUFlO0FBQ3hCLE9BQU9DLFlBQVk7QUFJbkIsd0JBQXdCQyxRQUFRLEVBQUVDLE9BQU9DLFVBQVVDLE1BQU0sR0FBRztBQUFBQyxLQUFBO0FBRTFELFFBQU0sQ0FBQ0MsY0FBY0MsZUFBZSxJQUFJVCxTQUFTLE1BQU07QUFDckQsUUFBSSxDQUFDSyxTQUFVLFFBQU8sQ0FBQztBQUN2QixVQUFNSyxVQUFVLENBQUM7QUFDakJMLGFBQVNNLFFBQVEsQ0FBQ0MsUUFBUTtBQUN4QkYsY0FBUUUsSUFBSUMsS0FBSyxJQUFJRCxJQUFJRSxnQkFBZ0I7QUFBQSxJQUMzQyxDQUFDO0FBQ0QsV0FBT0o7QUFBQUEsRUFDVCxDQUFDO0FBRUQsUUFBTUssZ0JBQWdCQSxDQUFDRixVQUFVO0FBQy9CSixvQkFBZ0IsQ0FBQ08sVUFBVTtBQUFBLE1BQ3pCLEdBQUdBO0FBQUFBLE1BQ0gsQ0FBQ0gsS0FBSyxHQUFHLENBQUNHLEtBQUtILEtBQUs7QUFBQSxJQUN0QixFQUFFO0FBQUEsRUFDSjtBQUVBLE1BQUlSLFlBQVlBLFNBQVNZLFNBQVMsR0FBRztBQUNuQyxXQUNFLHVCQUFDLFdBQU0sV0FBV2YsT0FBT2dCLFNBQ3RCWjtBQUFBQSxlQUFTLHVCQUFDLFNBQUksV0FBV0osT0FBT2lCLGNBQWViLG1CQUF0QztBQUFBO0FBQUE7QUFBQTtBQUFBLGFBQTRDO0FBQUEsTUFDckRELFNBQVNlLElBQUksQ0FBQ0MsWUFBWTtBQUN6QixjQUFNQyxTQUFTZCxhQUFhYSxRQUFRUixLQUFLLE1BQU07QUFDL0MsY0FBTVUsZ0JBQWdCRixRQUFRRyxnQkFBZ0I7QUFFOUMsZUFDRSx1QkFBQyxTQUF3QixXQUFXdEIsT0FBT3VCLGNBQ3hDRjtBQUFBQSwwQkFDQztBQUFBLFlBQUM7QUFBQTtBQUFBLGNBQ0MsTUFBSztBQUFBLGNBQ0wsV0FBV3JCLE9BQU93QjtBQUFBQSxjQUNsQixTQUFTLE1BQU1YLGNBQWNNLFFBQVFSLEtBQUs7QUFBQSxjQUMxQyxpQkFBZVM7QUFBQUEsY0FFZjtBQUFBLHVDQUFDLFVBQUssV0FBV3BCLE9BQU95QixrQkFDckJOO0FBQUFBLDBCQUFRTyxRQUFRLHVCQUFDLE9BQUUsV0FBVyxZQUFZUCxRQUFRTyxJQUFJLElBQUksZUFBWSxVQUF0RDtBQUFBO0FBQUE7QUFBQTtBQUFBLHlCQUE2RDtBQUFBLGtCQUM5RSx1QkFBQyxVQUFNUCxrQkFBUVIsU0FBZjtBQUFBO0FBQUE7QUFBQTtBQUFBLHlCQUFxQjtBQUFBLHFCQUZ2QjtBQUFBO0FBQUE7QUFBQTtBQUFBLHVCQUdBO0FBQUEsZ0JBQ0E7QUFBQSxrQkFBQztBQUFBO0FBQUEsb0JBQ0MsV0FBVyw0QkFBNEJYLE9BQU8yQixPQUFPLElBQ25EUCxTQUFTcEIsT0FBTzRCLGNBQWM1QixPQUFPNkIsYUFBYTtBQUFBLG9CQUVwRCxlQUFZO0FBQUE7QUFBQSxrQkFKZDtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsZ0JBS0M7QUFBQTtBQUFBO0FBQUEsWUFmSDtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsVUFnQkEsSUFFQSx1QkFBQyxTQUFJLFdBQVc3QixPQUFPaUIsY0FDcEJFO0FBQUFBLG9CQUFRTyxRQUFRLHVCQUFDLE9BQUUsV0FBVyxZQUFZUCxRQUFRTyxJQUFJLFNBQVMsZUFBWSxVQUEzRDtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUFrRTtBQUFBLFlBQ2xGUCxRQUFRUjtBQUFBQSxlQUZYO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBR0E7QUFBQSxVQUdEUyxVQUNDLHVCQUFDLFNBQUksV0FBV3BCLE9BQU84QixhQUNwQlgsa0JBQVFqQixNQUFNZ0I7QUFBQUEsWUFBSSxDQUFDYSxTQUNsQjtBQUFBLGNBQUM7QUFBQTtBQUFBLGdCQUVDLElBQUlBLEtBQUtDO0FBQUFBLGdCQUNULEtBQUtELEtBQUtFO0FBQUFBLGdCQUNWLFdBQVcsQ0FBQyxFQUFFQyxTQUFTLE1BQ3JCLEdBQUdsQyxPQUFPbUMsSUFBSSxJQUFJZCxnQkFBZ0JyQixPQUFPb0MsVUFBVSxFQUFFLElBQ25ERixXQUFXbEMsT0FBT3FDLGFBQWEsRUFBRTtBQUFBLGdCQUlyQztBQUFBLHlDQUFDLE9BQUUsV0FBVyxZQUFZTixLQUFLTCxJQUFJLElBQUksZUFBWSxVQUFuRDtBQUFBO0FBQUE7QUFBQTtBQUFBLHlCQUEwRDtBQUFBLGtCQUMxRCx1QkFBQyxVQUFNSyxlQUFLM0IsU0FBWjtBQUFBO0FBQUE7QUFBQTtBQUFBLHlCQUFrQjtBQUFBO0FBQUE7QUFBQSxjQVZiMkIsS0FBS0M7QUFBQUEsY0FEWjtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLFlBWUE7QUFBQSxVQUNELEtBZkg7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFnQkE7QUFBQSxhQTNDTWIsUUFBUVIsT0FBbEI7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQTZDQTtBQUFBLE1BRUosQ0FBQztBQUFBLFNBdERIO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0F1REE7QUFBQSxFQUVKO0FBR0EsU0FDRSx1QkFBQyxXQUFNLFdBQVdYLE9BQU9nQixTQUN0Qlo7QUFBQUEsYUFBUyx1QkFBQyxTQUFJLFdBQVdKLE9BQU9pQixjQUFlYixtQkFBdEM7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQUE0QztBQUFBLElBQ3JERixTQUNDQSxNQUFNZ0I7QUFBQUEsTUFBSSxDQUFDYSxTQUNUO0FBQUEsUUFBQztBQUFBO0FBQUEsVUFFQyxJQUFJQSxLQUFLQztBQUFBQSxVQUNULEtBQUtELEtBQUtFO0FBQUFBLFVBQ1YsV0FBVyxDQUFDLEVBQUVDLFNBQVMsTUFBTSxHQUFHbEMsT0FBT21DLElBQUksSUFBSUQsV0FBV2xDLE9BQU9xQyxhQUFhLEVBQUU7QUFBQSxVQUVoRjtBQUFBLG1DQUFDLE9BQUUsV0FBVyxZQUFZTixLQUFLTCxJQUFJLElBQUksZUFBWSxVQUFuRDtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUEwRDtBQUFBLFlBQzFELHVCQUFDLFVBQU1LLGVBQUszQixTQUFaO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQWtCO0FBQUE7QUFBQTtBQUFBLFFBTmIyQixLQUFLQztBQUFBQSxRQURaO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsTUFRQTtBQUFBLElBQ0Q7QUFBQSxPQWJMO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0FjQTtBQUVKO0FBQUMzQixHQWpHdUJKLFNBQU87QUFBQSxLQUFQQTtBQUFPLElBQUFxQztBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VTdGF0ZSIsIk5hdkxpbmsiLCJzdHlsZXMiLCJTaWRlYmFyIiwiaXRlbXMiLCJzZWN0aW9ucyIsImxhYmVsIiwiX3MiLCJvcGVuU2VjdGlvbnMiLCJzZXRPcGVuU2VjdGlvbnMiLCJpbml0aWFsIiwiZm9yRWFjaCIsInNlYyIsInRpdGxlIiwiZGVmYXVsdE9wZW4iLCJ0b2dnbGVTZWN0aW9uIiwicHJldiIsImxlbmd0aCIsInNpZGViYXIiLCJzZWN0aW9uTGFiZWwiLCJtYXAiLCJzZWN0aW9uIiwiaXNPcGVuIiwiaXNDb2xsYXBzaWJsZSIsImNvbGxhcHNpYmxlIiwic2VjdGlvbkdyb3VwIiwic2VjdGlvbkhlYWRlciIsInNlY3Rpb25UaXRsZVdyYXAiLCJpY29uIiwiY2hldnJvbiIsImNoZXZyb25PcGVuIiwiY2hldnJvbkNsb3NlZCIsInNlY3Rpb25Cb2R5IiwiaXRlbSIsInRvIiwiZW5kIiwiaXNBY3RpdmUiLCJsaW5rIiwic3ViTGluayIsImxpbmtBY3RpdmUiLCJfYyJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJTaWRlYmFyLmpzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IE5hdkxpbmsgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCBzdHlsZXMgZnJvbSAnLi9TaWRlYmFyLm1vZHVsZS5jc3MnO1xuXG4vLyBzZWN0aW9uczogW3sgdGl0bGUsIGNvbGxhcHNpYmxlOiB0cnVlfGZhbHNlLCBkZWZhdWx0T3BlbjogdHJ1ZXxmYWxzZSwgaWNvbjogc3RyaW5nLCBpdGVtczogW3sgdG8sIGljb24sIGxhYmVsLCBlbmQgfV0gfV1cbi8vIG9yIGZhbGxiYWNrIGl0ZW1zOiBbeyB0bywgaWNvbiwgbGFiZWwsIGVuZCB9XVxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gU2lkZWJhcih7IGl0ZW1zLCBzZWN0aW9ucywgbGFiZWwgfSkge1xuICAvLyBUcmFjayBvcGVuIHN0YXRlIGZvciBjb2xsYXBzaWJsZSBzZWN0aW9uc1xuICBjb25zdCBbb3BlblNlY3Rpb25zLCBzZXRPcGVuU2VjdGlvbnNdID0gdXNlU3RhdGUoKCkgPT4ge1xuICAgIGlmICghc2VjdGlvbnMpIHJldHVybiB7fTtcbiAgICBjb25zdCBpbml0aWFsID0ge307XG4gICAgc2VjdGlvbnMuZm9yRWFjaCgoc2VjKSA9PiB7XG4gICAgICBpbml0aWFsW3NlYy50aXRsZV0gPSBzZWMuZGVmYXVsdE9wZW4gIT09IGZhbHNlO1xuICAgIH0pO1xuICAgIHJldHVybiBpbml0aWFsO1xuICB9KTtcblxuICBjb25zdCB0b2dnbGVTZWN0aW9uID0gKHRpdGxlKSA9PiB7XG4gICAgc2V0T3BlblNlY3Rpb25zKChwcmV2KSA9PiAoe1xuICAgICAgLi4ucHJldixcbiAgICAgIFt0aXRsZV06ICFwcmV2W3RpdGxlXSxcbiAgICB9KSk7XG4gIH07XG5cbiAgaWYgKHNlY3Rpb25zICYmIHNlY3Rpb25zLmxlbmd0aCA+IDApIHtcbiAgICByZXR1cm4gKFxuICAgICAgPGFzaWRlIGNsYXNzTmFtZT17c3R5bGVzLnNpZGViYXJ9PlxuICAgICAgICB7bGFiZWwgJiYgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5zZWN0aW9uTGFiZWx9PntsYWJlbH08L2Rpdj59XG4gICAgICAgIHtzZWN0aW9ucy5tYXAoKHNlY3Rpb24pID0+IHtcbiAgICAgICAgICBjb25zdCBpc09wZW4gPSBvcGVuU2VjdGlvbnNbc2VjdGlvbi50aXRsZV0gIT09IGZhbHNlO1xuICAgICAgICAgIGNvbnN0IGlzQ29sbGFwc2libGUgPSBzZWN0aW9uLmNvbGxhcHNpYmxlICE9PSBmYWxzZTtcblxuICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICA8ZGl2IGtleT17c2VjdGlvbi50aXRsZX0gY2xhc3NOYW1lPXtzdHlsZXMuc2VjdGlvbkdyb3VwfT5cbiAgICAgICAgICAgICAge2lzQ29sbGFwc2libGUgPyAoXG4gICAgICAgICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e3N0eWxlcy5zZWN0aW9uSGVhZGVyfVxuICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gdG9nZ2xlU2VjdGlvbihzZWN0aW9uLnRpdGxlKX1cbiAgICAgICAgICAgICAgICAgIGFyaWEtZXhwYW5kZWQ9e2lzT3Blbn1cbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9e3N0eWxlcy5zZWN0aW9uVGl0bGVXcmFwfT5cbiAgICAgICAgICAgICAgICAgICAge3NlY3Rpb24uaWNvbiAmJiA8aSBjbGFzc05hbWU9e2BmYS1zb2xpZCAke3NlY3Rpb24uaWNvbn1gfSBhcmlhLWhpZGRlbj1cInRydWVcIj48L2k+fVxuICAgICAgICAgICAgICAgICAgICA8c3Bhbj57c2VjdGlvbi50aXRsZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICA8aVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2BmYS1zb2xpZCBmYS1jaGV2cm9uLWRvd24gJHtzdHlsZXMuY2hldnJvbn0gJHtcbiAgICAgICAgICAgICAgICAgICAgICBpc09wZW4gPyBzdHlsZXMuY2hldnJvbk9wZW4gOiBzdHlsZXMuY2hldnJvbkNsb3NlZFxuICAgICAgICAgICAgICAgICAgICB9YH1cbiAgICAgICAgICAgICAgICAgICAgYXJpYS1oaWRkZW49XCJ0cnVlXCJcbiAgICAgICAgICAgICAgICAgID48L2k+XG4gICAgICAgICAgICAgICAgPC9idXR0b24+XG4gICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5zZWN0aW9uTGFiZWx9PlxuICAgICAgICAgICAgICAgICAge3NlY3Rpb24uaWNvbiAmJiA8aSBjbGFzc05hbWU9e2BmYS1zb2xpZCAke3NlY3Rpb24uaWNvbn0gbWUtMWB9IGFyaWEtaGlkZGVuPVwidHJ1ZVwiPjwvaT59XG4gICAgICAgICAgICAgICAgICB7c2VjdGlvbi50aXRsZX1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKX1cblxuICAgICAgICAgICAgICB7aXNPcGVuICYmIChcbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17c3R5bGVzLnNlY3Rpb25Cb2R5fT5cbiAgICAgICAgICAgICAgICAgIHtzZWN0aW9uLml0ZW1zLm1hcCgoaXRlbSkgPT4gKFxuICAgICAgICAgICAgICAgICAgICA8TmF2TGlua1xuICAgICAgICAgICAgICAgICAgICAgIGtleT17aXRlbS50b31cbiAgICAgICAgICAgICAgICAgICAgICB0bz17aXRlbS50b31cbiAgICAgICAgICAgICAgICAgICAgICBlbmQ9e2l0ZW0uZW5kfVxuICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17KHsgaXNBY3RpdmUgfSkgPT5cbiAgICAgICAgICAgICAgICAgICAgICAgIGAke3N0eWxlcy5saW5rfSAke2lzQ29sbGFwc2libGUgPyBzdHlsZXMuc3ViTGluayA6ICcnfSAke1xuICAgICAgICAgICAgICAgICAgICAgICAgICBpc0FjdGl2ZSA/IHN0eWxlcy5saW5rQWN0aXZlIDogJydcbiAgICAgICAgICAgICAgICAgICAgICAgIH1gXG4gICAgICAgICAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgPGkgY2xhc3NOYW1lPXtgZmEtc29saWQgJHtpdGVtLmljb259YH0gYXJpYS1oaWRkZW49XCJ0cnVlXCI+PC9pPlxuICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPntpdGVtLmxhYmVsfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgPC9OYXZMaW5rPlxuICAgICAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApO1xuICAgICAgICB9KX1cbiAgICAgIDwvYXNpZGU+XG4gICAgKTtcbiAgfVxuXG4gIC8vIEZhbGxiYWNrIGZvciBzaW1wbGUgaXRlbXMgYXJyYXlcbiAgcmV0dXJuIChcbiAgICA8YXNpZGUgY2xhc3NOYW1lPXtzdHlsZXMuc2lkZWJhcn0+XG4gICAgICB7bGFiZWwgJiYgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5zZWN0aW9uTGFiZWx9PntsYWJlbH08L2Rpdj59XG4gICAgICB7aXRlbXMgJiZcbiAgICAgICAgaXRlbXMubWFwKChpdGVtKSA9PiAoXG4gICAgICAgICAgPE5hdkxpbmtcbiAgICAgICAgICAgIGtleT17aXRlbS50b31cbiAgICAgICAgICAgIHRvPXtpdGVtLnRvfVxuICAgICAgICAgICAgZW5kPXtpdGVtLmVuZH1cbiAgICAgICAgICAgIGNsYXNzTmFtZT17KHsgaXNBY3RpdmUgfSkgPT4gYCR7c3R5bGVzLmxpbmt9ICR7aXNBY3RpdmUgPyBzdHlsZXMubGlua0FjdGl2ZSA6ICcnfWB9XG4gICAgICAgICAgPlxuICAgICAgICAgICAgPGkgY2xhc3NOYW1lPXtgZmEtc29saWQgJHtpdGVtLmljb259YH0gYXJpYS1oaWRkZW49XCJ0cnVlXCI+PC9pPlxuICAgICAgICAgICAgPHNwYW4+e2l0ZW0ubGFiZWx9PC9zcGFuPlxuICAgICAgICAgIDwvTmF2TGluaz5cbiAgICAgICAgKSl9XG4gICAgPC9hc2lkZT5cbiAgKTtcbn1cbiJdLCJmaWxlIjoiQzovVXNlcnMvbWlybmEvRG93bmxvYWRzL2VzYS1hY2FkZW15LXBsYXRmb3JtL2VzYS1wbGF0Zm9ybS9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9sYXlvdXQvU2lkZWJhci5qc3gifQ==

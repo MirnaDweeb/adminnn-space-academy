@@ -1,0 +1,259 @@
+.chartTitle {
+  font-size: 0.925rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+  color: var(--esa-text, #1e293b);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emptyChart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 1px dashed var(--esa-border, #e2e8f0);
+  border-radius: 8px;
+  background-color: var(--esa-bg-subtle, #f8fafc);
+  text-align: center;
+}
+
+/* Donut Chart */
+.donutWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--esa-card-bg, #ffffff);
+  border: 1px solid var(--esa-border, #e2e8f0);
+  border-radius: 8px;
+}
+
+.donutInner {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.donutSvg {
+  transform: rotate(-90deg);
+}
+
+.donutSegment {
+  transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease;
+  cursor: pointer;
+}
+
+.donutSegment:hover {
+  opacity: 0.85;
+}
+
+.donutCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.donutCenterValue {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--esa-text, #0f172a);
+  line-height: 1.1;
+}
+
+.donutCenterLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--esa-text-muted, #64748b);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.donutLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  font-size: 0.825rem;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  color: var(--esa-text, #334155);
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 0.5rem;
+}
+
+.legendValue {
+  font-weight: 600;
+  color: var(--esa-text, #0f172a);
+}
+
+.legendPct {
+  font-weight: 400;
+  color: var(--esa-text-muted, #64748b);
+  font-size: 0.775rem;
+}
+
+/* Horizontal Bar Chart */
+.barChartWrap {
+  padding: 1rem;
+  background: var(--esa-card-bg, #ffffff);
+  border: 1px solid var(--esa-border, #e2e8f0);
+  border-radius: 8px;
+}
+
+.barList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.barItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.barHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+}
+
+.barLabel {
+  color: var(--esa-text, #334155);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.barValue {
+  font-weight: 600;
+  color: var(--esa-text, #0f172a);
+}
+
+.barSecondary {
+  font-weight: 400;
+  color: var(--esa-text-muted, #64748b);
+  font-size: 0.75rem;
+}
+
+.barTrack {
+  height: 8px;
+  background-color: var(--esa-bg-subtle, #f1f5f9);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-in-out;
+}
+
+/* Trend Chart */
+.trendWrap {
+  padding: 1rem;
+  background: var(--esa-card-bg, #ffffff);
+  border: 1px solid var(--esa-border, #e2e8f0);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.trendPlot {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--esa-border, #e2e8f0);
+  position: relative;
+  overflow-x: auto;
+}
+
+.trendColumn {
+  flex: 1;
+  min-width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.trendBarContainer {
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.trendBar {
+  width: 14px;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  transition: height 0.4s ease;
+  cursor: pointer;
+}
+
+.trendBar:hover {
+  filter: brightness(1.15);
+}
+
+.trendTooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  border-radius: 4px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.trendBar:hover .trendTooltip {
+  display: block;
+}
+
+.trendDateLabel {
+  font-size: 0.7rem;
+  color: var(--esa-text-muted, #64748b);
+  margin-top: 0.4rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}

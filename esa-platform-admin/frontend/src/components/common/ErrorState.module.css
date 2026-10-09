@@ -1,0 +1,15 @@
+.wrap {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--esa-danger);
+}
+
+.icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.message {
+  color: var(--esa-text-secondary);
+  margin-bottom: 1rem;
+}

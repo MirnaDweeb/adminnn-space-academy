@@ -1,0 +1,17 @@
+.wrap {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--esa-text-secondary);
+}
+
+.icon {
+  font-size: 2rem;
+  color: var(--esa-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-weight: 600;
+  color: var(--esa-text-primary);
+  margin-bottom: 0.25rem;
+}

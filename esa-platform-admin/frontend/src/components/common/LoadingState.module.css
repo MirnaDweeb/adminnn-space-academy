@@ -1,0 +1,13 @@
+.wrap {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--esa-text-secondary);
+}
+
+.fullPage {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

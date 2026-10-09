@@ -1,0 +1,113 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(6, 11, 22, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+  overflow-y: auto;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.dialog {
+  background: var(--esa-surface);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-lg);
+  box-shadow: 0 20px 40px rgba(6, 11, 22, 0.25);
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sm { max-width: 420px; }
+.md { max-width: 560px; }
+.lg { max-width: 760px; }
+.xl { max-width: 960px; }
+
+.header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--esa-border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background-color: var(--esa-surface);
+  border-top-left-radius: var(--esa-radius-lg);
+  border-top-right-radius: var(--esa-radius-lg);
+}
+
+.titleArea {
+  flex: 1;
+}
+
+.title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--esa-text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--esa-text-secondary);
+  margin-top: 0.25rem;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--esa-text-muted);
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--esa-radius-sm);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+  color: var(--esa-text-primary);
+  background-color: var(--esa-surface-alt);
+}
+
+.body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  color: var(--esa-text-primary);
+}
+
+.footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--esa-border);
+  background: var(--esa-surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  border-bottom-left-radius: var(--esa-radius-lg);
+  border-bottom-right-radius: var(--esa-radius-lg);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
