@@ -8,6 +8,9 @@ const {
   listAssignmentsAdmin,
   recordGrades,
   getGrades,
+  startSessionInstructor,
+  endSessionInstructor,
+  updateSessionInstructor,
 } = require('../controllers/cohortController');
 const { getCohortEvaluationsInstructor } = require('../controllers/evaluationController');
 const { protect } = require('../middleware/auth');
@@ -29,6 +32,11 @@ router.use(protect, authorize(...INSTRUCTOR_OR_ADMIN_ROLES));
 // Cohort listing and details for instructor
 router.get('/cohorts', listInstructorCohorts);
 router.get('/cohorts/:id', getInstructorCohortDetails);
+
+// Live Session Monitoring & Lifecycle Controls
+router.post('/cohorts/:id/sessions/:sessionId/start', startSessionInstructor);
+router.post('/cohorts/:id/sessions/:sessionId/end', endSessionInstructor);
+router.patch('/cohorts/:id/sessions/:sessionId', updateSessionInstructor);
 
 // Session Attendance
 router.post('/cohorts/:id/attendance', recordAttendance);

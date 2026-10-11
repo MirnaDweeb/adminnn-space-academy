@@ -5,7 +5,7 @@ import styles from './charts.module.css';
  * Horizontal Bar Chart for categorical breakdown (e.g. programs, outcome distribution)
  * items: [{ label, value, secondaryLabel, color }]
  */
-export default function BarChart({ items = [], title, maxVal, unit = '', color = '#3b82f6' }) {
+export default function BarChart({ items = [], title, maxVal, unit = '', color = '#3A6985' }) {
   if (!items || items.length === 0) {
     return (
       <div className={styles.emptyChart}>

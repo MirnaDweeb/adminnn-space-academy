@@ -5,7 +5,7 @@ import styles from './charts.module.css';
  * Timeline / Trend Bar Chart
  * data: [{ date or period, value, label }]
  */
-export default function TrendChart({ data = [], title, unit = '', color = '#3b82f6', height = 140 }) {
+export default function TrendChart({ data = [], title, unit = '', color = '#3A6985', height = 140 }) {
   if (!data || data.length === 0) {
     return (
       <div className={styles.emptyChart} style={{ height }}>

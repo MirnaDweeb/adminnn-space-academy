@@ -138,13 +138,13 @@ const updateAdministratorStatus = asyncHandler(async (req, res) => {
   validateUpdateAdminStatusInput(req.body);
   const { isActive } = req.body;
 
+  if (String(req.params.id) === String(req.user._id)) {
+    throw ApiError.badRequest('You cannot change your own active status');
+  }
+
   const user = await User.findById(req.params.id);
   if (!user || ![ROLES.PRE_UNIVERSITY_ADMIN, ROLES.UNIVERSITY_ADMIN].includes(user.role)) {
     throw ApiError.notFound('Administrator not found');
-  }
-
-  if (user._id.equals(req.user._id)) {
-    throw ApiError.badRequest('You cannot change your own active status');
   }
 
   if (user.isActive === isActive) {
@@ -173,14 +173,15 @@ const updateAdministratorStatus = asyncHandler(async (req, res) => {
 // PUT /api/admin/administrators/:id (SUPER_ADMIN only)
 const updateAdministrator = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
+  // Prevent self-elevation / self-modification of own account
+  if (String(id) === String(req.user._id)) {
+    throw ApiError.badRequest('You cannot modify your own administrative permissions or scope');
+  }
+
   const user = await User.findById(id);
   if (!user || ![ROLES.PRE_UNIVERSITY_ADMIN, ROLES.UNIVERSITY_ADMIN].includes(user.role)) {
     throw ApiError.notFound('Administrator not found');
-  }
-
-  // Prevent self-elevation / self-modification of own account
-  if (user._id.equals(req.user._id)) {
-    throw ApiError.badRequest('You cannot modify your own administrative permissions or scope');
   }
 
   const { fullName, role, division, permissions, isActive } = req.body;

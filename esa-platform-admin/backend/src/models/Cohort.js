@@ -28,6 +28,34 @@ const sessionSchema = new mongoose.Schema(
       trim: true,
       default: 'Main Training Lab / Online Room',
     },
+    status: {
+      type: String,
+      enum: ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+      default: 'SCHEDULED',
+      index: true,
+    },
+    deliveryMode: {
+      type: String,
+      enum: ['ONLINE', 'OFFLINE', 'HYBRID', 'ONSITE'],
+      default: 'OFFLINE',
+    },
+    startedAt: {
+      type: Date,
+      default: null,
+    },
+    endedAt: {
+      type: Date,
+      default: null,
+    },
+    actualDurationMinutes: {
+      type: Number,
+      default: 0,
+    },
+    meetingUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   { _id: true }
 );

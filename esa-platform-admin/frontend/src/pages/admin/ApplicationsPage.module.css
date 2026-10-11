@@ -398,7 +398,7 @@
 .recommendationCard {
   background: #f8fafc;
   border: 1px solid #cbd5e1;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--esa-cosmos-blue, #3a6985);
   border-radius: 6px;
   padding: 0.85rem 1.15rem;
 }
@@ -423,7 +423,7 @@
   font-size: 0.8rem;
   background: none;
   border: none;
-  color: #2563eb;
+  color: var(--esa-cosmos-blue, #3a6985);
   padding: 0;
   cursor: pointer;
   display: inline-flex;

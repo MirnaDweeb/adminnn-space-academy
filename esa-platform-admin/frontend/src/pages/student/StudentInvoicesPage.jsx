@@ -73,14 +73,20 @@ export default function StudentInvoicesPage() {
         transactionNumber: checkoutData.transactionNumber,
         gatewayTransactionId: simTxId,
         gatewayOrderId: simOrderId,
-        amountCents: Math.round(checkoutData.amount * 100),
+        // amountCents intentionally omitted — derived server-side from the invoice
         success: isSuccess,
       });
 
       // Redirect to return page with verification query params
       navigate(`/student/payments/return?id=${simTxId}&order=${simOrderId}&success=${isSuccess}&amount_cents=${Math.round(checkoutData.amount * 100)}&enrollmentId=${selectedInvoice.enrollment._id}`);
     } catch (err) {
-      setCheckoutError(err.message || 'Payment simulation failed');
+      // Provide a clear, user-friendly message for 404 (production/unavailable) and 403 (access denied)
+      const status = err?.response?.status;
+      if (status === 404 || status === 403) {
+        setCheckoutError('Sandbox payments are not available in this environment. Please contact your administrator.');
+      } else {
+        setCheckoutError(err.message || 'Payment simulation failed');
+      }
       setSimulating(false);
     }
   };

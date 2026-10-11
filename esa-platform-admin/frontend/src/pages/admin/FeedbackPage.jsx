@@ -1,9 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-import StatCard from '../../components/common/StatCard';
 import DataTable from '../../components/common/DataTable';
-import StatusBadge from '../../components/common/StatusBadge';
 import Modal from '../../components/common/Modal';
 import LoadingState from '../../components/common/LoadingState';
 import EmptyState from '../../components/common/EmptyState';
@@ -14,24 +12,55 @@ import { useAuth } from '../../hooks/useAuth';
 import { ROLE_TO_DIVISION, DIVISION_LABELS } from '../../constants/divisions';
 import styles from './FeedbackPage.module.css';
 
+const CATEGORY_LABELS = {
+  COURSE_CONTENT: 'Course Content',
+  INSTRUCTOR: 'Instructor Guidance',
+  OVERALL: 'Overall Experience',
+  FACILITIES: 'Facilities & Labs',
+  PLATFORM: 'Platform & Systems',
+};
+
+const RATING_COLORS = {
+  5: '#1E7C85', // Deep Teal-Green
+  4: '#3A6985', // Deep Cosmos Blue
+  3: '#996814', // Accessible Warm Gold
+  2: '#C9733A', // Supporting Coral-Tan
+  1: '#DF4F4C', // Red-Coral
+};
+
 export default function FeedbackPage() {
   const { user } = useAuth();
   const params = useParams();
   const activeDivision = params.division || ROLE_TO_DIVISION[user?.role] || 'ALL';
 
-  // Feedback Table State
+  // Feedback Table & Metrics State
   const [feedbackList, setFeedbackList] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
-  const [metrics, setMetrics] = useState({ total: 0, averageRating: 0 });
+  const [metrics, setMetrics] = useState({
+    total: 0,
+    averageRating: 0,
+    positiveCount: 0,
+    positivePercentage: 0,
+    needsAttentionCount: 0,
+    sentimentBreakdown: { POSITIVE: 0, NEUTRAL: 0, NEGATIVE: 0 },
+    ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+    categoryBreakdown: {
+      OVERALL: 0,
+      COURSE_CONTENT: 0,
+      INSTRUCTOR: 0,
+      FACILITIES: 0,
+      PLATFORM: 0,
+    },
+    improvementPriorities: [],
+  });
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState('');
 
-  // AI / Thematic Summary State
-  const [summaryData, setSummaryData] = useState(null);
-  const [summaryLoading, setSummaryLoading] = useState(false);
-  const [summaryError, setSummaryError] = useState('');
+  // Improvement Priorities expansion
+  const [showAllPriorities, setShowAllPriorities] = useState(false);
 
-  // Filters
+  // Filters State
   const [ratingFilter, setRatingFilter] = useState('');
   const [sentimentFilter, setSentimentFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -40,62 +69,56 @@ export default function FeedbackPage() {
   const [page, setPage] = useState(1);
   const [programs, setPrograms] = useState([]);
 
-  // Detail Modal
+  // Detail Modal State
   const [selectedFeedback, setSelectedFeedback] = useState(null);
 
-  // Fetch Feedback List
-  const fetchFeedback = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await adminService.listFeedback({
-        division: activeDivision === 'ALL' ? undefined : activeDivision,
-        rating: ratingFilter || undefined,
-        sentiment: sentimentFilter || undefined,
-        feedbackType: typeFilter || undefined,
-        program: programFilter || undefined,
-        search: search.trim() || undefined,
-        page,
-        limit: 20,
-      });
+  const hasActiveFilters = Boolean(
+    search.trim() || ratingFilter || sentimentFilter || typeFilter || programFilter
+  );
 
-      setFeedbackList(res.feedback || []);
-      setPagination(res.pagination || { page: 1, limit: 20, total: 0, totalPages: 1 });
-      setMetrics(res.metrics || { total: 0, averageRating: 0 });
-    } catch (err) {
-      setError(err.message || 'Failed to load student feedback');
-    } finally {
-      setLoading(false);
-    }
-  }, [activeDivision, ratingFilter, sentimentFilter, typeFilter, programFilter, search, page]);
+  // Fetch Feedback & Metrics
+  const fetchFeedback = useCallback(
+    async (refreshing = false) => {
+      if (refreshing) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError('');
 
-  // Fetch AI/Thematic Summary
-  const fetchSummary = useCallback(async () => {
-    setSummaryLoading(true);
-    setSummaryError('');
-    try {
-      const res = await adminService.getFeedbackSummary({
-        division: activeDivision === 'ALL' ? undefined : activeDivision,
-        program: programFilter || undefined,
-      });
-      setSummaryData(res.summary || null);
-    } catch (err) {
-      setSummaryError(err.message || 'Failed to generate feedback summary');
-    } finally {
-      setSummaryLoading(false);
-    }
-  }, [activeDivision, programFilter]);
+      try {
+        const res = await adminService.listFeedback({
+          division: activeDivision === 'ALL' ? undefined : activeDivision,
+          rating: ratingFilter || undefined,
+          sentiment: sentimentFilter || undefined,
+          feedbackType: typeFilter || undefined,
+          program: programFilter || undefined,
+          search: search.trim() || undefined,
+          page,
+          limit: 20,
+        });
+
+        setFeedbackList(res.feedback || []);
+        setPagination(res.pagination || { page: 1, limit: 20, total: 0, totalPages: 1 });
+        if (res.metrics) {
+          setMetrics(res.metrics);
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load student feedback analytics');
+      } finally {
+        setLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [activeDivision, ratingFilter, sentimentFilter, typeFilter, programFilter, search, page]
+  );
 
   // Initial & Filter Triggers
   useEffect(() => {
     fetchFeedback();
   }, [fetchFeedback]);
 
-  useEffect(() => {
-    fetchSummary();
-  }, [fetchSummary]);
-
-  // Load programs dropdown
+  // Load programs dropdown options
   useEffect(() => {
     async function loadPrograms() {
       try {
@@ -103,111 +126,158 @@ export default function FeedbackPage() {
         const res = await programService.listPrograms(query);
         setPrograms(res.programs || []);
       } catch (err) {
-        console.error('Failed to load programs for filter:', err);
+        console.error('Failed to load programs for feedback filter:', err);
       }
     }
     loadPrograms();
   }, [activeDivision]);
 
-  // Render Stars
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <i
-          key={i}
-          className={`fa-solid fa-star ${i <= rating ? 'text-warning' : 'text-muted'}`}
-          style={{ fontSize: '0.85rem' }}
-        ></i>
-      );
-    }
-    return <span className={styles.feedbackRating}>{stars}</span>;
+  // Clear all filters action
+  const handleClearFilters = () => {
+    setSearch('');
+    setRatingFilter('');
+    setSentimentFilter('');
+    setTypeFilter('');
+    setProgramFilter('');
+    setPage(1);
   };
 
+  // Render Stars helper
+  const renderStars = (rating) => {
+    const num = Math.round(Number(rating) || 0);
+    return (
+      <span className={styles.starsRow} aria-label={`${rating} out of 5 stars`}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <i
+            key={star}
+            className={`fa-solid fa-star ${star <= num ? 'text-warning' : 'text-muted'}`}
+            style={{ fontSize: '0.75rem', opacity: star <= num ? 1 : 0.3 }}
+            aria-hidden="true"
+          />
+        ))}
+      </span>
+    );
+  };
+
+  // Total verified ratings sum (used as denominator for rating distribution)
+  const totalValidRatings = useMemo(() => {
+    if (!metrics.ratingDistribution) return metrics.total || 0;
+    const sum = Object.values(metrics.ratingDistribution).reduce((acc, curr) => acc + (curr || 0), 0);
+    return sum > 0 ? sum : metrics.total || 0;
+  }, [metrics.ratingDistribution, metrics.total]);
+
+  // Columns definition for DataTable
   const columns = [
     {
-      header: 'Student',
-      render: (item) => (
-        <div>
-          <div className="fw-semibold text-dark">{item.student?.fullName || 'Anonymous / Student'}</div>
-          <div className="text-muted small">{item.student?.email || 'Confidential'}</div>
-        </div>
-      ),
+      key: 'student',
+      label: 'Student',
+      render: (item) => {
+        const studentName = item.student?.fullName?.trim() || 'Enrolled Candidate';
+        const studentEmail = item.student?.email || 'Confidential Profile';
+        return (
+          <div>
+            <div className={styles.studentName}>{studentName}</div>
+            <div className={styles.studentMetaRow}>
+              <span className={styles.studentEmail}>{studentEmail}</span>
+              <span className={styles.verifiedBadge}>Verified</span>
+            </div>
+          </div>
+        );
+      },
     },
     {
-      header: 'Program & Cohort',
+      key: 'program',
+      label: 'Program & Cohort',
       render: (item) => (
         <div>
-          <div className="fw-medium text-dark">{item.program?.title || 'Academy Program'}</div>
-          <div className="text-muted small">
-            {item.cohort?.cohortNumber} ({item.division?.replace('_', ' ')})
+          <div className={styles.programTitle}>{item.program?.title || 'Academy Program'}</div>
+          <div className={styles.cohortTag}>
+            {item.cohort?.cohortNumber || 'General Cohort'}
+            {item.division ? ` · ${item.division.replace(/_/g, ' ')}` : ''}
           </div>
         </div>
       ),
     },
     {
-      header: 'Rating & Sentiment',
+      key: 'category',
+      label: 'Category',
       render: (item) => (
-        <div>
-          <div>{renderStars(item.rating)}</div>
-          <span
-            className={`badge mt-1 ${
-              item.sentiment === 'POSITIVE'
-                ? 'bg-success'
-                : item.sentiment === 'NEGATIVE'
-                ? 'bg-danger'
-                : 'bg-secondary'
-            }`}
-            style={{ fontSize: '0.7rem' }}
-          >
-            {item.sentiment}
-          </span>
-        </div>
-      ),
-    },
-    {
-      header: 'Type',
-      render: (item) => (
-        <span className="badge bg-light text-dark border">
-          {item.feedbackType?.replace('_', ' ')}
+        <span className={styles.badgeCategory}>
+          {CATEGORY_LABELS[item.feedbackType] || item.feedbackType?.replace(/_/g, ' ') || 'Overall'}
         </span>
       ),
     },
     {
-      header: 'Comments Summary',
+      key: 'rating',
+      label: 'Rating',
       render: (item) => (
-        <div style={{ maxWidth: '340px' }}>
-          <div className="text-truncate text-dark small">{item.comments}</div>
-          {item.strengths && (
-            <div className="text-success small text-truncate">
-              <strong>+</strong> {item.strengths}
+        <div className="d-flex align-items-center">
+          {renderStars(item.rating)}
+          <span className={styles.ratingNum}>{item.rating} / 5</span>
+        </div>
+      ),
+    },
+    {
+      key: 'sentiment',
+      label: 'Sentiment',
+      render: (item) => {
+        const sent = item.sentiment || 'POSITIVE';
+        const badgeClass =
+          sent === 'POSITIVE'
+            ? styles.badgeSentimentPos
+            : sent === 'NEGATIVE'
+            ? styles.badgeSentimentNeg
+            : styles.badgeSentimentNeu;
+        return <span className={badgeClass}>{sent}</span>;
+      },
+    },
+    {
+      key: 'summary',
+      label: 'Feedback Summary',
+      render: (item) => (
+        <div style={{ maxWidth: '320px' }}>
+          <div className={styles.commentSummary} title={item.comments}>
+            {item.comments}
+          </div>
+          {item.improvements && (
+            <div className={styles.commentImprovement} title={`Improvement: ${item.improvements}`}>
+              <i className="fa-solid fa-arrow-turn-up me-1" style={{ transform: 'rotate(90deg)' }} />
+              {item.improvements}
             </div>
           )}
         </div>
       ),
     },
     {
-      header: 'Date',
+      key: 'date',
+      label: 'Date',
       render: (item) => (
-        <span className="small text-secondary">
+        <span className={styles.dateCell}>
           {new Date(item.submittedAt || item.createdAt).toLocaleDateString()}
         </span>
       ),
     },
     {
-      header: 'Actions',
+      key: 'actions',
+      label: 'Actions',
       render: (item) => (
         <button
           type="button"
           className="btn btn-outline-primary btn-sm py-0 px-2"
           onClick={() => setSelectedFeedback(item)}
           id={`btn-view-feedback-${item._id}`}
+          title="Inspect full student review"
         >
-          <i className="fa-solid fa-eye me-1"></i> View
+          <i className="fa-solid fa-eye me-1" aria-hidden="true" /> View
         </button>
       ),
     },
   ];
+
+  // Visible Improvement Priorities
+  const visiblePriorities = showAllPriorities
+    ? metrics.improvementPriorities || []
+    : (metrics.improvementPriorities || []).slice(0, 3);
 
   const divisionTitle =
     activeDivision === 'ALL'
@@ -216,288 +286,523 @@ export default function FeedbackPage() {
 
   return (
     <div className={styles.container}>
+      {/* 1. Compact Page Header */}
       <PageHeader
-        title={`${divisionTitle} Student Feedback Center`}
-        subtitle="Review real student sentiment, evaluate training experience, and leverage AI-assisted feedback analytics grounded in verified submissions."
+        title={`${divisionTitle} Student Feedback Analytics`}
+        subtitle="Monitor student satisfaction, training quality, and improvement opportunities."
+        division={activeDivision !== 'ALL' ? activeDivision : undefined}
         actions={
           <button
             type="button"
-            className="btn btn-outline-primary d-flex align-items-center gap-2"
-            id="btn-refresh-summary"
-            onClick={fetchSummary}
-            disabled={summaryLoading}
+            className={styles.refreshBtn}
+            id="btn-refresh-feedback-analytics"
+            onClick={() => fetchFeedback(true)}
+            disabled={isRefreshing || loading}
+            title="Refresh feedback analytics from active database"
           >
-            <i className={`fa-solid fa-arrows-rotate ${summaryLoading ? 'fa-spin' : ''}`}></i>
-            <span>Refresh Insights</span>
+            <i className={`fa-solid fa-arrows-rotate ${isRefreshing ? 'fa-spin' : ''}`} aria-hidden="true" />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh Analytics'}</span>
           </button>
         }
       />
 
-      {/* STAT CARDS */}
-      <div className={styles.statsGrid}>
-        <StatCard label="Total Feedback Responses" value={metrics.total || pagination.total} icon="fa-comments" />
-        <StatCard
-          label="Average Academy Rating"
-          value={metrics.averageRating ? `${metrics.averageRating} / 5.0` : 'N/A'}
-          icon="fa-star"
-        />
-        <StatCard
-          label="Positive Sentiment"
-          value={
-            summaryData?.sentimentBreakdown
-              ? `${summaryData.sentimentBreakdown.POSITIVE || 0} (${Math.round(
-                  ((summaryData.sentimentBreakdown.POSITIVE || 0) / (summaryData.totalAnalyzed || 1)) * 100
-                )}%)`
-              : 'N/A'
-          }
-          icon="fa-face-smile"
-        />
-        <StatCard
-          label="Areas for Improvement"
-          value={
-            summaryData?.sentimentBreakdown
-              ? `${summaryData.sentimentBreakdown.NEGATIVE || 0} responses`
-              : '0'
-          }
-          icon="fa-triangle-exclamation"
-        />
-      </div>
-
-      {/* AI / SMART FEEDBACK INSIGHTS PANEL */}
-      <div className={styles.insightsCard}>
-        <div className={styles.insightsHeader}>
-          <div className={styles.insightsTitle}>
-            <i className="fa-solid fa-wand-magic-sparkles text-info"></i>
-            <span>STUDENT FEEDBACK INSIGHTS</span>
-            <span className={styles.insightsBadge}>
-              {summaryData?.provider?.includes('GEMINI')
-                ? 'Google Gemini 1.5 Flash'
-                : 'ESA Thematic & Grounded NLP Engine'}
-            </span>
+      {/* 2. KPI Summary Row (4 Equal, Compact Statistic Cards) */}
+      <div className={styles.kpiGrid}>
+        {/* KPI 1: Total Responses */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiTop}>
+            <span className={styles.kpiLabel}>Total Responses</span>
+            <div className={`${styles.kpiIconWrap} ${styles.iconNavy}`}>
+              <i className="fa-solid fa-comments" aria-hidden="true" />
+            </div>
           </div>
+          <div className={styles.kpiValueRow}>
+            <span className={styles.kpiValue}>{metrics.total}</span>
+          </div>
+          <div className={styles.kpiSubtext}>Verified student evaluations across cohorts</div>
+        </div>
 
-          <div className="d-flex align-items-center gap-2 small text-light">
-            <i className="fa-solid fa-database"></i>
-            <span>
-              {summaryData?.totalAnalyzed || 0} real responses analyzed · Avg Rating:{' '}
-              <strong>{summaryData?.averageRating || 0} / 5.0</strong>
+        {/* KPI 2: Average Rating */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiTop}>
+            <span className={styles.kpiLabel}>Average Rating</span>
+            <div className={`${styles.kpiIconWrap} ${styles.iconGold}`}>
+              <i className="fa-solid fa-star" aria-hidden="true" />
+            </div>
+          </div>
+          <div className={styles.kpiValueRow}>
+            <span className={styles.kpiValue}>
+              {metrics.averageRating > 0 ? `${metrics.averageRating.toFixed(1)} / 5.0` : '—'}
             </span>
+            {metrics.averageRating > 0 && <span className={styles.kpiStar}>★</span>}
+          </div>
+          <div className={styles.kpiSubtext}>
+            {metrics.total > 0
+              ? `Based on ${metrics.total} valid evaluations`
+              : 'No evaluations submitted yet'}
           </div>
         </div>
 
-        {summaryLoading ? (
-          <div className="text-center py-4">
-            <div className="spinner-border text-info mb-2" role="status"></div>
-            <div className="small text-light">Synthesizing institutional student feedback...</div>
+        {/* KPI 3: Positive Feedback */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiTop}>
+            <span className={styles.kpiLabel}>Positive Feedback</span>
+            <div className={`${styles.kpiIconWrap} ${styles.iconGreen}`}>
+              <i className="fa-solid fa-circle-check" aria-hidden="true" />
+            </div>
           </div>
-        ) : summaryError ? (
-          <div className="alert alert-danger py-2 small mb-0">{summaryError}</div>
-        ) : !summaryData || summaryData.totalAnalyzed === 0 ? (
-          <div className="text-center py-3 text-light small">
-            No student feedback records available for automated thematic synthesis.
+          <div className={styles.kpiValueRow}>
+            <span className={styles.kpiValue}>
+              {metrics.positiveCount}
+              <span style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b', marginLeft: '4px' }}>
+                ({metrics.positivePercentage}%)
+              </span>
+            </span>
           </div>
-        ) : (
-          <div>
-            {/* Executive Overview */}
-            {summaryData.executiveOverview && (
-              <div className="mb-3 p-2 rounded bg-white bg-opacity-10 small text-light border border-white border-opacity-10">
-                <i className="fa-solid fa-circle-info me-2 text-info"></i>
-                {summaryData.executiveOverview}
-              </div>
-            )}
+          <div className={styles.kpiSubtext}>Ratings ≥ 4★ or verified positive sentiment</div>
+        </div>
 
-            {/* Key Themes Chips */}
-            {summaryData.keyThemes && summaryData.keyThemes.length > 0 && (
-              <div className="mb-3">
-                <div className="small text-uppercase fw-bold text-info mb-2">Key Themes Detected:</div>
-                <div className={styles.themesContainer}>
-                  {summaryData.keyThemes.map((theme, i) => (
-                    <span key={i} className={styles.themeChip}>
-                      <i className="fa-solid fa-tag me-1"></i> {theme}
+        {/* KPI 4: Needs Attention */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiTop}>
+            <span className={styles.kpiLabel}>Needs Attention</span>
+            <div className={`${styles.kpiIconWrap} ${styles.iconRose}`}>
+              <i className="fa-solid fa-triangle-exclamation" aria-hidden="true" />
+            </div>
+          </div>
+          <div className={styles.kpiValueRow}>
+            <span className={styles.kpiValue}>{metrics.needsAttentionCount}</span>
+            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>responses</span>
+          </div>
+          <div className={styles.kpiSubtext}>Ratings ≤ 2★ or negative sentiment flagged</div>
+        </div>
+      </div>
+
+      {/* 3. Analytics Panels Row (Rating Distribution & Feedback Breakdown) */}
+      <div className={styles.analyticsRow}>
+        {/* Panel A: Rating Distribution */}
+        <div className={styles.panelCard}>
+          <div className={styles.panelHeader}>
+            <div>
+              <h2 className={styles.panelTitle}>
+                <i className="fa-solid fa-chart-bar text-primary" aria-hidden="true" />
+                Rating Distribution
+              </h2>
+              <div className={styles.panelSubtitle}>
+                Breakdown across {totalValidRatings} verified star evaluations
+              </div>
+            </div>
+            <span className={styles.panelBadge}>1 – 5 Star Scale</span>
+          </div>
+
+          <div className={styles.chartList}>
+            {[5, 4, 3, 2, 1].map((star) => {
+              const count = metrics.ratingDistribution?.[star] || 0;
+              const pct = totalValidRatings > 0 ? Math.round((count / totalValidRatings) * 100) : 0;
+              return (
+                <div key={star} className={styles.chartRow}>
+                  <div className={styles.chartRowLabels}>
+                    <span className={styles.chartRowName}>
+                      <i className="fa-solid fa-star text-warning" style={{ fontSize: '0.75rem' }} />
+                      {star} {star === 1 ? 'Star' : 'Stars'}
                     </span>
-                  ))}
+                    <span className={styles.chartRowStats}>
+                      <span className={styles.chartRowStatsStrong}>{count}</span> ({pct}%)
+                    </span>
+                  </div>
+                  <div className={styles.barTrack}>
+                    <div
+                      className={styles.barFill}
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: RATING_COLORS[star],
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })}
+          </div>
 
-            {/* 4-Column / Grid of Grounded Insights */}
-            <div className={styles.insightsGrid}>
-              {/* Strengths */}
-              <div className={styles.insightSection}>
-                <div className={styles.sectionTitle}>
-                  <i className="fa-solid fa-circle-check text-success"></i>
-                  <span>Most Mentioned Strengths</span>
-                </div>
-                <ul className={styles.insightList}>
-                  {summaryData.mostMentionedStrengths?.map((str, i) => (
-                    <li key={i} className={styles.insightItem}>{str}</li>
-                  ))}
-                </ul>
-              </div>
+          <div className={styles.ruleNote}>
+            Sum of ratings reconciles to {totalValidRatings} valid records.
+          </div>
+        </div>
 
-              {/* Issues */}
-              <div className={styles.insightSection}>
-                <div className={styles.sectionTitle}>
-                  <i className="fa-solid fa-triangle-exclamation text-warning"></i>
-                  <span>Most Mentioned Issues</span>
-                </div>
-                <ul className={styles.insightList}>
-                  {summaryData.mostMentionedIssues?.map((iss, i) => (
-                    <li key={i} className={styles.insightItem}>{iss}</li>
-                  ))}
-                </ul>
-              </div>
+        {/* Panel B: Feedback Breakdown (Category & Sentiment) */}
+        <div className={styles.panelCard}>
+          <div className={styles.panelHeader}>
+            <div>
+              <h2 className={styles.panelTitle}>
+                <i className="fa-solid fa-layer-group text-primary" aria-hidden="true" />
+                Feedback Breakdown
+              </h2>
+              <div className={styles.panelSubtitle}>Categorical and sentiment classification</div>
+            </div>
+            <span className={styles.panelBadge}>Institutional Quality</span>
+          </div>
 
-              {/* Suggestions */}
-              <div className={styles.insightSection}>
-                <div className={styles.sectionTitle}>
-                  <i className="fa-solid fa-lightbulb text-info"></i>
-                  <span>Common Suggestions</span>
-                </div>
-                <ul className={styles.insightList}>
-                  {summaryData.commonSuggestions?.map((sug, i) => (
-                    <li key={i} className={styles.insightItem}>{sug}</li>
-                  ))}
-                </ul>
+          <div className={styles.breakdownSection}>
+            {/* Subsection 1: Feedback by Category */}
+            <div>
+              <div className={styles.subSectionTitle}>
+                <i className="fa-solid fa-shapes text-secondary" />
+                Feedback by Category
               </div>
-
-              {/* Important Signals */}
-              <div className={styles.insightSection}>
-                <div className={styles.sectionTitle}>
-                  <i className="fa-solid fa-bell text-danger"></i>
-                  <span>Important Signals</span>
-                </div>
-                <ul className={styles.insightList}>
-                  {summaryData.importantSignals?.map((sig, i) => (
-                    <li key={i} className={styles.insightItem}>{sig}</li>
-                  ))}
-                </ul>
+              <div className={styles.chartList}>
+                {Object.entries(CATEGORY_LABELS).map(([catKey, catLabel]) => {
+                  const count = metrics.categoryBreakdown?.[catKey] || 0;
+                  const pct = metrics.total > 0 ? Math.round((count / metrics.total) * 100) : 0;
+                  return (
+                    <div key={catKey} className={styles.chartRow}>
+                      <div className={styles.chartRowLabels}>
+                        <span className={styles.chartRowName}>{catLabel}</span>
+                        <span className={styles.chartRowStats}>
+                          <span className={styles.chartRowStatsStrong}>{count}</span> ({pct}%)
+                        </span>
+                      </div>
+                      <div className={styles.barTrack}>
+                        <div
+                          className={styles.barFill}
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: '#3A6985',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Representative Grounded Feedback */}
-            {summaryData.representativeFeedback && summaryData.representativeFeedback.length > 0 && (
-              <div className="mt-3 pt-3 border-top border-white border-opacity-10">
-                <div className="small text-uppercase fw-bold text-info mb-2">Representative Student Feedback:</div>
-                <div className={styles.quotesContainer}>
-                  {summaryData.representativeFeedback.map((quote, i) => (
-                    <div key={i} className={styles.quoteItem}>
-                      "{quote}"
-                    </div>
-                  ))}
-                </div>
+            {/* Subsection 2: Sentiment Overview */}
+            <div style={{ paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9' }}>
+              <div className={styles.subSectionTitle}>
+                <i className="fa-solid fa-face-smile text-secondary" />
+                Sentiment Overview
               </div>
-            )}
+              <div className={styles.chartList}>
+                {[
+                  {
+                    key: 'POSITIVE',
+                    label: 'Positive Sentiment',
+                    color: '#10b981',
+                    icon: 'fa-face-smile',
+                  },
+                  {
+                    key: 'NEUTRAL',
+                    label: 'Neutral Sentiment',
+                    color: '#64748b',
+                    icon: 'fa-face-meh',
+                  },
+                  {
+                    key: 'NEGATIVE',
+                    label: 'Negative Sentiment',
+                    color: '#ef4444',
+                    icon: 'fa-face-frown',
+                  },
+                ].map((s) => {
+                  const count = metrics.sentimentBreakdown?.[s.key] || 0;
+                  const pct = metrics.total > 0 ? Math.round((count / metrics.total) * 100) : 0;
+                  return (
+                    <div key={s.key} className={styles.chartRow}>
+                      <div className={styles.chartRowLabels}>
+                        <span className={styles.chartRowName}>
+                          <i className={`fa-solid ${s.icon}`} style={{ color: s.color, fontSize: '0.8rem' }} />
+                          {s.label}
+                        </span>
+                        <span className={styles.chartRowStats}>
+                          <span className={styles.chartRowStatsStrong}>{count}</span> ({pct}%)
+                        </span>
+                      </div>
+                      <div className={styles.barTrack}>
+                        <div
+                          className={styles.barFill}
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: s.color,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className={styles.ruleNote}>
+                Sentiment classified by evaluation thresholds (≥ 4★ Positive, 3★ Neutral, ≤ 2★ Negative).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Improvement Priorities (Compact, Verified Section) */}
+      <div className={styles.prioritiesCard}>
+        <div className={styles.prioritiesHeader}>
+          <div className={styles.prioritiesTitleWrap}>
+            <h2 className={styles.prioritiesTitle}>
+              <i className="fa-solid fa-flag text-warning" aria-hidden="true" />
+              Improvement Priorities
+            </h2>
+            <div className={styles.prioritiesSubtitle}>
+              Verified student suggestions and flagged evaluations requiring administrative follow-up
+            </div>
+          </div>
+
+          {(metrics.improvementPriorities || []).length > 3 && (
+            <button
+              type="button"
+              className={styles.togglePrioritiesBtn}
+              onClick={() => setShowAllPriorities(!showAllPriorities)}
+              id="btn-toggle-all-priorities"
+            >
+              {showAllPriorities
+                ? 'Show Top 3 Only'
+                : `View All (${metrics.improvementPriorities.length}) Priorities`}
+            </button>
+          )}
+        </div>
+
+        {visiblePriorities.length === 0 ? (
+          <div className={styles.prioritiesEmpty}>
+            <i className="fa-solid fa-circle-check text-success me-2" />
+            No negative feedback or critical improvement items recorded in this scope.
+          </div>
+        ) : (
+          <div className={styles.prioritiesList}>
+            {visiblePriorities.map((item) => {
+              const isCritical = item.rating <= 2 || item.sentiment === 'NEGATIVE';
+              return (
+                <div
+                  key={item.id}
+                  className={`${styles.priorityItem} ${isCritical ? styles.priorityItemDanger : ''}`}
+                >
+                  <div className={styles.priorityTop}>
+                    <div className={styles.priorityBadges}>
+                      <span className={styles.priorityBadgeCategory}>
+                        {CATEGORY_LABELS[item.category] || item.category?.replace(/_/g, ' ') || 'Overall'}
+                      </span>
+                      <span
+                        className={`${styles.priorityBadgeRating} ${
+                          isCritical ? styles.priorityBadgeRatingDanger : ''
+                        }`}
+                      >
+                        <i className="fa-solid fa-star me-1" style={{ fontSize: '0.65rem' }} />
+                        {item.rating} / 5
+                      </span>
+                      <span
+                        className={`badge ${
+                          item.sentiment === 'NEGATIVE'
+                            ? 'bg-danger-subtle text-danger border border-danger-subtle'
+                            : item.sentiment === 'NEUTRAL'
+                            ? 'bg-secondary-subtle text-secondary'
+                            : 'bg-success-subtle text-success border border-success-subtle'
+                        }`}
+                        style={{ fontSize: '0.7rem' }}
+                      >
+                        {item.sentiment}
+                      </span>
+                    </div>
+
+                    <div className={styles.priorityMeta}>
+                      <span>
+                        <i className="fa-regular fa-calendar me-1" />
+                        {new Date(item.submittedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className={styles.priorityQuote}>
+                    &ldquo;{item.improvementText}&rdquo;
+                  </p>
+
+                  <div className={styles.priorityFooter}>
+                    <span className={styles.priorityProgram}>
+                      <i className="fa-solid fa-graduation-cap me-1 text-secondary" />
+                      {item.programTitle} {item.cohortNumber ? `(${item.cohortNumber})` : ''}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.inspectBtn}
+                      onClick={() => {
+                        // Find matching feedback item or use priority metadata
+                        const fullRecord = feedbackList.find((f) => String(f._id) === String(item.id));
+                        setSelectedFeedback(
+                          fullRecord || {
+                            _id: item.id,
+                            rating: item.rating,
+                            feedbackType: item.category,
+                            sentiment: item.sentiment,
+                            comments: item.improvementText,
+                            improvements: item.improvementText,
+                            program: { title: item.programTitle },
+                            cohort: { cohortNumber: item.cohortNumber },
+                            submittedAt: item.submittedAt,
+                          }
+                        );
+                      }}
+                      id={`btn-inspect-priority-${item.id}`}
+                    >
+                      <i className="fa-solid fa-magnifying-glass me-1" /> Inspect Record
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* TOOLBAR & FILTERS */}
-      <div className={styles.toolbar}>
-        <div className={styles.searchBox}>
-          <input
-            type="text"
-            className="form-control form-control-sm"
-            placeholder="Search feedback comments, strengths, or student names..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            id="input-search-feedback"
+      {/* 5. Feedback Records Table Section */}
+      <div className={styles.tableSection}>
+        <div className={styles.tableHeader}>
+          <div className={styles.tableTitleWrap}>
+            <h2 className={styles.tableTitle}>Student Feedback Records</h2>
+            <span className={styles.tableCountBadge}>
+              {pagination.total} {pagination.total === 1 ? 'Record' : 'Records'}
+            </span>
+          </div>
+        </div>
+
+        {/* Filter Toolbar */}
+        <div className={styles.toolbar}>
+          <div className={styles.searchBox}>
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              placeholder="Search comments, suggestions, or student names..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              id="input-search-feedback"
+            />
+          </div>
+
+          <div className={styles.filters}>
+            {/* Rating Filter */}
+            <select
+              className={styles.selectInput}
+              value={ratingFilter}
+              onChange={(e) => {
+                setRatingFilter(e.target.value);
+                setPage(1);
+              }}
+              id="select-feedback-rating"
+              aria-label="Filter by rating"
+            >
+              <option value="">All Ratings</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
+
+            {/* Sentiment Filter */}
+            <select
+              className={styles.selectInput}
+              value={sentimentFilter}
+              onChange={(e) => {
+                setSentimentFilter(e.target.value);
+                setPage(1);
+              }}
+              id="select-feedback-sentiment"
+              aria-label="Filter by sentiment"
+            >
+              <option value="">All Sentiments</option>
+              <option value="POSITIVE">Positive</option>
+              <option value="NEUTRAL">Neutral</option>
+              <option value="NEGATIVE">Negative</option>
+            </select>
+
+            {/* Category / Feedback Type Filter */}
+            <select
+              className={styles.selectInput}
+              value={typeFilter}
+              onChange={(e) => {
+                setTypeFilter(e.target.value);
+                setPage(1);
+              }}
+              id="select-feedback-type"
+              aria-label="Filter by category"
+            >
+              <option value="">All Categories</option>
+              <option value="COURSE_CONTENT">Course Content</option>
+              <option value="INSTRUCTOR">Instructor Guidance</option>
+              <option value="OVERALL">Overall Experience</option>
+              <option value="FACILITIES">Facilities & Labs</option>
+              <option value="PLATFORM">Platform & Systems</option>
+            </select>
+
+            {/* Program Filter */}
+            <select
+              className={styles.selectInput}
+              value={programFilter}
+              onChange={(e) => {
+                setProgramFilter(e.target.value);
+                setPage(1);
+              }}
+              id="select-feedback-program"
+              aria-label="Filter by program"
+            >
+              <option value="">All Programs</option>
+              {programs.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+
+            {/* Reset Filters Action */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                className={styles.clearFilterBtn}
+                onClick={handleClearFilters}
+                id="btn-clear-feedback-filters"
+                title="Reset all search and filter criteria"
+              >
+                <i className="fa-solid fa-filter-circle-xmark" aria-hidden="true" />
+                <span>Reset Filters</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Data Table / Loading / Error / Empty States */}
+        {loading ? (
+          <LoadingState message="Loading student feedback analytics..." />
+        ) : error ? (
+          <ErrorState message={error} onRetry={() => fetchFeedback(false)} />
+        ) : feedbackList.length === 0 ? (
+          <EmptyState
+            title="No Feedback Records Found"
+            message={
+              hasActiveFilters
+                ? 'No student feedback matches the selected filters. Click Reset Filters to view all records.'
+                : 'No feedback submissions recorded for this division yet. Candidates submit feedback upon course completion.'
+            }
           />
-        </div>
-
-        <div className={styles.filters}>
-          <select
-            className={styles.selectInput}
-            value={ratingFilter}
-            onChange={(e) => {
-              setRatingFilter(e.target.value);
-              setPage(1);
+        ) : (
+          <DataTable
+            columns={columns}
+            rows={feedbackList}
+            pagination={{
+              page: pagination.page,
+              totalPages: pagination.totalPages,
+              total: pagination.total,
+              onPageChange: (p) => setPage(p),
             }}
-            id="select-feedback-rating"
-          >
-            <option value="">All Ratings</option>
-            <option value="5">5 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="3">3 Stars</option>
-            <option value="2">2 Stars</option>
-            <option value="1">1 Star</option>
-          </select>
-
-          <select
-            className={styles.selectInput}
-            value={sentimentFilter}
-            onChange={(e) => {
-              setSentimentFilter(e.target.value);
-              setPage(1);
-            }}
-            id="select-feedback-sentiment"
-          >
-            <option value="">All Sentiments</option>
-            <option value="POSITIVE">Positive</option>
-            <option value="NEUTRAL">Neutral</option>
-            <option value="NEGATIVE">Negative</option>
-          </select>
-
-          <select
-            className={styles.selectInput}
-            value={typeFilter}
-            onChange={(e) => {
-              setTypeFilter(e.target.value);
-              setPage(1);
-            }}
-            id="select-feedback-type"
-          >
-            <option value="">All Types</option>
-            <option value="COURSE_CONTENT">Course Content</option>
-            <option value="INSTRUCTOR">Instructor</option>
-            <option value="FACILITY">Facility & Lab</option>
-            <option value="PLATFORM">Platform & Systems</option>
-            <option value="GENERAL">General</option>
-          </select>
-
-          <select
-            className={styles.selectInput}
-            value={programFilter}
-            onChange={(e) => {
-              setProgramFilter(e.target.value);
-              setPage(1);
-            }}
-            id="select-feedback-program"
-          >
-            <option value="">All Programs</option>
-            {programs.map((p) => (
-              <option key={p._id} value={p._id}>
-                {p.title}
-              </option>
-            ))}
-          </select>
-        </div>
+            emptyTitle="No student feedback records found"
+            id="table-student-feedback"
+          />
+        )}
       </div>
 
-      {/* FEEDBACK TABLE */}
-      {loading ? (
-        <LoadingState message="Loading student feedback..." />
-      ) : error ? (
-        <ErrorState message={error} onRetry={fetchFeedback} />
-      ) : feedbackList.length === 0 ? (
-        <EmptyState
-          title="No Student Feedback Records"
-          message="No student feedback matches the active filters. Feedback is collected directly from enrolled candidates following course completion."
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={feedbackList}
-          pagination={pagination}
-          onPageChange={(p) => setPage(p)}
-          id="table-student-feedback"
-        />
-      )}
-
-      {/* FEEDBACK DETAIL MODAL */}
+      {/* 6. Feedback Record Details Modal */}
       {selectedFeedback && (
         <Modal
           isOpen={Boolean(selectedFeedback)}
@@ -505,23 +810,28 @@ export default function FeedbackPage() {
           title="Student Feedback Record"
           size="md"
         >
-          <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
             <div>
-              <div className="fw-bold text-dark">{selectedFeedback.student?.fullName || 'Anonymous Student'}</div>
-              <div className="text-muted small">{selectedFeedback.student?.email}</div>
+              <div className="fw-bold text-dark fs-6">
+                {selectedFeedback.student?.fullName?.trim() || 'Enrolled Student'}
+              </div>
+              <div className="text-muted small">
+                {selectedFeedback.student?.email || 'Confidential Student Account'}
+              </div>
             </div>
             <div className="text-end">
               <div>{renderStars(selectedFeedback.rating)}</div>
               <span
                 className={`badge mt-1 ${
                   selectedFeedback.sentiment === 'POSITIVE'
-                    ? 'bg-success'
+                    ? 'bg-success-subtle text-success border border-success-subtle'
                     : selectedFeedback.sentiment === 'NEGATIVE'
-                    ? 'bg-danger'
-                    : 'bg-secondary'
+                    ? 'bg-danger-subtle text-danger border border-danger-subtle'
+                    : 'bg-secondary-subtle text-secondary'
                 }`}
+                style={{ fontSize: '0.725rem' }}
               >
-                {selectedFeedback.sentiment}
+                {selectedFeedback.sentiment || 'POSITIVE'}
               </span>
             </div>
           </div>
@@ -530,26 +840,42 @@ export default function FeedbackPage() {
             <div className="row g-2">
               <div className="col-sm-6">
                 <span className="text-secondary fw-semibold">Program:</span>
-                <div className="fw-medium text-dark">{selectedFeedback.program?.title}</div>
+                <div className="fw-medium text-dark">
+                  {selectedFeedback.program?.title || 'Academy Program'}
+                </div>
               </div>
               <div className="col-sm-6">
                 <span className="text-secondary fw-semibold">Cohort:</span>
-                <div className="fw-medium text-dark">{selectedFeedback.cohort?.cohortNumber} ({selectedFeedback.division?.replace('_', ' ')})</div>
+                <div className="fw-medium text-dark">
+                  {selectedFeedback.cohort?.cohortNumber || 'Cohort'}
+                  {selectedFeedback.division ? ` (${selectedFeedback.division.replace(/_/g, ' ')})` : ''}
+                </div>
               </div>
               <div className="col-sm-6">
-                <span className="text-secondary fw-semibold">Feedback Type:</span>
-                <div className="fw-medium text-dark">{selectedFeedback.feedbackType?.replace('_', ' ')}</div>
+                <span className="text-secondary fw-semibold">Category:</span>
+                <div className="fw-medium text-dark">
+                  {CATEGORY_LABELS[selectedFeedback.feedbackType] ||
+                    selectedFeedback.feedbackType?.replace(/_/g, ' ') ||
+                    'Overall'}
+                </div>
               </div>
               <div className="col-sm-6">
                 <span className="text-secondary fw-semibold">Submission Date:</span>
-                <div className="fw-medium text-dark">{new Date(selectedFeedback.submittedAt || selectedFeedback.createdAt).toLocaleString()}</div>
+                <div className="fw-medium text-dark">
+                  {new Date(
+                    selectedFeedback.submittedAt || selectedFeedback.createdAt
+                  ).toLocaleString()}
+                </div>
               </div>
             </div>
           </div>
 
           <div className="mb-3">
-            <label className="form-label fw-bold text-dark small">Student Comments & Review</label>
-            <div className="p-3 bg-white border rounded small text-dark" style={{ minHeight: '80px', lineHeight: 1.5 }}>
+            <label className="form-label fw-bold text-dark small">Student Review & Comments</label>
+            <div
+              className="p-3 bg-white border rounded small text-dark"
+              style={{ minHeight: '75px', lineHeight: 1.55 }}
+            >
               {selectedFeedback.comments}
             </div>
           </div>

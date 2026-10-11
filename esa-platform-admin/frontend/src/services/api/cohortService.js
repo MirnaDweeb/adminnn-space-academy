@@ -85,6 +85,22 @@ const cohortService = {
     return res.data?.data;
   },
 
+  // Session Live Lifecycle (Instructor)
+  async startSession(cohortId, sessionId) {
+    const res = await apiClient.post(`/instructor/cohorts/${cohortId}/sessions/${sessionId}/start`);
+    return res.data?.data;
+  },
+
+  async endSession(cohortId, sessionId) {
+    const res = await apiClient.post(`/instructor/cohorts/${cohortId}/sessions/${sessionId}/end`);
+    return res.data?.data;
+  },
+
+  async updateSession(cohortId, sessionId, data) {
+    const res = await apiClient.patch(`/instructor/cohorts/${cohortId}/sessions/${sessionId}`, data);
+    return res.data?.data;
+  },
+
   // --- Student Methods ---
   async getStudentCohorts() {
     const res = await apiClient.get('/students/mine/cohorts');
@@ -93,6 +109,11 @@ const cohortService = {
 
   async getMyEvaluations() {
     const res = await apiClient.get('/student/mine/evaluations');
+    return res.data?.data;
+  },
+
+  async submitFeedback(payload) {
+    const res = await apiClient.post('/student/mine/feedback', payload);
     return res.data?.data;
   },
 };

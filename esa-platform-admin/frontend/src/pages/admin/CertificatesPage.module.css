@@ -46,7 +46,8 @@
 }
 
 .selectInput:focus {
-  border-color: #0284c7;
+  border-color: var(--esa-cosmos-blue, #3a6985);
+  box-shadow: var(--esa-focus-ring);
 }
 
 .serialNumber {

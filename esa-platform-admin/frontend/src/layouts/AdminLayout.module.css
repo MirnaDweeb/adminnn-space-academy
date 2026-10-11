@@ -1,8 +1,167 @@
 .body {
   display: flex;
+  min-height: calc(100vh - 56px);
+  position: relative;
 }
 
 .content {
   flex: 1;
   min-width: 0;
+  padding: 1.5rem 1rem 3.5rem;
+  overflow-x: auto;
+}
+
+/* Gateway & Administrator Governance minimal full-width layout */
+.gatewayMain {
+  width: 100%;
+  padding: 2rem 1.25rem 4rem;
+  display: flex;
+  justify-content: center;
+}
+
+.gatewayContainer {
+  width: 100%;
+  max-width: 1180px;
+}
+
+/* Division Workspace Context Bar (displayed above page content) */
+.workspaceContextBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--esa-surface, #ffffff);
+  border: 1px solid var(--esa-border, #e1e6ed);
+  border-radius: var(--esa-radius-md, 8px);
+  padding: 0.6rem 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  flex-wrap: wrap;
+}
+
+.workspaceBreadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--esa-text-secondary, #334155);
+  font-weight: 500;
+}
+
+.breadcrumbGatewayLink {
+  color: var(--esa-cosmos-blue, #3a6985);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  transition: color 140ms ease;
+}
+
+.breadcrumbGatewayLink:hover {
+  color: var(--esa-primary-hover, #2e546b);
+  text-decoration: underline;
+}
+
+.breadcrumbSeparator {
+  margin: 0 0.5rem;
+  color: var(--esa-text-muted, #64748b);
+  font-size: 0.68rem;
+}
+
+.activeWorkspaceTag {
+  color: var(--esa-text-primary, #000000);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.preUniIcon {
+  color: var(--esa-teal-green, #1e7c85);
+}
+
+.uniIcon {
+  color: var(--esa-gold-dark, #876722);
+}
+
+.backToGatewayActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--esa-surface-alt, #f7f9fa);
+  color: var(--esa-text-secondary, #334155);
+  border: 1px solid var(--esa-border-strong, #cbd5e1);
+  border-radius: var(--esa-radius-sm, 6px);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition: all 140ms ease;
+  white-space: nowrap;
+}
+
+.backToGatewayActionBtn:hover {
+  background: var(--esa-primary-subtle, #edf3f7);
+  color: var(--esa-cosmos-blue, #3a6985);
+  border-color: var(--esa-cosmos-blue, #3a6985);
+}
+
+.backToGatewayActionBtn:focus-visible {
+  outline: 2px solid var(--esa-cosmos-blue, #3a6985);
+  outline-offset: 2px;
+}
+
+/* Sidebar Exit Action (Clean light surface alignment) */
+.sidebarExitWrap {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--esa-border-subtle, #edf2f7);
+  background: var(--esa-surface-alt, #f7f9fa);
+}
+
+.sidebarExitBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background: var(--esa-white, #ffffff);
+  color: var(--esa-text-secondary, #334155);
+  border: 1px solid var(--esa-border-strong, #cbd5e1);
+  border-radius: var(--esa-radius-sm, 6px);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.4rem 0.65rem;
+  cursor: pointer;
+  transition: all 140ms ease;
+  white-space: nowrap;
+}
+
+.sidebarExitBtn:hover {
+  background: var(--esa-primary-subtle, #edf3f7);
+  border-color: var(--esa-cosmos-blue, #3a6985);
+  color: var(--esa-cosmos-blue, #3a6985);
+}
+
+.sidebarExitBtn:focus-visible {
+  outline: 2px solid var(--esa-cosmos-blue, #3a6985);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem 0.5rem 2rem;
+  }
+
+  .gatewayMain {
+    padding: 1rem 0.5rem 2rem;
+  }
+
+  .workspaceContextBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .backToGatewayActionBtn {
+    width: 100%;
+    justify-content: center;
+  }
 }

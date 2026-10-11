@@ -159,6 +159,92 @@ const adjustPaymentAdmin = asyncHandler(async (req, res) => {
   });
 });
 
+const {
+  getPaymentRemindersSummary,
+  previewPaymentReminders,
+  sendSinglePaymentReminder,
+  sendBulkPaymentReminders,
+  getPaymentRemindersHistory,
+} = require('../services/paymentReminderService');
+
+/**
+ * GET /api/admin/invoices/reminders/summary
+ * Retrieves summary metrics for due-soon, overdue, and sent reminders.
+ */
+const getPaymentRemindersSummaryAdmin = asyncHandler(async (req, res) => {
+  const { dueSoonWindowHours } = req.query;
+  const summary = await getPaymentRemindersSummary({
+    user: req.user,
+    scopeDivision: req.scopeDivision,
+    dueSoonWindowHours: dueSoonWindowHours ? Number(dueSoonWindowHours) : 24,
+  });
+
+  sendSuccess(res, 200, summary);
+});
+
+/**
+ * POST /api/admin/invoices/reminders/preview
+ * Previews eligible recipient counts and candidates for bulk reminder action.
+ */
+const previewPaymentRemindersAdmin = asyncHandler(async (req, res) => {
+  const { category, dueSoonWindowHours } = req.body || {};
+  const preview = await previewPaymentReminders({
+    category,
+    user: req.user,
+    scopeDivision: req.scopeDivision,
+    dueSoonWindowHours: dueSoonWindowHours ? Number(dueSoonWindowHours) : 24,
+  });
+
+  sendSuccess(res, 200, preview);
+});
+
+/**
+ * POST /api/admin/invoices/:id/reminder
+ * Sends a single payment reminder for an eligible invoice.
+ */
+const sendSinglePaymentReminderAdmin = asyncHandler(async (req, res) => {
+  const { category, force } = req.body || {};
+  const result = await sendSinglePaymentReminder({
+    invoiceId: req.params.id,
+    category,
+    force: force === true || force === 'true',
+    adminUser: req.user,
+    scopeDivision: req.scopeDivision,
+  });
+
+  sendSuccess(res, 201, result);
+});
+
+/**
+ * POST /api/admin/invoices/reminders/bulk
+ * Executes bulk payment reminder operation for all eligible invoices in division.
+ */
+const sendBulkPaymentRemindersAdmin = asyncHandler(async (req, res) => {
+  const { category, dueSoonWindowHours } = req.body || {};
+  const result = await sendBulkPaymentReminders({
+    category,
+    adminUser: req.user,
+    scopeDivision: req.scopeDivision,
+    dueSoonWindowHours: dueSoonWindowHours ? Number(dueSoonWindowHours) : 24,
+  });
+
+  sendSuccess(res, 201, result);
+});
+
+/**
+ * GET /api/admin/invoices/reminders/history
+ * Lists paginated history of sent payment reminders.
+ */
+const getPaymentRemindersHistoryAdmin = asyncHandler(async (req, res) => {
+  const { notifications, pagination } = await getPaymentRemindersHistory({
+    query: req.query,
+    user: req.user,
+    scopeDivision: req.scopeDivision,
+  });
+
+  sendSuccess(res, 200, { reminders: notifications }, pagination);
+});
+
 module.exports = {
   generateInvoiceAdmin,
   recordPaymentAdmin,
@@ -169,4 +255,9 @@ module.exports = {
   listMyInvoices,
   updateInvoiceMetadataAdmin,
   adjustPaymentAdmin,
+  getPaymentRemindersSummaryAdmin,
+  previewPaymentRemindersAdmin,
+  sendSinglePaymentReminderAdmin,
+  sendBulkPaymentRemindersAdmin,
+  getPaymentRemindersHistoryAdmin,
 };

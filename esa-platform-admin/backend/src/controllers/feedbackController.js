@@ -12,7 +12,7 @@ const feedbackService = require('../services/feedbackService');
 async function listFeedbackAdminController(req, res, next) {
   try {
     const { division, program, cohort, rating, feedbackType, sentiment, search, page, limit } = req.query;
-    const activeDivision = req.division || division;
+    const activeDivision = req.scopeDivision || req.division || division;
 
     const result = await feedbackService.listFeedbackAdmin({
       user: req.user,
@@ -42,7 +42,7 @@ async function listFeedbackAdminController(req, res, next) {
 async function getFeedbackSummaryAdminController(req, res, next) {
   try {
     const { division, program, cohort } = req.query;
-    const activeDivision = req.division || division;
+    const activeDivision = req.scopeDivision || req.division || division;
 
     const result = await feedbackService.getFeedbackSummaryAdmin({
       user: req.user,

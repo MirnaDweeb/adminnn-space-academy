@@ -20,7 +20,9 @@ router.get('/enrollments/:id/status', protect, authorize(ROLES.STUDENT), getPaym
 router.post('/paymob/callback', handlePaymobWebhook);
 router.get('/paymob/callback', handlePaymobReturn);
 
-// 3. Sandbox simulation endpoint for automated tests and sandbox verification
-router.post('/paymob/simulate', simulateSandboxPayment);
+// 3. Sandbox simulation endpoint for automated tests and sandbox verification (strictly non-production).
+// Always registered so that unauthenticated callers receive 401 and non-STUDENT/SUPER_ADMIN callers
+// receive 403. The controller responds 404 when NODE_ENV === 'production' or IS_SIMULATION is false.
+router.post('/paymob/simulate', protect, authorize(ROLES.STUDENT, ROLES.SUPER_ADMIN), simulateSandboxPayment);
 
 module.exports = router;

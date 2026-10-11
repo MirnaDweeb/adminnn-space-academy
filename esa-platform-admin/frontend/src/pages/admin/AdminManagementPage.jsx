@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import DataTable from '../../components/common/DataTable';
 import SearchBar from '../../components/common/SearchBar';
@@ -34,6 +35,7 @@ const STATUS_OPTIONS = [
 ];
 
 export default function AdminManagementPage() {
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [administrators, setAdministrators] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -356,30 +358,34 @@ export default function AdminManagementPage() {
           <div className={styles.actionBtns}>
             <button
               type="button"
-              className="btn btn-sm btn-outline-primary"
+              className="btn btn-sm btn-primary"
               onClick={() => handleOpenDetail(row)}
-              title="View Details & Audit"
+              title="View Administrator Details & Audit Trail"
+              aria-label={`View details for ${row.fullName}`}
             >
-              <i className="fa-solid fa-eye me-1" aria-hidden="true"></i>Details
+              <i className="fa-solid fa-eye me-1" aria-hidden="true"></i>View Details
             </button>
             <button
               type="button"
               className="btn btn-sm btn-outline-secondary"
               onClick={() => handleOpenEdit(row)}
               title={isSelf ? 'Self-elevation protected' : 'Edit Administrator & Permissions'}
+              aria-label={`Edit ${row.fullName}`}
               disabled={isSelf}
             >
-              <i className="fa-solid fa-user-pen me-1" aria-hidden="true"></i>Edit
+              <i className="fa-solid fa-user-pen" aria-hidden="true"></i>
+              <span className="d-none d-lg-inline ms-1">Edit</span>
             </button>
             <button
               type="button"
               className={`btn btn-sm ${row.isActive ? 'btn-outline-danger' : 'btn-outline-success'}`}
               onClick={() => setConfirmAdmin(row)}
               title={row.isActive ? 'Deactivate Administrator' : 'Activate Administrator'}
+              aria-label={row.isActive ? `Deactivate ${row.fullName}` : `Activate ${row.fullName}`}
               disabled={isSelf}
             >
-              <i className={`fa-solid ${row.isActive ? 'fa-user-slash' : 'fa-user-check'} me-1`} aria-hidden="true"></i>
-              {row.isActive ? 'Deactivate' : 'Activate'}
+              <i className={`fa-solid ${row.isActive ? 'fa-user-slash' : 'fa-user-check'}`} aria-hidden="true"></i>
+              <span className="d-none d-xl-inline ms-1">{row.isActive ? 'Deactivate' : 'Activate'}</span>
             </button>
           </div>
         );
@@ -393,17 +399,29 @@ export default function AdminManagementPage() {
         title="Administrator Management & Permissions"
         subtitle="Provision division administrators, configure granular operational permissions, and audit platform security."
         actions={
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              setCreateError('');
-              setIsCreateOpen(true);
-            }}
-          >
-            <i className="fa-solid fa-user-plus me-1" aria-hidden="true"></i>
-            Create Administrator
-          </button>
+          <div className="d-flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => navigate('/admin')}
+              title="Return to Administration Gateway"
+              aria-label="Back to Administration Gateway"
+            >
+              <i className="fa-solid fa-arrow-left me-1.5" aria-hidden="true"></i>
+              Back to Gateway
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setCreateError('');
+                setIsCreateOpen(true);
+              }}
+            >
+              <i className="fa-solid fa-user-plus me-1" aria-hidden="true"></i>
+              Create Administrator
+            </button>
+          </div>
         }
       />
 
@@ -492,6 +510,7 @@ export default function AdminManagementPage() {
           columns={columns}
           rows={administrators}
           emptyTitle="No administrators found"
+          onRowClick={handleOpenDetail}
           pagination={
             meta
               ? {
@@ -843,12 +862,11 @@ export default function AdminManagementPage() {
       <Modal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title={detailAdmin?.fullName || 'Administrator Details'}
-        subtitle={detailAdmin?.email}
+        title="Administrator Details"
         size="lg"
         footer={
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsDetailOpen(false)}>
-            Close
+          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setIsDetailOpen(false)}>
+            <i className="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back to List
           </button>
         }
       >
@@ -856,69 +874,147 @@ export default function AdminManagementPage() {
           <LoadingState message="Loading administrator details & audit log..." />
         ) : (
           <div>
-            <div className={styles.detailSection}>
-              <div className={styles.detailTitle}>Account Profile</div>
-              <div className={styles.detailRow}>
-                <div className={styles.detailKey}>Full Name:</div>
-                <div className={styles.detailValue}>{detailAdmin?.fullName}</div>
+            {/* ── Profile header ──────────────────────────────────── */}
+            <div className={styles.detailHeader}>
+              <div className={styles.detailAvatarLg} aria-hidden="true">
+                {getInitials(detailAdmin?.fullName)}
               </div>
-              <div className={styles.detailRow}>
-                <div className={styles.detailKey}>Email Address:</div>
-                <div className={styles.detailValue}>{detailAdmin?.email}</div>
-              </div>
-              <div className={styles.detailRow}>
-                <div className={styles.detailKey}>Role:</div>
-                <div className={styles.detailValue}>{formatRoleLabel(detailAdmin?.role)}</div>
-              </div>
-              <div className={styles.detailRow}>
-                <div className={styles.detailKey}>Division Scope:</div>
-                <div className={styles.detailValue}>
-                  {DIVISION_LABELS[detailAdmin?.division] || detailAdmin?.division || 'Global'}
+              <div className={styles.detailHeaderInfo}>
+                <div className={styles.detailHeaderName}>
+                  {detailAdmin?.fullName}
+                  {String(detailAdmin?.id || detailAdmin?._id) === String(currentUser?._id || currentUser?.id) && (
+                    <span className={`${styles.selfBadge} ms-2`}>
+                      <i className="fa-solid fa-user" aria-hidden="true"></i>You
+                    </span>
+                  )}
                 </div>
-              </div>
-              <div className={styles.detailRow}>
-                <div className={styles.detailKey}>Account Status:</div>
-                <div className={styles.detailValue}>
+                <div className={styles.detailHeaderEmail}>{detailAdmin?.email}</div>
+                <div className={styles.detailHeaderMeta}>
+                  <span className={styles.roleTag}>
+                    <i className="fa-solid fa-shield-halved me-1 text-secondary" aria-hidden="true"></i>
+                    {formatRoleLabel(detailAdmin?.role)}
+                  </span>
+                  <span className={styles.divisionTag}>
+                    <i
+                      className={`fa-solid ${
+                        detailAdmin?.division === 'PRE_UNIVERSITY' ? 'fa-school text-info' : 'fa-graduation-cap text-warning'
+                      }`}
+                      aria-hidden="true"
+                    ></i>
+                    {DIVISION_LABELS[detailAdmin?.division] || detailAdmin?.division || 'Global'}
+                  </span>
                   <StatusBadge status={detailAdmin?.isActive ? 'ACTIVE' : 'INACTIVE'} />
                 </div>
               </div>
-              <div className={styles.detailRow}>
-                <div className={styles.detailKey}>Provisioned At:</div>
-                <div className={styles.detailValue}>
-                  {detailAdmin?.createdAt ? new Date(detailAdmin.createdAt).toLocaleString() : '—'}
-                </div>
+              {/* Quick actions inside the detail view */}
+              {(() => {
+                const isSelf = String(detailAdmin?.id || detailAdmin?._id) === String(currentUser?._id || currentUser?.id);
+                return (
+                  <div className={styles.detailHeaderActions}>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => {
+                        setIsDetailOpen(false);
+                        handleOpenEdit(detailAdmin);
+                      }}
+                      disabled={isSelf}
+                      title={isSelf ? 'Self-elevation protected' : 'Edit this administrator'}
+                      aria-label={`Edit ${detailAdmin?.fullName}`}
+                    >
+                      <i className="fa-solid fa-user-pen me-1" aria-hidden="true"></i>Edit
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${detailAdmin?.isActive ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                      onClick={() => {
+                        setIsDetailOpen(false);
+                        setConfirmAdmin(detailAdmin);
+                      }}
+                      disabled={isSelf}
+                      title={detailAdmin?.isActive ? 'Deactivate this administrator' : 'Activate this administrator'}
+                      aria-label={detailAdmin?.isActive ? `Deactivate ${detailAdmin?.fullName}` : `Activate ${detailAdmin?.fullName}`}
+                    >
+                      <i
+                        className={`fa-solid ${detailAdmin?.isActive ? 'fa-user-slash' : 'fa-user-check'} me-1`}
+                        aria-hidden="true"
+                      ></i>
+                      {detailAdmin?.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* ── Account details grid ────────────────────────────── */}
+            <div className={styles.detailSection}>
+              <div className={styles.detailTitle}>
+                <i className="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
+                Account Profile
               </div>
-              {detailAdmin?.createdBy && (
-                <div className={styles.detailRow}>
-                  <div className={styles.detailKey}>Provisioned By:</div>
-                  <div className={styles.detailValue}>
-                    {detailAdmin.createdBy.fullName || detailAdmin.createdBy.email || 'Super Admin'}
+              <div className={styles.detailGrid}>
+                <div className={styles.detailField}>
+                  <div className={styles.detailFieldLabel}>Full Name</div>
+                  <div className={styles.detailFieldValue}>{detailAdmin?.fullName || '—'}</div>
+                </div>
+                <div className={styles.detailField}>
+                  <div className={styles.detailFieldLabel}>Email Address</div>
+                  <div className={styles.detailFieldValue} style={{ wordBreak: 'break-all' }}>{detailAdmin?.email || '—'}</div>
+                </div>
+                <div className={styles.detailField}>
+                  <div className={styles.detailFieldLabel}>Provisioned On</div>
+                  <div className={styles.detailFieldValue}>
+                    {detailAdmin?.createdAt ? new Date(detailAdmin.createdAt).toLocaleString() : '—'}
                   </div>
                 </div>
-              )}
-              <div className="mt-3">
-                <div className="fw-semibold text-secondary small mb-2">Granted Permissions ({detailAdmin?.permissions?.length || 0}):</div>
-                {detailAdmin?.permissions && detailAdmin.permissions.length > 0 ? (
-                  <div className="d-flex flex-wrap gap-1">
-                    {detailAdmin.permissions.map((p) => (
-                      <span key={p} className={styles.permBadge}>
-                        <i className="fa-solid fa-check me-1 text-success"></i>{p}
-                      </span>
-                    ))}
+                <div className={styles.detailField}>
+                  <div className={styles.detailFieldLabel}>Provisioned By</div>
+                  <div className={styles.detailFieldValue}>
+                    {detailAdmin?.createdBy
+                      ? detailAdmin.createdBy.fullName || detailAdmin.createdBy.email || 'Super Admin'
+                      : '—'}
                   </div>
-                ) : (
-                  <span className="text-muted small">Default Full Division Permissions (Unrestricted)</span>
-                )}
+                </div>
               </div>
             </div>
 
+            {/* ── Permissions ─────────────────────────────────────── */}
+            <div className={styles.detailSection}>
+              <div className={styles.detailTitle}>
+                <i className="fa-solid fa-key me-1" aria-hidden="true"></i>
+                Granted Permissions
+                <span className="ms-2 fw-normal text-muted" style={{ textTransform: 'none', letterSpacing: 0 }}>
+                  ({detailAdmin?.permissions?.length || 0} assigned)
+                </span>
+              </div>
+              {detailAdmin?.permissions && detailAdmin.permissions.length > 0 ? (
+                <div className="d-flex flex-wrap gap-1">
+                  {detailAdmin.permissions.map((p) => (
+                    <span key={p} className={styles.permBadge}>
+                      <i className="fa-solid fa-check me-1" style={{ color: 'var(--esa-success)' }} aria-hidden="true"></i>
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted small mb-0">
+                  <i className="fa-solid fa-circle-check me-1 text-success" aria-hidden="true"></i>
+                  Full division permissions — no restrictions applied.
+                </p>
+              )}
+            </div>
+
+            {/* ── Audit trail ─────────────────────────────────────── */}
             <div className={styles.detailSection}>
               <div className={styles.detailTitle}>
                 <i className="fa-solid fa-clock-rotate-left me-1" aria-hidden="true"></i>
-                Audit Trail ({detailAuditLogs.length})
+                Audit Trail
+                <span className="ms-2 fw-normal text-muted" style={{ textTransform: 'none', letterSpacing: 0 }}>
+                  ({detailAuditLogs.length} records)
+                </span>
               </div>
               {detailAuditLogs.length === 0 ? (
-                <div className="text-secondary small py-2">No audit records found for this account.</div>
+                <p className="text-secondary small mb-0">No audit records found for this account.</p>
               ) : (
                 <div className="table-responsive">
                   <table className={styles.auditTable}>

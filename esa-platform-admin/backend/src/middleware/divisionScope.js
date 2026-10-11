@@ -13,12 +13,27 @@ function resolveDivisionScope(req, res, next) {
   const role = req.user.role;
 
   if (role === ROLES.SUPER_ADMIN) {
-    const requested = req.query.division;
-    const isAll = !requested || requested.toLowerCase() === 'all';
-    if (!isAll && !ALL_DIVISIONS.includes(requested)) {
+    let requested = req.query.division;
+
+    // Safely unwrap nested division object if query param was serialized as an object
+    if (requested && typeof requested === 'object') {
+      if (typeof requested.division === 'string') {
+        requested = requested.division;
+      } else {
+        throw ApiError.badRequest('Invalid division filter: division must be a string');
+      }
+    }
+
+    if (requested !== undefined && requested !== null && typeof requested !== 'string') {
+      throw ApiError.badRequest('Invalid division filter: division must be a string');
+    }
+
+    const trimmed = typeof requested === 'string' ? requested.trim() : '';
+    const isAll = !trimmed || trimmed.toLowerCase() === 'all';
+    if (!isAll && !ALL_DIVISIONS.includes(trimmed)) {
       throw ApiError.badRequest('Invalid division filter');
     }
-    req.scopeDivision = isAll ? 'all' : requested;
+    req.scopeDivision = isAll ? 'all' : trimmed;
     return next();
   }
 
@@ -35,7 +50,12 @@ function resolveDivisionScope(req, res, next) {
 function enforceDivisionParam(paramName = 'division') {
   return (req, res, next) => {
     const role = req.user.role;
-    const requestedDivision = req.params[paramName];
+    const rawDivision = req.params[paramName];
+    const requestedDivision = (rawDivision || '').replace(/-/g, '_').toUpperCase();
+
+    if (!ALL_DIVISIONS.includes(requestedDivision)) {
+      throw ApiError.badRequest('Invalid division specified');
+    }
 
     if (role === ROLES.SUPER_ADMIN) {
       req.scopeDivision = requestedDivision;

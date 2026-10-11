@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   getMineNotifications,
@@ -10,6 +10,8 @@ import {
   getNotificationConfig,
   getNotificationTargetRoute,
 } from '../../utils/notificationIcons';
+import { ROLES } from '../../constants/roles';
+import { ROLE_TO_DIVISION } from '../../constants/divisions';
 import styles from './NotificationBell.module.css';
 
 function formatRelativeTime(dateString) {
@@ -31,44 +33,74 @@ function formatRelativeTime(dateString) {
 export default function NotificationBell() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const dropdownRef = useRef(null);
+  const [error, setError] = useState(null);
 
-  const fetchNotifications = async () => {
+  const containerRef = useRef(null);
+  const bellButtonRef = useRef(null);
+
+  const isAdmin = Boolean(
+    user?.role === ROLES.SUPER_ADMIN ||
+    user?.role === ROLES.PRE_UNIVERSITY_ADMIN ||
+    user?.role === ROLES.UNIVERSITY_ADMIN
+  );
+
+  // Determine active division for admin navigation
+  const adminDivision = user?.division || (user?.role && ROLE_TO_DIVISION[user.role]);
+  const oversightLogRoute =
+    user?.role === ROLES.SUPER_ADMIN
+      ? '/admin/notifications'
+      : adminDivision
+      ? `/admin/${adminDivision}/notifications`
+      : '/admin/notifications';
+
+  const fetchNotifications = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
+      setError(null);
       const data = await getMineNotifications({ limit: 8 });
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
+      setError('Unable to load notifications.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
+  // Initial fetch and auto-refresh listeners
   useEffect(() => {
     fetchNotifications();
-    const handleUpdate = () => fetchNotifications();
+
+    const handleUpdate = () => {
+      fetchNotifications();
+    };
+
     window.addEventListener('notifications-updated', handleUpdate);
-    // Background polling every 30 seconds to keep unread counter fresh
+    // Background polling every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
+
     return () => {
       window.removeEventListener('notifications-updated', handleUpdate);
       clearInterval(interval);
     };
-  }, []);
+  }, [fetchNotifications]);
 
   // Close on outside click
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -77,11 +109,33 @@ export default function NotificationBell() {
     };
   }, [isOpen]);
 
+  // Keyboard navigation: Escape key closes dropdown and focuses bell button
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+        bellButtonRef.current?.focus();
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  // Close on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
   const handleToggle = () => {
     if (!isOpen) {
       fetchNotifications();
     }
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
 
   const handleMarkAsRead = async (id, e) => {
@@ -92,6 +146,7 @@ export default function NotificationBell() {
         prev.map((n) => (n._id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
     }
@@ -104,6 +159,7 @@ export default function NotificationBell() {
         prev.map((n) => ({ ...n, read: true, readAt: new Date().toISOString() }))
       );
       setUnreadCount(0);
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
     } catch (err) {
       console.error('Failed to mark all as read:', err);
     }
@@ -114,32 +170,46 @@ export default function NotificationBell() {
       await handleMarkAsRead(item._id);
     }
     setIsOpen(false);
-    const targetRoute = getNotificationTargetRoute(item, user);
+    const targetRoute = getNotificationTargetRoute(item, user, adminDivision);
     if (targetRoute) {
       navigate(targetRoute);
     }
   };
 
   return (
-    <div className={styles.container} ref={dropdownRef}>
+    <div className={styles.container} ref={containerRef}>
       <button
+        ref={bellButtonRef}
         type="button"
         id="notification-bell-btn"
         className={`${styles.bellBtn} ${isOpen ? styles.active : ''}`}
         onClick={handleToggle}
-        title="Notifications"
-        aria-label="Open Notifications"
+        title="Personal Notifications"
+        aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
       >
-        <i className="fa-solid fa-bell" aria-hidden="true"></i>
+        <i className="fa-solid fa-bell" aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className={styles.badge} id="notification-unread-badge">
-            {unreadCount > 9 ? '9+' : unreadCount}
+          <span
+            className={styles.badge}
+            id="notification-unread-badge"
+            aria-label={`${unreadCount} unread`}
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className={styles.dropdown} id="notification-dropdown-panel">
+        <div
+          className={styles.dropdown}
+          id="notification-dropdown-panel"
+          role="dialog"
+          aria-label="Notifications Dropdown"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
           <div className={styles.header}>
             <div className={styles.headerTitle}>
               <span>Notifications</span>
@@ -153,25 +223,44 @@ export default function NotificationBell() {
                 id="mark-all-notifications-read-btn"
                 className={styles.markAllBtn}
                 onClick={handleMarkAllRead}
+                title="Mark all notifications as read"
               >
-                <i className="fa-solid fa-check-double" aria-hidden="true"></i>
-                Mark all read
+                <i className="fa-solid fa-check-double" aria-hidden="true" />
+                <span>Mark all read</span>
               </button>
             )}
           </div>
 
+          {/* Body / List */}
           <div className={styles.list}>
             {loading && notifications.length === 0 ? (
               <div className={styles.empty}>
-                <i className="fa-solid fa-spinner fa-spin emptyIcon" aria-hidden="true"></i>
+                <i className="fa-solid fa-spinner fa-spin fs-5 mb-2" aria-hidden="true" />
                 <p>Loading notifications...</p>
+              </div>
+            ) : error ? (
+              <div className={styles.errorBox}>
+                <i className="fa-solid fa-circle-exclamation me-2 text-danger" aria-hidden="true" />
+                <span>{error}</span>
+                <button
+                  type="button"
+                  className={styles.retryBtn}
+                  onClick={fetchNotifications}
+                >
+                  Retry
+                </button>
               </div>
             ) : notifications.length === 0 ? (
               <div className={styles.empty}>
                 <div className={styles.emptyIcon}>
-                  <i className="fa-regular fa-bell-slash" aria-hidden="true"></i>
+                  <i className="fa-regular fa-bell-slash" aria-hidden="true" />
                 </div>
-                <p>No notifications yet</p>
+                <p className="mb-1 fw-medium text-light">No new notifications</p>
+                <span className="text-secondary small">
+                  {isAdmin
+                    ? 'Your personal administrator inbox is up to date.'
+                    : 'Important academy alerts will appear here.'}
+                </span>
               </div>
             ) : (
               notifications.map((item) => {
@@ -194,16 +283,16 @@ export default function NotificationBell() {
                     <div
                       className={styles.iconCol}
                       style={{
-                        backgroundColor: `${config.accentColor}20`,
+                        backgroundColor: `${config.accentColor}25`,
                         color: config.accentColor,
                       }}
                     >
-                      <i className={`fa-solid ${config.icon}`} aria-hidden="true"></i>
+                      <i className={`fa-solid ${config.icon}`} aria-hidden="true" />
                     </div>
                     <div className={styles.contentCol}>
                       <div className={styles.itemTitle}>
                         <span>{item.title}</span>
-                        {!item.read && <span className={styles.dot} title="Unread"></span>}
+                        {!item.read && <span className={styles.dot} title="Unread" />}
                       </div>
                       <div className={styles.itemMsg}>{item.message}</div>
                       <div className={styles.itemFooter}>
@@ -216,7 +305,7 @@ export default function NotificationBell() {
                             onClick={(e) => handleMarkAsRead(item._id, e)}
                             title="Mark as read"
                           >
-                            <i className="fa-solid fa-check me-1" aria-hidden="true"></i>
+                            <i className="fa-solid fa-check me-1" aria-hidden="true" />
                             Mark read
                           </button>
                         )}
@@ -228,15 +317,38 @@ export default function NotificationBell() {
             )}
           </div>
 
+          {/* Footer with Role-Aware Destinations */}
           <div className={styles.footer}>
-            <Link
-              to="/notifications"
-              className={styles.viewAllLink}
-              onClick={() => setIsOpen(false)}
-            >
-              <span>View all notifications</span>
-              <i className="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
-            </Link>
+            {isAdmin ? (
+              <div className={styles.adminFooterActions}>
+                <Link
+                  to={oversightLogRoute}
+                  className={styles.viewAllLink}
+                  onClick={() => setIsOpen(false)}
+                  id="link-admin-oversight-log"
+                >
+                  <i className="fa-solid fa-list-check me-1" aria-hidden="true" />
+                  <span>Notification Oversight Log</span>
+                  <i className="fa-solid fa-arrow-right ms-1 text-xs" aria-hidden="true" />
+                </Link>
+                <Link
+                  to="/notifications"
+                  className={styles.subLink}
+                  onClick={() => setIsOpen(false)}
+                >
+                  My Inbox
+                </Link>
+              </div>
+            ) : (
+              <Link
+                to="/notifications"
+                className={styles.viewAllLink}
+                onClick={() => setIsOpen(false)}
+              >
+                <span>View all notifications</span>
+                <i className="fa-solid fa-arrow-right text-xs" aria-hidden="true" />
+              </Link>
+            )}
           </div>
         </div>
       )}

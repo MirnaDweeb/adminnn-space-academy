@@ -177,6 +177,104 @@ async function getMyCohorts(req, res, next) {
   }
 }
 
+// =========================================================================
+// SESSION WORKFLOW CONTROLLERS (Instructor & Admin)
+// =========================================================================
+
+async function startSessionInstructor(req, res, next) {
+  try {
+    const { id: cohortId, sessionId } = req.params;
+    const result = await cohortService.startSession({
+      cohortId,
+      sessionId,
+      user: req.user,
+    });
+    res.json({
+      success: true,
+      message: 'Session started successfully',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function endSessionInstructor(req, res, next) {
+  try {
+    const { id: cohortId, sessionId } = req.params;
+    const result = await cohortService.endSession({
+      cohortId,
+      sessionId,
+      user: req.user,
+    });
+    res.json({
+      success: true,
+      message: 'Session completed successfully',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateSessionInstructor(req, res, next) {
+  try {
+    const { id: cohortId, sessionId } = req.params;
+    const result = await cohortService.updateSessionDetails({
+      cohortId,
+      sessionId,
+      updateData: req.body,
+      user: req.user,
+    });
+    res.json({
+      success: true,
+      message: 'Session updated successfully',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function listSessionsAdmin(req, res, next) {
+  try {
+    const division = req.scopeDivision || req.query.division;
+    const result = await cohortService.listSessionsForAdmin({
+      division,
+      status: req.query.status,
+      deliveryMode: req.query.deliveryMode,
+      search: req.query.search,
+      date: req.query.date,
+      page: req.query.page,
+      limit: req.query.limit,
+      user: req.user,
+    });
+    res.json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateSessionStatusAdmin(req, res, next) {
+  try {
+    const { cohortId, sessionId } = req.params;
+    const { status, location, meetingUrl } = req.body;
+    const result = await cohortService.updateSessionDetails({
+      cohortId,
+      sessionId,
+      updateData: { status, location, meetingUrl },
+      user: req.user,
+    });
+    res.json({
+      success: true,
+      message: `Session status updated to ${status}`,
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createCohortAdmin,
   listCohortsAdmin,
@@ -192,4 +290,9 @@ module.exports = {
   recordGrades,
   getGrades,
   getMyCohorts,
+  startSessionInstructor,
+  endSessionInstructor,
+  updateSessionInstructor,
+  listSessionsAdmin,
+  updateSessionStatusAdmin,
 };

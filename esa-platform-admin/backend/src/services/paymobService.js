@@ -4,12 +4,67 @@ const crypto = require('crypto');
 // Handles Authentication, Order Registration, Payment Key generation,
 // Checkout URL construction, and SHA512 HMAC signature verification.
 
-const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY || 'mock_sandbox_key_esa_2026';
-const PAYMOB_HMAC_SECRET = process.env.PAYMOB_HMAC_SECRET || 'mock_hmac_secret_esa_2026_secured';
-const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID || '412398';
-const PAYMOB_IFRAME_ID = process.env.PAYMOB_IFRAME_ID || '849201';
+// ---------------------------------------------------------------------------
+// Configuration — production fails closed on missing / mock env vars.
+// ---------------------------------------------------------------------------
+
+const _IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// In non-production environments fall back to known mock values so developers
+// can run locally without any Paymob credentials.
+const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY || (_IS_PRODUCTION ? undefined : 'mock_sandbox_key_esa_2026');
+const PAYMOB_HMAC_SECRET = process.env.PAYMOB_HMAC_SECRET || (_IS_PRODUCTION ? undefined : 'mock_hmac_secret_esa_2026_secured');
+const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID || (_IS_PRODUCTION ? undefined : '412398');
+const PAYMOB_IFRAME_ID = process.env.PAYMOB_IFRAME_ID || (_IS_PRODUCTION ? undefined : '849201');
 const PAYMOB_BASE_URL = (process.env.PAYMOB_BASE_URL || 'https://accept.paymob.com/api').replace(/\/+$/, '');
-const IS_SIMULATION = process.env.PAYMOB_SANDBOX_SIMULATION === 'true' || PAYMOB_API_KEY.startsWith('mock');
+
+// IS_SIMULATION is always false in production (assertPaymobConfig() will have thrown before we get here).
+const IS_SIMULATION = !_IS_PRODUCTION && (
+  process.env.PAYMOB_SANDBOX_SIMULATION === 'true' ||
+  (PAYMOB_API_KEY && PAYMOB_API_KEY.startsWith('mock'))
+);
+
+/**
+ * Asserts that all required Paymob configuration is present and valid for a
+ * production deployment.  Call this from server.js before app.listen().
+ *
+ * Throws a startup-fatal Error (non-secret message) if any of the following:
+ *   - PAYMOB_API_KEY or PAYMOB_HMAC_SECRET or PAYMOB_INTEGRATION_ID or PAYMOB_IFRAME_ID is missing.
+ *   - PAYMOB_API_KEY starts with 'mock' (mock credentials leaked into production).
+ *   - PAYMOB_SANDBOX_SIMULATION === 'true' (simulation mode must never be active in production).
+ * In non-production environments this function is a no-op.
+ */
+function assertPaymobConfig() {
+  if (!_IS_PRODUCTION) return; // only enforce in production
+
+  const missing = [];
+  if (!process.env.PAYMOB_API_KEY)          missing.push('PAYMOB_API_KEY');
+  if (!process.env.PAYMOB_HMAC_SECRET)      missing.push('PAYMOB_HMAC_SECRET');
+  if (!process.env.PAYMOB_INTEGRATION_ID)   missing.push('PAYMOB_INTEGRATION_ID');
+  if (!process.env.PAYMOB_IFRAME_ID)        missing.push('PAYMOB_IFRAME_ID');
+
+  if (missing.length > 0) {
+    throw new Error(
+      `[paymob] Fatal: required environment variable(s) not set in production: ${missing.join(', ')}. ` +
+      'Refusing to start — set the missing variables and redeploy.'
+    );
+  }
+
+  if (process.env.PAYMOB_API_KEY.startsWith('mock')) {
+    throw new Error(
+      '[paymob] Fatal: PAYMOB_API_KEY appears to be a mock/development value in production. ' +
+      'Refusing to start — supply real Paymob credentials.'
+    );
+  }
+
+  if (process.env.PAYMOB_SANDBOX_SIMULATION === 'true') {
+    throw new Error(
+      '[paymob] Fatal: PAYMOB_SANDBOX_SIMULATION=true is set in production. ' +
+      'Simulation mode must never be enabled in a production deployment. ' +
+      'Remove this environment variable and redeploy.'
+    );
+  }
+}
 
 /**
  * Calculates Paymob SHA-512 HMAC according to official Paymob specification.
@@ -257,6 +312,7 @@ function buildSimulatedCallback({
 }
 
 module.exports = {
+  assertPaymobConfig,
   calculateHmac,
   verifyHmac,
   authenticate,

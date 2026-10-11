@@ -23,14 +23,14 @@ export default function DonutChart({ items = [], title, size = 180, strokeWidth 
   let accumulatedPercent = 0;
 
   const defaultColors = [
-    '#3b82f6', // blue
-    '#10b981', // emerald
-    '#f59e0b', // amber
-    '#ef4444', // red
-    '#8b5cf6', // purple
-    '#06b6d4', // cyan
-    '#ec4899', // pink
-    '#64748b', // slate
+    '#3A6985', // Deep Cosmos Blue
+    '#1E7C85', // Deep Teal-Green
+    '#D4B87C', // Gold-Tan
+    '#4E83A4', // Cosmos Supporting Tint
+    '#2A95A0', // Teal-Green Supporting Tint
+    '#996814', // Accessible Warm Gold
+    '#254558', // Deep Cosmos Navy
+    '#135056', // Deep Teal
   ];
 
   return (

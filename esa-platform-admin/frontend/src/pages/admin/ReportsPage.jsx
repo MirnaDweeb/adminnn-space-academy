@@ -573,7 +573,7 @@ export default function ReportsPage() {
                       value: t.applications,
                     }))}
                     unit="apps"
-                    color="#0284c7"
+                    color="#3A6985"
                     height={150}
                   />
                 </div>
@@ -901,10 +901,10 @@ export default function ReportsPage() {
                                 width: `${Math.min(row.utilizationRate, 100)}%`,
                                 backgroundColor:
                                   row.utilizationRate >= 100
-                                    ? '#ef4444'
+                                    ? '#DF4F4C'
                                     : row.utilizationRate >= 75
-                                    ? '#f59e0b'
-                                    : '#3b82f6',
+                                    ? '#996814'
+                                    : '#3A6985',
                               }}
                             />
                           </div>
@@ -1146,7 +1146,7 @@ export default function ReportsPage() {
                     label: s.range,
                     value: s.count,
                     secondaryLabel: `${s.percentage}%`,
-                    color: s.range.includes('Below') ? '#ef4444' : '#3b82f6',
+                    color: s.range.includes('Below') ? '#DF4F4C' : '#3A6985',
                   }))}
                   unit="students"
                 />

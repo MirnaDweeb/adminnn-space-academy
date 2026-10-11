@@ -2,7 +2,7 @@ import styles from './DataTable.module.css';
 import EmptyState from './EmptyState';
 
 // columns: [{ key, label, render?(row) }]
-export default function DataTable({ columns, rows, data, emptyTitle = 'No records found', pagination }) {
+export default function DataTable({ columns, rows, data, emptyTitle = 'No records found', pagination, onRowClick }) {
   const tableRows = rows || data || [];
   if (!tableRows || tableRows.length === 0) {
     return (
@@ -24,7 +24,18 @@ export default function DataTable({ columns, rows, data, emptyTitle = 'No record
         </thead>
         <tbody>
           {tableRows.map((row, idx) => (
-            <tr key={row._id || row.id || idx}>
+            <tr
+              key={row._id || row.id || idx}
+              className={onRowClick ? styles.clickableRow : undefined}
+              onClick={
+                onRowClick
+                  ? (e) => {
+                      if (e.target.closest('button, a, input, select, textarea, label')) return;
+                      onRowClick(row);
+                    }
+                  : undefined
+              }
+            >
               {columns.map((col) => (
                 <td key={col.key}>{col.render ? col.render(row) : row[col.key]}</td>
               ))}

@@ -6,7 +6,7 @@ import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
 import cohortService from '../../services/api/cohortService';
 import { useAuth } from '../../hooks/useAuth';
-import { ATTENDANCE_STATUS } from '../../constants/statuses';
+import { ATTENDANCE_STATUS, SESSION_STATUS } from '../../constants/statuses';
 import styles from './InstructorCohortsPage.module.css';
 
 export default function InstructorCohortsPage() {
@@ -26,6 +26,7 @@ export default function InstructorCohortsPage() {
   const [selectedSessionId, setSelectedSessionId] = useState('');
   const [attendanceMap, setAttendanceMap] = useState({}); // { studentId: { status, notes } }
   const [savingAttendance, setSavingAttendance] = useState(false);
+  const [sessionActionLoading, setSessionActionLoading] = useState(false);
 
   // Grading state
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
@@ -281,6 +282,38 @@ export default function InstructorCohortsPage() {
     }
   };
 
+  // Start Session (Live monitoring integration)
+  const handleStartSession = async (sessId) => {
+    if (!selectedCohort?._id || !sessId) return;
+    setSessionActionLoading(true);
+    setError('');
+    try {
+      await cohortService.startSession(selectedCohort._id, sessId);
+      setSuccessMsg('Session officially started! Live status is now visible to academy administration.');
+      await loadCohortWorkspace(selectedCohort._id);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to start session');
+    } finally {
+      setSessionActionLoading(false);
+    }
+  };
+
+  // End Session (Calculates actual duration & completes)
+  const handleEndSession = async (sessId) => {
+    if (!selectedCohort?._id || !sessId) return;
+    setSessionActionLoading(true);
+    setError('');
+    try {
+      await cohortService.endSession(selectedCohort._id, sessId);
+      setSuccessMsg('Session successfully concluded. Actual delivery duration has been recorded.');
+      await loadCohortWorkspace(selectedCohort._id);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to end session');
+    } finally {
+      setSessionActionLoading(false);
+    }
+  };
+
   if (loading) {
     return <LoadingState message="Loading instructor cohorts and assigned runs..." />;
   }
@@ -461,12 +494,69 @@ export default function InstructorCohortsPage() {
               </div>
 
               {activeSession && (
-                <div className="alert alert-light border py-2 px-3 mb-3 d-flex justify-content-between align-items-center">
+                <div className="alert alert-light border py-2 px-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                   <div>
-                    <span className="fw-bold text-dark me-2">Session #{activeSession.sessionNumber}:</span>
-                    <span className="text-secondary">{activeSession.topic}</span>
+                    <div className="d-flex align-items-center gap-2">
+                      <span className="fw-bold text-dark">Session #{activeSession.sessionNumber}:</span>
+                      <span className="text-secondary">{activeSession.topic || activeSession.title}</span>
+                      <StatusBadge status={activeSession.status || SESSION_STATUS.SCHEDULED} />
+                    </div>
+                    <div className="text-muted small mt-1">
+                      <span>{activeSession.durationMinutes || 0} mins (scheduled)</span>
+                      {activeSession.actualDurationMinutes && (
+                        <span className="text-success fw-bold ms-2">
+                          &middot; {activeSession.actualDurationMinutes} mins actual
+                        </span>
+                      )}
+                      {activeSession.location && (
+                        <span className="ms-2">&middot; {activeSession.location}</span>
+                      )}
+                      {activeSession.deliveryMode === 'ONLINE' && activeSession.meetingUrl && (
+                        <a
+                          href={activeSession.meetingUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ms-2 text-primary"
+                        >
+                          <i className="fa-solid fa-video me-1"></i> Meeting Link
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <span className="badge bg-secondary-subtle text-secondary">{activeSession.durationMinutes} mins &middot; {activeSession.location}</span>
+
+                  <div className="d-flex align-items-center gap-2">
+                    {(!activeSession.status || activeSession.status === SESSION_STATUS.SCHEDULED) && (
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-success d-inline-flex align-items-center gap-1"
+                        onClick={() => handleStartSession(activeSession._id)}
+                        disabled={sessionActionLoading}
+                        id={`btn-start-session-${activeSession.sessionNumber}`}
+                      >
+                        <i className={`fa-solid ${sessionActionLoading ? 'fa-spinner fa-spin' : 'fa-play'}`}></i>
+                        Start Session
+                      </button>
+                    )}
+
+                    {activeSession.status === SESSION_STATUS.IN_PROGRESS && (
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger d-inline-flex align-items-center gap-1"
+                        onClick={() => handleEndSession(activeSession._id)}
+                        disabled={sessionActionLoading}
+                        id={`btn-end-session-${activeSession.sessionNumber}`}
+                      >
+                        <i className={`fa-solid ${sessionActionLoading ? 'fa-spinner fa-spin' : 'fa-stop'}`}></i>
+                        End Session
+                      </button>
+                    )}
+
+                    {activeSession.status === SESSION_STATUS.COMPLETED && (
+                      <span className="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">
+                        <i className="fa-solid fa-circle-check me-1"></i> Session Completed
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
 

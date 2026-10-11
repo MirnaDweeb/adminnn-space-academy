@@ -4,11 +4,16 @@ const { getMyCohorts } = require('../controllers/cohortController');
 const { getMyEvaluations } = require('../controllers/evaluationController');
 const { listMyCertificates, downloadMyCertificatePdf } = require('../controllers/certificateController');
 const { submitFeedbackController } = require('../controllers/feedbackController');
+const { getMyStudentProfile, updateMyStudentProfile } = require('../controllers/studentController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/authorize');
 const { ROLES } = require('../constants/roles');
 
 const router = express.Router();
+
+// Student-facing self-service profile
+router.get('/mine/profile', protect, authorize(ROLES.STUDENT), getMyStudentProfile);
+router.put('/mine/profile', protect, authorize(ROLES.STUDENT), updateMyStudentProfile);
 
 // Student-facing self-service invoice status (read-only)
 router.get('/mine/invoices', protect, authorize(ROLES.STUDENT), listMyInvoices);

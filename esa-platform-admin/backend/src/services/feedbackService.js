@@ -45,13 +45,13 @@ async function listFeedbackAdmin({
   page = 1,
   limit = 20,
 }) {
-  await seedFeedbackIfEmpty();
   const query = {};
 
   // Division Scoping
+  const divStr = typeof division === 'string' ? division.trim() : '';
   if (user.role === ROLES.SUPER_ADMIN) {
-    if (division && division.toLowerCase() !== 'all') {
-      query.division = division;
+    if (divStr && divStr.toLowerCase() !== 'all') {
+      query.division = divStr;
     }
   } else {
     const userDiv = user.division || (user.role && require('../constants/divisions').ROLE_TO_DIVISION[user.role]);
@@ -96,7 +96,7 @@ async function listFeedbackAdmin({
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
   const skip = (pageNum - 1) * limitNum;
 
-  const [feedback, total] = await Promise.all([
+  const [feedback, total, statsAgg, sentimentAgg, ratingAgg, categoryAgg, attentionRecords, verifiedNeedsAttention] = await Promise.all([
     Feedback.find(query)
       .populate('student', 'fullName email phone studentProfile')
       .populate('program', 'title division level price')
@@ -105,7 +105,104 @@ async function listFeedbackAdmin({
       .skip(skip)
       .limit(limitNum),
     Feedback.countDocuments(query),
+    Feedback.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          averageRating: { $avg: '$rating' },
+        },
+      },
+    ]),
+    Feedback.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$sentiment',
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    Feedback.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$rating',
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    Feedback.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$feedbackType',
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    Feedback.find({
+      ...query,
+      $or: [
+        { improvements: { $exists: true, $ne: '' } },
+        { sentiment: 'NEGATIVE' },
+        { rating: { $lte: 3 } },
+      ],
+    })
+      .populate('program', 'title')
+      .populate('cohort', 'cohortNumber')
+      .sort({ rating: 1, submittedAt: -1 })
+      .limit(6),
+    Feedback.countDocuments({
+      ...query,
+      $or: [{ sentiment: 'NEGATIVE' }, { rating: { $lte: 2 } }],
+    }),
   ]);
+
+  const totalResponses = statsAgg[0]?.total || 0;
+  const averageRating = totalResponses > 0 ? Number((statsAgg[0].averageRating || 0).toFixed(1)) : 0;
+
+  const sentimentBreakdown = { POSITIVE: 0, NEUTRAL: 0, NEGATIVE: 0 };
+  sentimentAgg.forEach((s) => {
+    if (s._id && sentimentBreakdown[s._id] !== undefined) {
+      sentimentBreakdown[s._id] = s.count;
+    }
+  });
+
+  const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  ratingAgg.forEach((r) => {
+    if (r._id && ratingDistribution[r._id] !== undefined) {
+      ratingDistribution[r._id] = r.count;
+    }
+  });
+
+  const categoryBreakdown = {
+    OVERALL: 0,
+    COURSE_CONTENT: 0,
+    INSTRUCTOR: 0,
+    FACILITIES: 0,
+    PLATFORM: 0,
+  };
+  categoryAgg.forEach((c) => {
+    if (c._id && categoryBreakdown[c._id] !== undefined) {
+      categoryBreakdown[c._id] = c.count;
+    }
+  });
+
+  const positiveCount = sentimentBreakdown.POSITIVE || 0;
+  const positivePercentage = totalResponses > 0 ? Math.round((positiveCount / totalResponses) * 100) : 0;
+
+  const improvementPriorities = attentionRecords.map((r) => ({
+    id: r._id,
+    category: r.feedbackType || 'OVERALL',
+    programTitle: r.program?.title || 'Academy Program',
+    cohortNumber: r.cohort?.cohortNumber || '',
+    rating: r.rating,
+    sentiment: r.sentiment,
+    improvementText: r.improvements || r.comments,
+    submittedAt: r.submittedAt,
+  }));
 
   return {
     feedback,
@@ -114,6 +211,17 @@ async function listFeedbackAdmin({
       limit: limitNum,
       total,
       totalPages: Math.ceil(total / limitNum) || 1,
+    },
+    metrics: {
+      total: totalResponses,
+      averageRating,
+      positiveCount,
+      positivePercentage,
+      needsAttentionCount: verifiedNeedsAttention,
+      sentimentBreakdown,
+      ratingDistribution,
+      categoryBreakdown,
+      improvementPriorities,
     },
   };
 }
@@ -125,12 +233,12 @@ async function listFeedbackAdmin({
  * @returns {Promise<Object>}
  */
 async function getFeedbackSummaryAdmin({ user, division, program, cohort }) {
-  await seedFeedbackIfEmpty();
   const query = {};
 
+  const divStr = typeof division === 'string' ? division.trim() : '';
   if (user.role === ROLES.SUPER_ADMIN) {
-    if (division && division.toLowerCase() !== 'all') {
-      query.division = division;
+    if (divStr && divStr.toLowerCase() !== 'all') {
+      query.division = divStr;
     }
   } else {
     const userDiv = user.division || (user.role && require('../constants/divisions').ROLE_TO_DIVISION[user.role]);

@@ -60,6 +60,20 @@ export default function InstructorManagementPage() {
     bio: '',
   });
 
+  // Edit Modal State
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editInstructor, setEditInstructor] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [editForm, setEditForm] = useState({
+    fullName: '',
+    title: '',
+    specialization: '',
+    phone: '',
+    bio: '',
+    division: '',
+  });
+
   // Detail Modal State
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailInstructor, setDetailInstructor] = useState(null);
@@ -111,6 +125,38 @@ export default function InstructorManagementPage() {
     });
     setCreateError('');
     setIsCreateOpen(true);
+  };
+
+  // Handle open edit modal
+  const handleOpenEdit = (inst) => {
+    setEditInstructor(inst);
+    setEditForm({
+      fullName: inst.user?.fullName || '',
+      title: inst.title || '',
+      specialization: inst.specialization || '',
+      phone: inst.phone || '',
+      bio: inst.bio || '',
+      division: inst.division || DIVISIONS.PRE_UNIVERSITY,
+    });
+    setEditError('');
+    setIsEditOpen(true);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editInstructor) return;
+    setEditLoading(true);
+    setEditError('');
+    try {
+      await adminService.updateInstructor(editInstructor._id, editForm);
+      setIsEditOpen(false);
+      setEditInstructor(null);
+      fetchInstructors();
+    } catch (err) {
+      setEditError(err.response?.data?.message || err.message || 'Failed to update instructor profile');
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   // Submit Create Instructor
@@ -273,6 +319,14 @@ export default function InstructorManagementPage() {
             onClick={() => handleOpenDetail(row)}
           >
             Details
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm"
+            onClick={() => handleOpenEdit(row)}
+            title="Edit instructor profile and faculty credentials"
+          >
+            Edit
           </button>
           <button
             type="button"
@@ -728,6 +782,109 @@ export default function InstructorManagementPage() {
           loading={statusLoading}
           icon={confirmInstructor.isActive ? 'fa-user-slash' : 'fa-user-check'}
         />
+      )}
+
+      {/* EDIT INSTRUCTOR MODAL */}
+      {isEditOpen && (
+        <Modal
+          title={`Edit Instructor — ${editInstructor?.user?.fullName || ''}`}
+          isOpen={isEditOpen}
+          onClose={() => !editLoading && setIsEditOpen(false)}
+        >
+          <form onSubmit={handleSaveEdit} className="d-flex flex-column gap-3">
+            {editError && <div className="alert alert-danger py-2 small mb-0">{editError}</div>}
+
+            <div className="row g-2">
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  className="form-control form-control-sm"
+                  value={editForm.fullName}
+                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Academic / Professional Title</label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="e.g. Lead Orbital Mechanics Specialist"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="row g-2">
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Specialization / Domain</label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="e.g. CubeSat Subsystems & Payloads"
+                  value={editForm.specialization}
+                  onChange={(e) => setEditForm({ ...editForm, specialization: e.target.value })}
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Contact Phone</label>
+                <input
+                  type="tel"
+                  className="form-control form-control-sm"
+                  placeholder="+20 100 123 4567"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {isSuperAdmin && (
+              <div>
+                <label className="form-label small fw-semibold text-dark">Assigned Division</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={editForm.division}
+                  onChange={(e) => setEditForm({ ...editForm, division: e.target.value })}
+                >
+                  <option value={DIVISIONS.PRE_UNIVERSITY}>Pre-University Division</option>
+                  <option value={DIVISIONS.UNIVERSITY}>University Division</option>
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="form-label small fw-semibold text-dark">Professional Biography</label>
+              <textarea
+                className="form-control form-control-sm"
+                rows={3}
+                placeholder="Background and research focus in space sciences..."
+                value={editForm.bio}
+                onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+              />
+            </div>
+
+            <div className="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                disabled={editLoading}
+                onClick={() => setIsEditOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                disabled={editLoading}
+              >
+                {editLoading && <i className="fa-solid fa-spinner fa-spin"></i>}
+                {editLoading ? 'Saving Changes...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
     </div>
   );

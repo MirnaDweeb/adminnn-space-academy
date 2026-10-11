@@ -275,11 +275,74 @@ const syncAllInstructorsAccessController = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { results, count: results.length });
 });
 
+// PUT /api/admin/instructors/:id
+const updateInstructorAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { fullName, name, title, specialization, phone, bio, division } = req.body;
+
+  let profile = await InstructorProfile.findById(id).populate('user');
+  if (!profile) {
+    profile = await InstructorProfile.findOne({ user: id }).populate('user');
+  }
+
+  if (!profile) {
+    throw ApiError.notFound('Instructor not found');
+  }
+
+  if (req.user.role !== ROLES.SUPER_ADMIN && profile.division !== req.scopeDivision) {
+    throw ApiError.forbidden('You cannot modify an instructor outside your division');
+  }
+
+  const user = await User.findById(profile.user._id || profile.user);
+  if (!user) {
+    throw ApiError.notFound('Associated user account not found');
+  }
+
+  const updatedName = (fullName || name || user.fullName).trim();
+  user.fullName = updatedName;
+  if (req.user.role === ROLES.SUPER_ADMIN && division) {
+    user.division = division;
+    profile.division = division;
+  }
+  await user.save();
+
+  if (title !== undefined) profile.title = title.trim();
+  if (specialization !== undefined) profile.specialization = specialization.trim();
+  if (phone !== undefined) profile.phone = phone.trim();
+  if (bio !== undefined) profile.bio = bio.trim();
+
+  await profile.save();
+
+  await recordAudit({
+    user: req.user,
+    action: 'INSTRUCTOR_UPDATED',
+    resource: 'User',
+    resourceId: user._id,
+    division: profile.division,
+    after: {
+      fullName: user.fullName,
+      title: profile.title,
+      specialization: profile.specialization,
+      phone: profile.phone,
+    },
+    reason: `Instructor profile updated by ${req.user.role} ${req.user.fullName}`,
+  });
+
+  const updatedProfile = await InstructorProfile.findById(profile._id).populate(
+    'user',
+    'fullName email isActive createdAt lastLoginAt role division createdBy'
+  );
+
+  const formatted = formatInstructor(updatedProfile, updatedProfile.user);
+  sendSuccess(res, 200, { instructor: formatted });
+});
+
 module.exports = {
   createInstructor,
   listInstructors,
   getInstructorById,
   updateInstructorStatus,
+  updateInstructorAdmin,
   syncInstructorAccessController,
   syncAllInstructorsAccessController,
 };

@@ -2,10 +2,10 @@ const ApiError = require('../utils/ApiError');
 const { ROLES } = require('../constants/roles');
 const { DIVISIONS } = require('../constants/divisions');
 
-// Roles a person may self-select at public registration. Admin roles are
-// never assignable through this endpoint; they must be provisioned by a
-// Super Admin (future phase: an admin-only "create admin" endpoint).
-const SELF_REGISTERABLE_ROLES = [ROLES.STUDENT, ROLES.INSTRUCTOR];
+// Roles a person may self-select at public registration.
+// Strictly limited to STUDENT. Instructor and administrative roles must be
+// provisioned by an administrator.
+const SELF_REGISTERABLE_ROLES = [ROLES.STUDENT];
 
 function validateRegisterInput(body) {
   const { fullName, email, password, role, division } = body;
@@ -14,10 +14,10 @@ function validateRegisterInput(body) {
   if (!fullName || fullName.trim().length < 2) errors.push('fullName is required (min 2 characters)');
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) errors.push('A valid email is required');
   if (!password || password.length < 8) errors.push('password must be at least 8 characters');
-  if (role && !SELF_REGISTERABLE_ROLES.includes(role)) {
-    errors.push(`role must be one of: ${SELF_REGISTERABLE_ROLES.join(', ')}`);
+  if (role && role !== ROLES.STUDENT) {
+    errors.push('Public self-registration is strictly permitted for students only. Instructors and administrators must be provisioned by an administrator.');
   }
-  if (role === ROLES.STUDENT && division && !Object.values(DIVISIONS).includes(division)) {
+  if (division && !Object.values(DIVISIONS).includes(division)) {
     errors.push(`division must be one of: ${Object.values(DIVISIONS).join(', ')}`);
   }
 

@@ -53,8 +53,20 @@ function assertCohortAccess(cohort, user, action = 'view') {
 /**
  * Create a new Cohort for a Program with sessions and assigned instructor.
  */
-async function createCohort({ programId, name, instructorId, startDate, endDate, sessions = [], capacity, user }) {
-  const program = await Course.findById(programId);
+async function createCohort({
+  programId,
+  program: propProgram,
+  name,
+  instructorId,
+  instructor: propInstructor,
+  startDate,
+  endDate,
+  sessions = [],
+  capacity,
+  user,
+}) {
+  const targetProgramId = programId || propProgram;
+  const program = await Course.findById(targetProgramId);
   if (!program) {
     throw ApiError.notFound('Program not found');
   }
@@ -68,7 +80,8 @@ async function createCohort({ programId, name, instructorId, startDate, endDate,
   }
 
   // Instructor validation
-  const instructor = await User.findById(instructorId);
+  const targetInstructorId = instructorId || propInstructor;
+  const instructor = await User.findById(targetInstructorId);
   if (!instructor || instructor.role !== ROLES.INSTRUCTOR || !instructor.isActive) {
     throw ApiError.badRequest('Selected instructor is invalid or inactive');
   }
@@ -101,10 +114,16 @@ async function createCohort({ programId, name, instructorId, startDate, endDate,
   // Process sessions
   const formattedSessions = sessions.map((s, idx) => ({
     sessionNumber: s.sessionNumber || idx + 1,
+    title: (s.title || s.topic || `Session ${idx + 1}`).trim(),
+    topic: (s.topic || s.title || `Session ${idx + 1}`).trim(),
     date: new Date(s.date || start),
-    topic: (s.topic || `Session ${idx + 1}`).trim(),
+    startTime: s.startTime || '10:00',
+    endTime: s.endTime || '12:00',
     durationMinutes: Number(s.durationMinutes) || 120,
+    deliveryMode: s.deliveryMode || 'OFFLINE',
+    meetingUrl: s.meetingUrl || '',
     location: (s.location || 'Training Lab / Online').trim(),
+    status: s.status || 'SCHEDULED',
   }));
 
   // Create Cohort
@@ -797,6 +816,285 @@ async function updateCohort(cohortId, updateData, user) {
     .populate('instructor', 'fullName email');
 }
 
+/**
+ * Start an academic session (Instructor or Admin).
+ * Transitions status to IN_PROGRESS, records start timestamp and audit log.
+ */
+async function startSession({ cohortId, sessionId, user }) {
+  const cohort = await Cohort.findById(cohortId).populate('program instructor');
+  if (!cohort) {
+    throw ApiError.notFound('Cohort not found');
+  }
+
+  assertCohortAccess(cohort, user, 'session_start');
+
+  const session = cohort.sessions.id(sessionId);
+  if (!session) {
+    throw ApiError.notFound('Session not found in this cohort');
+  }
+
+  // Idempotency: if already IN_PROGRESS, return current state
+  if (session.status === 'IN_PROGRESS') {
+    return { cohort, session };
+  }
+
+  if (session.status === 'COMPLETED') {
+    throw ApiError.badRequest('Session has already been completed and cannot be restarted');
+  }
+
+  session.status = 'IN_PROGRESS';
+  session.startedAt = new Date();
+
+  // If cohort is SCHEDULED, advance to IN_PROGRESS
+  if (cohort.status === COHORT_STATUS.SCHEDULED) {
+    cohort.status = COHORT_STATUS.IN_PROGRESS;
+  }
+
+  await cohort.save();
+
+  await recordAudit({
+    user: user._id,
+    action: 'SESSION_STARTED',
+    resource: 'Cohort',
+    resourceId: cohort._id,
+    division: cohort.division,
+    after: {
+      sessionId: session._id,
+      sessionNumber: session.sessionNumber,
+      topic: session.topic,
+      status: session.status,
+      startedAt: session.startedAt,
+    },
+    reason: `Session #${session.sessionNumber} started by ${user.fullName || user.email}`,
+  });
+
+  return { cohort, session };
+}
+
+/**
+ * End an academic session (Instructor or Admin).
+ * Transitions status to COMPLETED, records end timestamp, calculates actual duration and audit log.
+ */
+async function endSession({ cohortId, sessionId, user }) {
+  const cohort = await Cohort.findById(cohortId).populate('program instructor');
+  if (!cohort) {
+    throw ApiError.notFound('Cohort not found');
+  }
+
+  assertCohortAccess(cohort, user, 'session_end');
+
+  const session = cohort.sessions.id(sessionId);
+  if (!session) {
+    throw ApiError.notFound('Session not found in this cohort');
+  }
+
+  // Idempotency: if already COMPLETED, return current state
+  if (session.status === 'COMPLETED') {
+    return { cohort, session };
+  }
+
+  session.status = 'COMPLETED';
+  session.endedAt = new Date();
+
+  const startMs = session.startedAt ? new Date(session.startedAt).getTime() : Date.now() - ((session.durationMinutes || 120) * 60000);
+  const endMs = session.endedAt.getTime();
+  const diffMinutes = Math.max(1, Math.round((endMs - startMs) / 60000));
+  session.actualDurationMinutes = diffMinutes;
+
+  await cohort.save();
+
+  await recordAudit({
+    user: user._id,
+    action: 'SESSION_COMPLETED',
+    resource: 'Cohort',
+    resourceId: cohort._id,
+    division: cohort.division,
+    after: {
+      sessionId: session._id,
+      sessionNumber: session.sessionNumber,
+      topic: session.topic,
+      status: session.status,
+      endedAt: session.endedAt,
+      actualDurationMinutes: session.actualDurationMinutes,
+    },
+    reason: `Session #${session.sessionNumber} ended by ${user.fullName || user.email}`,
+  });
+
+  return { cohort, session };
+}
+
+/**
+ * Update session details (topic, deliveryMode, meetingUrl, location, etc.).
+ */
+async function updateSessionDetails({ cohortId, sessionId, updateData = {}, user }) {
+  const cohort = await Cohort.findById(cohortId).populate('program instructor');
+  if (!cohort) {
+    throw ApiError.notFound('Cohort not found');
+  }
+
+  assertCohortAccess(cohort, user, 'session_update');
+
+  const session = cohort.sessions.id(sessionId);
+  if (!session) {
+    throw ApiError.notFound('Session not found in this cohort');
+  }
+
+  if (updateData.topic) session.topic = updateData.topic.trim();
+  if (updateData.location !== undefined) session.location = updateData.location.trim();
+  if (updateData.deliveryMode) session.deliveryMode = updateData.deliveryMode;
+  if (updateData.meetingUrl !== undefined) session.meetingUrl = updateData.meetingUrl.trim();
+  if (updateData.durationMinutes) session.durationMinutes = Number(updateData.durationMinutes);
+  if (updateData.status && ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].includes(updateData.status)) {
+    session.status = updateData.status;
+  }
+
+  await cohort.save();
+
+  return { cohort, session };
+}
+
+/**
+ * List sessions across cohorts for Admin Session Monitoring Dashboard.
+ */
+async function listSessionsForAdmin({ division, status, deliveryMode, search, date, page = 1, limit = 20, user }) {
+  const cohortFilter = {};
+
+  if (user.role !== ROLES.SUPER_ADMIN) {
+    const adminDiv = user.division || (user.role === ROLES.PRE_UNIVERSITY_ADMIN ? 'PRE_UNIVERSITY' : 'UNIVERSITY');
+    cohortFilter.division = adminDiv;
+  } else if (division && division !== 'all' && division !== 'ALL') {
+    cohortFilter.division = division;
+  }
+
+  const cohorts = await Cohort.find(cohortFilter)
+    .populate('program', 'title code level category division deliveryMode')
+    .populate('instructor', 'fullName email')
+    .lean();
+
+  let allSessions = [];
+  for (const c of cohorts) {
+    if (!c.sessions || c.sessions.length === 0) continue;
+    for (const s of c.sessions) {
+      allSessions.push({
+        _id: s._id,
+        sessionId: s._id,
+        cohortId: c._id,
+        cohortNumber: c.cohortNumber,
+        cohortName: c.name,
+        division: c.division,
+        program: c.program,
+        instructor: c.instructor,
+        sessionNumber: s.sessionNumber,
+        topic: s.topic,
+        date: s.date,
+        durationMinutes: s.durationMinutes,
+        actualDurationMinutes: s.actualDurationMinutes || 0,
+        location: s.location || 'Main Training Lab / Online Room',
+        status: s.status || 'SCHEDULED',
+        deliveryMode: s.deliveryMode || (c.program?.deliveryMode === 'ONLINE' ? 'ONLINE' : 'OFFLINE'),
+        startedAt: s.startedAt || null,
+        endedAt: s.endedAt || null,
+        meetingUrl: s.meetingUrl || '',
+      });
+    }
+  }
+
+  // Preload attendance counts for all sessions
+  const sessionIds = allSessions.map((s) => s._id);
+  const attendanceAgg = await Attendance.aggregate([
+    { $match: { sessionId: { $in: sessionIds } } },
+    {
+      $group: {
+        _id: '$sessionId',
+        total: { $sum: 1 },
+        present: { $sum: { $cond: [{ $eq: ['$status', ATTENDANCE_STATUS.PRESENT] }, 1, 0] } },
+        late: { $sum: { $cond: [{ $eq: ['$status', ATTENDANCE_STATUS.LATE] }, 1, 0] } },
+        absent: { $sum: { $cond: [{ $eq: ['$status', ATTENDANCE_STATUS.ABSENT] }, 1, 0] } },
+        excused: { $sum: { $cond: [{ $eq: ['$status', ATTENDANCE_STATUS.EXCUSED] }, 1, 0] } },
+      },
+    },
+  ]);
+
+  const attMap = {};
+  attendanceAgg.forEach((a) => {
+    attMap[String(a._id)] = a;
+  });
+
+  allSessions.forEach((s) => {
+    const att = attMap[String(s._id)];
+    s.attendance = att
+      ? {
+          total: att.total,
+          present: att.present,
+          late: att.late,
+          absent: att.absent,
+          excused: att.excused,
+          attendedRate: att.total > 0 ? Math.round(((att.present + att.late) / att.total) * 100) : 0,
+        }
+      : { total: 0, present: 0, late: 0, absent: 0, excused: 0, attendedRate: 0 };
+  });
+
+  const totalCount = allSessions.length;
+  const runningCount = allSessions.filter((s) => s.status === 'IN_PROGRESS').length;
+  const scheduledCount = allSessions.filter((s) => s.status === 'SCHEDULED').length;
+  const completedCount = allSessions.filter((s) => s.status === 'COMPLETED').length;
+
+  if (status && status !== 'all' && status !== 'ALL') {
+    allSessions = allSessions.filter((s) => s.status === status);
+  }
+
+  if (deliveryMode && deliveryMode !== 'all' && deliveryMode !== 'ALL') {
+    allSessions = allSessions.filter((s) => s.deliveryMode === deliveryMode);
+  }
+
+  if (date) {
+    const targetDateStr = new Date(date).toISOString().slice(0, 10);
+    allSessions = allSessions.filter(
+      (s) => s.date && new Date(s.date).toISOString().slice(0, 10) === targetDateStr
+    );
+  }
+
+  if (search && search.trim()) {
+    const q = search.trim().toLowerCase();
+    allSessions = allSessions.filter(
+      (s) =>
+        s.topic?.toLowerCase().includes(q) ||
+        s.cohortNumber?.toLowerCase().includes(q) ||
+        s.cohortName?.toLowerCase().includes(q) ||
+        s.program?.title?.toLowerCase().includes(q) ||
+        s.instructor?.fullName?.toLowerCase().includes(q)
+    );
+  }
+
+  // Sort: running sessions first, then by date descending
+  allSessions.sort((a, b) => {
+    if (a.status === 'IN_PROGRESS' && b.status !== 'IN_PROGRESS') return -1;
+    if (b.status === 'IN_PROGRESS' && a.status !== 'IN_PROGRESS') return 1;
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+  const skip = (pageNum - 1) * limitNum;
+  const paginated = allSessions.slice(skip, skip + limitNum);
+
+  return {
+    sessions: paginated,
+    summary: {
+      total: totalCount,
+      running: runningCount,
+      scheduled: scheduledCount,
+      completed: completedCount,
+    },
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: allSessions.length,
+      totalPages: Math.ceil(allSessions.length / limitNum) || 1,
+    },
+  };
+}
+
 module.exports = {
   createCohort,
   listCohorts,
@@ -810,4 +1108,8 @@ module.exports = {
   recordGradesBulk,
   getGradesForAssignment,
   getStudentCohortsAndRecords,
+  startSession,
+  endSession,
+  updateSessionDetails,
+  listSessionsForAdmin,
 };

@@ -33,3 +33,19 @@ table.table {
   font-size: 0.85rem;
   color: var(--esa-text-secondary);
 }
+
+.clickableRow {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.clickableRow:hover {
+  background-color: var(--esa-primary-subtle, #edf3f7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clickableRow {
+    transition: none;
+  }
+}
+

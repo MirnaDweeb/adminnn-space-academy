@@ -934,7 +934,7 @@ export default function ApplicationsPage() {
                     </div>
                     <div className={styles.detailRow}>
                       <span className={styles.detailKey}>Invoice Amount:</span>
-                      <span className={styles.detailValue} style={{ fontWeight: 700, color: '#0284c7' }}>
+                      <span className={styles.detailValue} style={{ fontWeight: 700, color: 'var(--esa-cosmos-blue, #3A6985)' }}>
                         {Number(detailInvoice.amount).toLocaleString()} {detailInvoice.currency || 'EGP'}
                       </span>
                     </div>

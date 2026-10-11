@@ -33,11 +33,11 @@
   flex-shrink: 0;
 }
 
-.iconNavy { background: #e8ecf4; color: var(--esa-navy-800); }
-.iconSuccess { background: #e7f5ec; color: var(--esa-success); }
-.iconDanger { background: #fbeceb; color: var(--esa-danger); }
-.iconCyan { background: var(--esa-cyan-100); color: var(--esa-cyan-600); }
-.iconGold { background: var(--esa-gold-100); color: var(--esa-gold-500); }
+.iconNavy { background: var(--esa-surface-alt, #f7f9fa); color: var(--esa-cosmos-blue, #3a6985); }
+.iconSuccess { background: var(--esa-secondary-subtle, #e8f4f5); color: var(--esa-teal-green, #1e7c85); }
+.iconDanger { background: var(--esa-danger-subtle, #fdf1f0); color: var(--esa-red-coral, #df4f4c); }
+.iconCyan { background: var(--esa-secondary-subtle, #e8f4f5); color: var(--esa-teal-green, #1e7c85); }
+.iconGold { background: var(--esa-gold-subtle, #fbf8f1); color: var(--esa-gold-dark, #876722); }
 
 .summaryLabel {
   font-size: 0.75rem;
@@ -87,8 +87,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--esa-navy-800);
-  color: var(--esa-text-inverse);
+  background: var(--esa-cosmos-blue, #3a6985);
+  color: var(--esa-text-inverse, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;

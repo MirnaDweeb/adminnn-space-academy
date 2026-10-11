@@ -1,6 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const { sendSuccess } = require('../utils/ApiResponse');
-const { getDivisionStats } = require('../services/statsService');
+const { getDivisionStats, getDivisionDashboard } = require('../services/statsService');
 const { DIVISIONS } = require('../constants/divisions');
 
 // GET /api/admin/gateway
@@ -22,10 +22,11 @@ const getGatewayOverview = asyncHandler(async (req, res) => {
 });
 
 // GET /api/admin/:division/overview
-// Powers the individual division dashboard header stats.
+// Powers the individual division dashboard with comprehensive, live,
+// division-scoped operational data (KPIs, sessions, activity, applications).
 const getDivisionOverview = asyncHandler(async (req, res) => {
-  const stats = await getDivisionStats(req.scopeDivision);
-  sendSuccess(res, 200, { division: req.scopeDivision, ...stats });
+  const dashboardData = await getDivisionDashboard(req.scopeDivision);
+  sendSuccess(res, 200, dashboardData);
 });
 
 module.exports = { getGatewayOverview, getDivisionOverview };

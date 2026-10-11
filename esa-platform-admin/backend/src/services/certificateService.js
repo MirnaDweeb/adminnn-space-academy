@@ -4,6 +4,7 @@ const Evaluation = require('../models/Evaluation');
 const Cohort = require('../models/Cohort');
 const Course = require('../models/Course');
 const User = require('../models/User');
+const Feedback = require('../models/Feedback');
 const ApiError = require('../utils/ApiError');
 const { recordAudit } = require('./auditService');
 const { generateCertificatePdfBuffer } = require('../utils/pdfGenerator');
@@ -736,6 +737,20 @@ async function getEligibleEvaluations({ user, division = null, search = null, li
     }
   }
 
+  // Check feedback completion status for all eligible student-cohort pairs
+  const candidateCohortIds = Array.from(latestMap.values()).map((ev) => ev.cohort?._id || ev.cohort);
+  const candidateStudentIds = Array.from(latestMap.values()).map((ev) => ev.student?._id || ev.student);
+
+  const existingFeedbacks = await Feedback.find({
+    student: { $in: candidateStudentIds },
+    cohort: { $in: candidateCohortIds },
+  }).select('student cohort submittedAt');
+
+  const feedbackMap = new Map();
+  existingFeedbacks.forEach((f) => {
+    feedbackMap.set(`${String(f.student)}_${String(f.cohort)}`, f.submittedAt);
+  });
+
   const eligible = [];
   for (const [key, ev] of latestMap.entries()) {
     if (issuedEvalIds.has(String(ev._id))) continue;
@@ -752,6 +767,8 @@ async function getEligibleEvaluations({ user, division = null, search = null, li
       }
     }
 
+    const hasFeedback = feedbackMap.has(key);
+
     eligible.push({
       _id: ev._id,
       evaluationId: ev._id,
@@ -763,6 +780,8 @@ async function getEligibleEvaluations({ user, division = null, search = null, li
       averageScore: ev.averageScore,
       evaluatedAt: ev.evaluatedAt,
       division: ev.division,
+      feedbackCompleted: hasFeedback,
+      feedbackSubmittedAt: hasFeedback ? feedbackMap.get(key) : null,
     });
 
     if (eligible.length >= limit) break;

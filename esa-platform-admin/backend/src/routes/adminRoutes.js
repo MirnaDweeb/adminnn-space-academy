@@ -7,6 +7,7 @@ const {
   updateStudentAdmin,
   getStudentOverviewAdmin,
   getStudentReportPdfAdmin,
+  createStudentAdmin,
 } = require('../controllers/studentController');
 const {
   listApplicationsForAdmin,
@@ -29,6 +30,7 @@ const {
   listInstructors,
   getInstructorById,
   updateInstructorStatus,
+  updateInstructorAdmin,
   syncInstructorAccessController,
   syncAllInstructorsAccessController,
 } = require('../controllers/instructorController');
@@ -52,6 +54,11 @@ const {
   getInvoiceByEnrollmentAdmin,
   updateInvoiceMetadataAdmin,
   adjustPaymentAdmin,
+  getPaymentRemindersSummaryAdmin,
+  previewPaymentRemindersAdmin,
+  sendSinglePaymentReminderAdmin,
+  sendBulkPaymentRemindersAdmin,
+  getPaymentRemindersHistoryAdmin,
 } = require('../controllers/financeController');
 const {
   createCohortAdmin,
@@ -61,6 +68,8 @@ const {
   createAssignmentAdmin,
   listAssignmentsAdmin,
   assignEnrollmentAdmin,
+  listSessionsAdmin,
+  updateSessionStatusAdmin,
 } = require('../controllers/cohortController');
 const {
   createAssessmentAdmin,
@@ -93,6 +102,11 @@ const {
   listAdminNotifications,
   getEmailConfigAdmin,
   updateEmailConfigAdmin,
+  previewBroadcastRecipientsAdmin,
+  broadcastAnnouncementAdmin,
+  retryNotificationEmailAdmin,
+  sendStudentMessageAdmin,
+  sendFeedbackReminderAdmin,
 } = require('../controllers/notificationController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/authorize');
@@ -121,6 +135,7 @@ router.patch('/administrators/:id/status', authorize(ROLES.SUPER_ADMIN), updateA
 
 // Division-scoped resources. resolveDivisionScope reads ?division= for
 // Super Admin, or forces the admin's own division otherwise.
+router.post('/students', resolveDivisionScope, requirePermission(PERMISSIONS.STUDENTS_MANAGE), createStudentAdmin);
 router.get('/students', resolveDivisionScope, requirePermission(PERMISSIONS.STUDENTS_VIEW), listStudents);
 router.get('/students/:id/overview', resolveDivisionScope, requirePermission(PERMISSIONS.STUDENTS_VIEW), getStudentOverviewAdmin);
 router.get('/students/:id/report-pdf', resolveDivisionScope, requirePermission(PERMISSIONS.STUDENTS_VIEW), getStudentReportPdfAdmin);
@@ -134,6 +149,7 @@ router.post('/instructors/:id/sync-access', resolveDivisionScope, requirePermiss
 router.post('/instructors', resolveDivisionScope, requirePermission(PERMISSIONS.INSTRUCTORS_MANAGE), createInstructor);
 router.get('/instructors', resolveDivisionScope, requirePermission(PERMISSIONS.INSTRUCTORS_VIEW), listInstructors);
 router.get('/instructors/:id', resolveDivisionScope, requirePermission(PERMISSIONS.INSTRUCTORS_VIEW), getInstructorById);
+router.put('/instructors/:id', resolveDivisionScope, requirePermission(PERMISSIONS.INSTRUCTORS_MANAGE), updateInstructorAdmin);
 router.patch('/instructors/:id/status', resolveDivisionScope, requirePermission(PERMISSIONS.INSTRUCTORS_MANAGE), updateInstructorStatus);
 
 // Application review & decision workflow — Division scoped
@@ -158,6 +174,14 @@ router.post('/invoices/:id/payments', resolveDivisionScope, requirePermission(PE
 router.patch('/invoices/:id', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_MANAGE), updateInvoiceMetadataAdmin);
 router.post('/payments/:id/adjust', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_MANAGE), adjustPaymentAdmin);
 router.get('/invoices', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_VIEW), listInvoicesAdmin);
+
+// Payment Reminders & Deadline Notifications
+router.get('/invoices/reminders/summary', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_VIEW), getPaymentRemindersSummaryAdmin);
+router.post('/invoices/reminders/preview', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_VIEW), previewPaymentRemindersAdmin);
+router.post('/invoices/reminders/bulk', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_MANAGE), sendBulkPaymentRemindersAdmin);
+router.get('/invoices/reminders/history', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_VIEW), getPaymentRemindersHistoryAdmin);
+router.post('/invoices/:id/reminder', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_MANAGE), sendSinglePaymentReminderAdmin);
+
 router.get('/invoices/:id', resolveDivisionScope, requirePermission(PERMISSIONS.FINANCE_VIEW), getInvoiceByIdAdmin);
 
 // Phase 11: Training Delivery, Cohorts, Schedule & Assignments — Division scoped
@@ -168,6 +192,8 @@ router.put('/cohorts/:id', resolveDivisionScope, requirePermission(PERMISSIONS.C
 router.post('/cohorts/:id/assignments', resolveDivisionScope, requirePermission(PERMISSIONS.COHORTS_MANAGE), createAssignmentAdmin);
 router.get('/cohorts/:id/assignments', resolveDivisionScope, requirePermission(PERMISSIONS.COHORTS_VIEW), listAssignmentsAdmin);
 router.post('/cohorts/:id/assign-enrollment', resolveDivisionScope, requirePermission(PERMISSIONS.COHORTS_MANAGE), assignEnrollmentAdmin);
+router.get('/sessions', resolveDivisionScope, requirePermission(PERMISSIONS.COHORTS_VIEW), listSessionsAdmin);
+router.patch('/sessions/:cohortId/:sessionId/status', resolveDivisionScope, requirePermission(PERMISSIONS.COHORTS_MANAGE), updateSessionStatusAdmin);
 
 // Program Assessment Builder — Admission Readiness Decision Support
 router.post('/assessments', resolveDivisionScope, requirePermission(PERMISSIONS.ASSESSMENTS_MANAGE), createAssessmentAdmin);
@@ -195,6 +221,11 @@ router.get('/certificates/:id/pdf', resolveDivisionScope, requirePermission(PERM
 // Phase 14: Notifications & Official Email — Division scoped oversight
 router.get('/notifications/email-config', authorize(ROLES.SUPER_ADMIN), getEmailConfigAdmin);
 router.patch('/notifications/email-config', authorize(ROLES.SUPER_ADMIN), updateEmailConfigAdmin);
+router.get('/notifications/broadcast-preview', resolveDivisionScope, requirePermission(PERMISSIONS.NOTIFICATIONS_VIEW), previewBroadcastRecipientsAdmin);
+router.post('/notifications/broadcast', resolveDivisionScope, requirePermission(PERMISSIONS.NOTIFICATIONS_VIEW), broadcastAnnouncementAdmin);
+router.post('/notifications/message-student', resolveDivisionScope, requirePermission(PERMISSIONS.NOTIFICATIONS_VIEW), sendStudentMessageAdmin);
+router.post('/notifications/feedback-reminder', resolveDivisionScope, requirePermission(PERMISSIONS.NOTIFICATIONS_VIEW), sendFeedbackReminderAdmin);
+router.post('/notifications/:id/retry-email', resolveDivisionScope, requirePermission(PERMISSIONS.NOTIFICATIONS_VIEW), retryNotificationEmailAdmin);
 router.get('/notifications', resolveDivisionScope, requirePermission(PERMISSIONS.NOTIFICATIONS_VIEW), listAdminNotifications);
 
 // Student Feedback Center — Division scoped

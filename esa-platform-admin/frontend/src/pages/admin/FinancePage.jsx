@@ -73,6 +73,80 @@ export default function FinancePage() {
   const [sweepLoading, setSweepLoading] = useState(false);
   const [sweepError, setSweepError] = useState('');
 
+  // Payment Reminders State
+  const [remindersSummary, setRemindersSummary] = useState({
+    dueSoonInvoices: 0,
+    overdueInvoices: 0,
+    remindersSentLast30Days: 0,
+    eligibleStudentsCount: 0,
+    dueSoonDistinctStudents: 0,
+    overdueDistinctStudents: 0,
+  });
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
+  // Bulk Reminders State
+  const [bulkCategory, setBulkCategory] = useState(null); // 'DUE_SOON' | 'OVERDUE' | null
+  const [bulkPreview, setBulkPreview] = useState(null);
+  const [bulkPreviewLoading, setBulkPreviewLoading] = useState(false);
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+  const [bulkError, setBulkError] = useState('');
+
+  // Single Reminder State
+  const [singleReminderInvoice, setSingleReminderInvoice] = useState(null);
+  const [singleReminderCategory, setSingleReminderCategory] = useState('DUE_SOON');
+  const [singleReminderLoading, setSingleReminderLoading] = useState(false);
+  const [singleReminderError, setSingleReminderError] = useState('');
+
+  // Reminder History State
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyReminders, setHistoryReminders] = useState([]);
+  const [historyPagination, setHistoryPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyCategory, setHistoryCategory] = useState('');
+  const [historyEmailStatus, setHistoryEmailStatus] = useState('');
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyPage, setHistoryPage] = useState(1);
+
+  const fetchRemindersSummary = useCallback(async () => {
+    setSummaryLoading(true);
+    try {
+      const data = await adminService.getPaymentRemindersSummary(activeDivision);
+      setRemindersSummary(
+        data || {
+          dueSoonInvoices: 0,
+          overdueInvoices: 0,
+          remindersSentLast30Days: 0,
+          eligibleStudentsCount: 0,
+          dueSoonDistinctStudents: 0,
+          overdueDistinctStudents: 0,
+        }
+      );
+    } catch (err) {
+      console.warn('Failed to load payment reminders summary:', err.message);
+    } finally {
+      setSummaryLoading(false);
+    }
+  }, [activeDivision]);
+
+  const fetchReminderHistory = useCallback(async () => {
+    if (!showHistoryModal) return;
+    setHistoryLoading(true);
+    try {
+      const q = { page: historyPage, limit: 10 };
+      if (historyCategory) q.category = historyCategory;
+      if (historyEmailStatus) q.emailStatus = historyEmailStatus;
+      if (historySearch.trim()) q.search = historySearch.trim();
+
+      const res = await adminService.getPaymentRemindersHistory(activeDivision, q);
+      setHistoryReminders(res.data?.reminders || []);
+      setHistoryPagination(res.pagination || { page: 1, limit: 10, total: 0, totalPages: 1 });
+    } catch (err) {
+      console.error('Failed to load reminders history:', err.message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [activeDivision, showHistoryModal, historyPage, historyCategory, historyEmailStatus, historySearch]);
+
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -93,7 +167,83 @@ export default function FinancePage() {
 
   useEffect(() => {
     fetchInvoices();
-  }, [fetchInvoices]);
+    fetchRemindersSummary();
+  }, [fetchInvoices, fetchRemindersSummary]);
+
+  useEffect(() => {
+    fetchReminderHistory();
+  }, [fetchReminderHistory]);
+
+  const handleOpenBulkModal = async (cat) => {
+    setBulkCategory(cat);
+    setBulkError('');
+    setBulkPreview(null);
+    setBulkPreviewLoading(true);
+    try {
+      const preview = await adminService.previewPaymentReminders({
+        category: cat,
+        scopeDivision: activeDivision,
+      });
+      setBulkPreview(preview);
+    } catch (err) {
+      setBulkError(err.response?.data?.message || err.message || 'Failed to preview bulk reminders');
+    } finally {
+      setBulkPreviewLoading(false);
+    }
+  };
+
+  const handleExecuteBulkSend = async () => {
+    if (!bulkCategory) return;
+    setBulkSubmitting(true);
+    setBulkError('');
+    try {
+      const res = await adminService.sendBulkPaymentReminders({
+        category: bulkCategory,
+        scopeDivision: activeDivision,
+      });
+      setSuccessMessage(
+        `Bulk ${bulkCategory === 'DUE_SOON' ? 'Due-Soon' : 'Overdue'} reminders dispatched: ${res.sentCount} sent (${res.distinctStudentsNotified} distinct students), ${res.skippedCooldownCount} skipped due to 24h cooldown.`
+      );
+      setBulkCategory(null);
+      setBulkPreview(null);
+      await fetchRemindersSummary();
+      await fetchInvoices();
+    } catch (err) {
+      setBulkError(err.response?.data?.message || err.message || 'Failed to execute bulk reminders');
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
+
+  const handleOpenSingleReminder = (inv) => {
+    setSingleReminderInvoice(inv);
+    const isOverdue = new Date(inv.dueAt).getTime() <= Date.now() || inv.status === INVOICE_STATUS.EXPIRED;
+    setSingleReminderCategory(isOverdue ? 'OVERDUE' : 'DUE_SOON');
+    setSingleReminderError('');
+  };
+
+  const handleExecuteSingleReminder = async (e) => {
+    e.preventDefault();
+    if (!singleReminderInvoice) return;
+    setSingleReminderLoading(true);
+    setSingleReminderError('');
+    try {
+      const res = await adminService.sendSinglePaymentReminder(singleReminderInvoice._id, {
+        category: singleReminderCategory,
+      });
+      setSuccessMessage(
+        res.message ||
+          `Payment reminder sent successfully to ${singleReminderInvoice.student?.fullName || 'student'} for invoice ${singleReminderInvoice.invoiceNumber}.`
+      );
+      setSingleReminderInvoice(null);
+      await fetchRemindersSummary();
+      await fetchInvoices();
+    } catch (err) {
+      setSingleReminderError(err.response?.data?.message || err.message || 'Failed to send payment reminder');
+    } finally {
+      setSingleReminderLoading(false);
+    }
+  };
 
   const fetchInvoiceDetail = async (id) => {
     setSelectedInvoiceId(id);
@@ -399,6 +549,17 @@ export default function FinancePage() {
               <i className="fa-solid fa-credit-card me-1" aria-hidden="true"></i> Pay
             </button>
           )}
+          {(inv.status === INVOICE_STATUS.PENDING || inv.status === INVOICE_STATUS.EXPIRED) && canManageFinance && (
+            <button
+              type="button"
+              className="btn btn-outline-warning btn-sm"
+              onClick={() => handleOpenSingleReminder(inv)}
+              id={`btn-remind-invoice-${inv._id}`}
+              title="Send Payment Deadline Reminder"
+            >
+              <i className="fa-solid fa-paper-plane me-1" aria-hidden="true"></i> Remind
+            </button>
+          )}
         </div>
       ),
     },
@@ -474,6 +635,108 @@ export default function FinancePage() {
           subtitle="Deadlines lapsed"
         />
       </div>
+
+      {/* PAYMENT REMINDERS SECTION */}
+      <section className={styles.remindersSection} aria-labelledby="heading-payment-reminders">
+        <div className={styles.remindersHeader}>
+          <div className={styles.remindersTitleGroup}>
+            <i className={`fa-solid fa-bell-concierge ${styles.remindersIcon}`} aria-hidden="true"></i>
+            <div>
+              <h2 id="heading-payment-reminders" className={styles.remindersTitle}>Payment Reminders</h2>
+              <p className={styles.remindersSubtitle}>
+                Monitor 72-hour payment deadlines, track approaching and elapsed windows, and dispatch institutional reminders.
+              </p>
+            </div>
+          </div>
+          {canManageFinance && (
+            <div className={styles.remindersActions}>
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5"
+                onClick={() => handleOpenBulkModal('DUE_SOON')}
+                disabled={remindersSummary.dueSoonInvoices === 0 || summaryLoading}
+                id="btn-bulk-remind-due-soon"
+                title="Send reminder to students with deadline approaching within 24 hours"
+              >
+                <i className="fa-solid fa-clock" aria-hidden="true"></i>
+                <span>Remind Due-Soon ({remindersSummary.dueSoonDistinctStudents})</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1.5"
+                onClick={() => handleOpenBulkModal('OVERDUE')}
+                disabled={remindersSummary.overdueInvoices === 0 || summaryLoading}
+                id="btn-bulk-notify-overdue"
+                title="Send notification to students whose payment deadline has passed"
+              >
+                <i className="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                <span>Notify Overdue ({remindersSummary.overdueDistinctStudents})</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5"
+                onClick={() => setShowHistoryModal(true)}
+                id="btn-view-reminder-history"
+                title="View audit history of sent payment reminders"
+              >
+                <i className="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+                <span>Reminder History</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* REMINDER METRICS */}
+        <div className={styles.remindersMetricsGrid}>
+          <div className={styles.reminderMetricBox}>
+            <div className={`${styles.metricIconWrap} ${styles.iconGold}`}>
+              <i className="fa-solid fa-clock" aria-hidden="true"></i>
+            </div>
+            <div className={styles.metricBody}>
+              <span className={styles.metricVal}>{remindersSummary.dueSoonInvoices}</span>
+              <span className={styles.metricLabel}>Due Soon (&lt;24h)</span>
+              <span className={styles.metricSubtext}>
+                {remindersSummary.dueSoonDistinctStudents} distinct student{remindersSummary.dueSoonDistinctStudents === 1 ? '' : 's'}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.reminderMetricBox}>
+            <div className={`${styles.metricIconWrap} ${styles.iconRed}`}>
+              <i className="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+            </div>
+            <div className={styles.metricBody}>
+              <span className={styles.metricVal}>{remindersSummary.overdueInvoices}</span>
+              <span className={styles.metricLabel}>Overdue Invoices</span>
+              <span className={styles.metricSubtext}>
+                {remindersSummary.overdueDistinctStudents} distinct student{remindersSummary.overdueDistinctStudents === 1 ? '' : 's'}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.reminderMetricBox}>
+            <div className={`${styles.metricIconWrap} ${styles.iconTeal}`}>
+              <i className="fa-solid fa-paper-plane" aria-hidden="true"></i>
+            </div>
+            <div className={styles.metricBody}>
+              <span className={styles.metricVal}>{remindersSummary.remindersSentLast30Days}</span>
+              <span className={styles.metricLabel}>Reminders Sent</span>
+              <span className={styles.metricSubtext}>Last 30 days</span>
+            </div>
+          </div>
+
+          <div className={styles.reminderMetricBox}>
+            <div className={`${styles.metricIconWrap} ${styles.iconBlue}`}>
+              <i className="fa-solid fa-users" aria-hidden="true"></i>
+            </div>
+            <div className={styles.metricBody}>
+              <span className={styles.metricVal}>{remindersSummary.eligibleStudentsCount}</span>
+              <span className={styles.metricLabel}>Eligible Students</span>
+              <span className={styles.metricSubtext}>Ready (not in cooldown)</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* TOOLBAR */}
       <div className={styles.toolbar}>
@@ -1084,6 +1347,414 @@ export default function FinancePage() {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {/* BULK REMINDER CONFIRMATION MODAL */}
+      {bulkCategory && (
+        <Modal
+          isOpen={!!bulkCategory}
+          onClose={() => {
+            if (!bulkSubmitting) {
+              setBulkCategory(null);
+              setBulkPreview(null);
+            }
+          }}
+          title={
+            bulkCategory === 'DUE_SOON'
+              ? 'Send Bulk Reminders: Payment Due Soon'
+              : 'Send Bulk Reminders: Payment Overdue'
+          }
+          size="lg"
+        >
+          {bulkPreviewLoading ? (
+            <LoadingState message="Analyzing eligible invoices, 72-hour deadlines, and duplicate cooldowns..." />
+          ) : (
+            <div>
+              {bulkError && (
+                <div className="alert alert-danger py-2 mb-3">
+                  <i className="fa-solid fa-triangle-exclamation me-2"></i>
+                  {bulkError}
+                </div>
+              )}
+
+              {bulkPreview && (
+                <>
+                  <div className={styles.previewSummaryCard}>
+                    <div className={styles.previewGrid}>
+                      <div className={styles.previewStat}>
+                        <span className={styles.previewStatNum} style={{ color: 'var(--esa-cosmos-blue, #3a6985)' }}>
+                          {bulkPreview.eligibleInvoicesCount}
+                        </span>
+                        <span className={styles.previewStatLabel}>Eligible Invoices</span>
+                      </div>
+                      <div className={styles.previewStat}>
+                        <span className={styles.previewStatNum} style={{ color: 'var(--esa-teal-green, #1e7c85)' }}>
+                          {bulkPreview.distinctStudentsCount}
+                        </span>
+                        <span className={styles.previewStatLabel}>Distinct Students to Notify</span>
+                      </div>
+                      <div className={styles.previewStat}>
+                        <span className={styles.previewStatNum} style={{ color: '#64748b' }}>
+                          {bulkPreview.excludedCount}
+                        </span>
+                        <span className={styles.previewStatLabel}>Excluded (Paid / Cancelled)</span>
+                      </div>
+                      <div className={styles.previewStat}>
+                        <span className={styles.previewStatNum} style={{ color: 'var(--esa-gold-accessible, #996814)' }}>
+                          {bulkPreview.skippedCooldownCount}
+                        </span>
+                        <span className={styles.previewStatLabel}>Skipped (24h Cooldown)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="small text-secondary mb-2">
+                      <strong>Policy Notice:</strong> Each student will receive an official institutional in-app notification and email. Students who already received a reminder for their invoice within the past 24 hours will be safely skipped.
+                    </p>
+                  </div>
+
+                  {bulkPreview.sampleCandidates?.length > 0 ? (
+                    <div className="mb-3">
+                      <div className="small fw-bold text-dark mb-1">
+                        Recipient Preview ({bulkPreview.sampleCandidates.length} of {bulkPreview.eligibleInvoicesCount})
+                      </div>
+                      <div className={styles.candidateList}>
+                        {bulkPreview.sampleCandidates.map((c) => (
+                          <div key={c.invoiceId} className={styles.candidateItem}>
+                            <div className={styles.candidateDetails}>
+                              <span className={styles.candidateName}>{c.studentName}</span>
+                              <span className={styles.candidateSub}>
+                                {c.invoiceNumber} • {c.programTitle}
+                              </span>
+                            </div>
+                            <div className={styles.candidateMeta}>
+                              <div className={styles.candidateAmount}>{Number(c.amount).toLocaleString()} EGP</div>
+                              <div className={styles.candidateDeadline}>{c.formattedDeadline}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="alert alert-info py-2 small mb-3">
+                      No candidate invoices currently qualify for bulk dispatch (all eligible invoices are either in 24h cooldown or already resolved).
+                    </div>
+                  )}
+
+                  <div className="d-flex justify-content-end gap-2 pt-2 border-top">
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary btn-sm"
+                      onClick={() => {
+                        setBulkCategory(null);
+                        setBulkPreview(null);
+                      }}
+                      disabled={bulkSubmitting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-${bulkCategory === 'DUE_SOON' ? 'primary' : 'danger'} btn-sm d-inline-flex align-items-center gap-1.5`}
+                      onClick={handleExecuteBulkSend}
+                      disabled={bulkSubmitting || bulkPreview.candidateCount === 0}
+                      id="btn-confirm-bulk-remind"
+                    >
+                      {bulkSubmitting && <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>}
+                      <i className="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                      <span>
+                        Confirm &amp; Send Bulk Reminders ({bulkPreview.distinctStudentsCount} student{bulkPreview.distinctStudentsCount === 1 ? '' : 's'})
+                      </span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </Modal>
+      )}
+
+      {/* SINGLE REMINDER MODAL */}
+      {singleReminderInvoice && (
+        <Modal
+          isOpen={!!singleReminderInvoice}
+          onClose={() => {
+            if (!singleReminderLoading) setSingleReminderInvoice(null);
+          }}
+          title="Send Payment Deadline Reminder"
+          size="md"
+        >
+          <form onSubmit={handleExecuteSingleReminder}>
+            {singleReminderError && (
+              <div className="alert alert-danger py-2 mb-3">
+                <i className="fa-solid fa-circle-exclamation me-2"></i>
+                {singleReminderError}
+              </div>
+            )}
+
+            <div className={styles.modalSection}>
+              <div className={styles.grid2}>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Student</span>
+                  <span className={styles.detailValue}>
+                    {singleReminderInvoice.student?.fullName || 'Student'} ({singleReminderInvoice.student?.email || '—'})
+                  </span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Invoice Number</span>
+                  <span className={styles.detailValue}>{singleReminderInvoice.invoiceNumber}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Program</span>
+                  <span className={styles.detailValue}>{singleReminderInvoice.program?.title || 'Program'}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Amount Due</span>
+                  <span className={styles.detailValue} style={{ color: 'var(--esa-cosmos-blue, #3a6985)', fontWeight: 700 }}>
+                    {Number(singleReminderInvoice.amount || 0).toLocaleString()} EGP
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label small fw-semibold text-secondary">
+                Reminder Category *
+              </label>
+              <div className="d-flex gap-3">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="reminderCategory"
+                    id="catDueSoon"
+                    value="DUE_SOON"
+                    checked={singleReminderCategory === 'DUE_SOON'}
+                    onChange={(e) => setSingleReminderCategory(e.target.value)}
+                    disabled={singleReminderLoading}
+                  />
+                  <label className="form-check-label small" htmlFor="catDueSoon">
+                    <strong>Payment Due Soon</strong> (Approaching deadline)
+                  </label>
+                </div>
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="reminderCategory"
+                    id="catOverdue"
+                    value="OVERDUE"
+                    checked={singleReminderCategory === 'OVERDUE'}
+                    onChange={(e) => setSingleReminderCategory(e.target.value)}
+                    disabled={singleReminderLoading}
+                  />
+                  <label className="form-check-label small" htmlFor="catOverdue">
+                    <strong>Payment Overdue</strong> (Deadline passed)
+                  </label>
+                </div>
+              </div>
+              <div className="form-text text-muted small mt-1">
+                Deadline: {singleReminderInvoice.dueAt ? new Date(singleReminderInvoice.dueAt).toLocaleString() : '—'}
+              </div>
+            </div>
+
+            <div className="p-2 border rounded bg-light mb-3">
+              <div className="text-muted small fw-semibold mb-1">Dispatch Channels:</div>
+              <div className="small text-secondary">
+                <i className="fa-solid fa-bell text-primary me-1"></i> In-App Student Notification + <i className="fa-solid fa-envelope text-primary me-1"></i> Official Transactional Email
+              </div>
+            </div>
+
+            <div className="d-flex justify-content-end gap-2 pt-2 border-top">
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => setSingleReminderInvoice(null)}
+                disabled={singleReminderLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="btn-confirm-send-reminder"
+                className="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5"
+                disabled={singleReminderLoading}
+              >
+                {singleReminderLoading && <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>}
+                <i className="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                <span>Dispatch Reminder</span>
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* REMINDER HISTORY MODAL */}
+      {showHistoryModal && (
+        <Modal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+          title="Payment Reminders History & Audit Trail"
+          size="lg"
+        >
+          <div>
+            <div className={styles.historyToolbar}>
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="Filter by student or message..."
+                  value={historySearch}
+                  onChange={(e) => {
+                    setHistorySearch(e.target.value);
+                    setHistoryPage(1);
+                  }}
+                />
+              </div>
+              <div>
+                <select
+                  className={styles.selectInput}
+                  value={historyCategory}
+                  onChange={(e) => {
+                    setHistoryCategory(e.target.value);
+                    setHistoryPage(1);
+                  }}
+                >
+                  <option value="">All Categories</option>
+                  <option value="DUE_SOON">Due Soon Only</option>
+                  <option value="OVERDUE">Overdue Only</option>
+                </select>
+              </div>
+              <div>
+                <select
+                  className={styles.selectInput}
+                  value={historyEmailStatus}
+                  onChange={(e) => {
+                    setHistoryEmailStatus(e.target.value);
+                    setHistoryPage(1);
+                  }}
+                >
+                  <option value="">All Delivery States</option>
+                  <option value="SENT">Email Delivered</option>
+                  <option value="FAILED">Email Failed</option>
+                  <option value="IN_APP">In-App Only</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={fetchReminderHistory}
+                title="Refresh history"
+              >
+                <i className="fa-solid fa-rotate-right" aria-hidden="true"></i>
+              </button>
+            </div>
+
+            {historyLoading ? (
+              <LoadingState message="Loading payment reminder history..." />
+            ) : historyReminders.length === 0 ? (
+              <EmptyState
+                icon="fa-clock-rotate-left"
+                title="No Reminders Found"
+                description="No payment reminders match your current filter parameters or division scope."
+              />
+            ) : (
+              <div className={styles.tableContainer}>
+                <table className={styles.historyTable}>
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Student</th>
+                      <th>Invoice #</th>
+                      <th>Category</th>
+                      <th>Channels &amp; Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyReminders.map((rem) => {
+                      const isDueSoon = rem.type === 'PAYMENT_REMINDER_DUE_SOON';
+                      return (
+                        <tr key={rem._id}>
+                          <td style={{ fontSize: '0.78rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                            {new Date(rem.createdAt).toLocaleString()}
+                          </td>
+                          <td>
+                            <div className="fw-semibold text-dark">{rem.recipient?.fullName || 'Student'}</div>
+                            <div className="text-muted small">{rem.recipient?.email || '—'}</div>
+                          </td>
+                          <td>
+                            <span className={styles.invoiceNumber}>
+                              {rem.invoice?.invoiceNumber || (rem.relatedResource?.resourceId ? `INV-${rem.relatedResource.resourceId.slice(-6).toUpperCase()}` : '—')}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`badge ${
+                                isDueSoon
+                                  ? 'bg-warning-subtle text-warning border border-warning-subtle'
+                                  : 'bg-danger-subtle text-danger border border-danger-subtle'
+                              }`}
+                              style={{ fontSize: '0.72rem' }}
+                            >
+                              {isDueSoon ? 'Due Soon' : 'Overdue'}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-1.5 flex-wrap">
+                              <span className={styles.badgeInApp}>
+                                <i className="fa-solid fa-bell me-1"></i> In-App
+                              </span>
+                              {rem.emailSent ? (
+                                <span className={styles.badgeEmailSent}>
+                                  <i className="fa-solid fa-envelope-circle-check me-1"></i> Email Sent
+                                </span>
+                              ) : rem.emailError ? (
+                                <span className={styles.badgeEmailFailed} title={rem.emailError}>
+                                  <i className="fa-solid fa-triangle-exclamation me-1"></i> Email Failed
+                                </span>
+                              ) : (
+                                <span className={styles.badgeInApp}>
+                                  <i className="fa-solid fa-envelope me-1"></i> In-App Only
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {historyPagination.totalPages > 1 && (
+              <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                <span className="small text-muted">
+                  Page {historyPagination.page} of {historyPagination.totalPages} ({historyPagination.total} total reminders)
+                </span>
+                <div className="d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    disabled={historyPagination.page <= 1 || historyLoading}
+                    onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    disabled={historyPagination.page >= historyPagination.totalPages || historyLoading}
+                    onClick={() => setHistoryPage((p) => Math.min(historyPagination.totalPages, p + 1))}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </Modal>
       )}
     </div>

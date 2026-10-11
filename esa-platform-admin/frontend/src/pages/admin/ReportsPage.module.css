@@ -82,14 +82,14 @@
 }
 
 .tabBtn:hover {
-  color: var(--esa-primary, #0284c7);
-  background-color: var(--esa-bg-subtle, #f8fafc);
+  color: var(--esa-cosmos-blue, #3a6985);
+  background-color: var(--esa-surface-alt, #f7f9fa);
 }
 
 .tabBtn.active {
-  color: var(--esa-primary, #0369a1);
-  border-bottom-color: var(--esa-primary, #0284c7);
-  background-color: var(--esa-bg-subtle, #f0f9ff);
+  color: var(--esa-cosmos-blue, #3a6985);
+  border-bottom-color: var(--esa-cosmos-blue, #3a6985);
+  background-color: var(--esa-primary-subtle, #edf3f7);
 }
 
 /* Filters Card */

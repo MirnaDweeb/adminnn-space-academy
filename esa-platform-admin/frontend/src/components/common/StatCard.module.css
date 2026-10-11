@@ -2,38 +2,52 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: var(--esa-surface);
-  border: 1px solid var(--esa-border);
-  border-radius: var(--esa-radius-md);
+  background: var(--esa-surface, #ffffff);
+  border: 1px solid var(--esa-border, #e2e8f0);
+  border-radius: var(--esa-radius-md, 8px);
   padding: 1.1rem 1.25rem;
-  box-shadow: var(--esa-shadow-sm);
+  box-shadow: var(--esa-shadow-sm, 0 1px 3px rgba(19, 36, 48, 0.05));
   height: 100%;
 }
 
 .iconWrap {
   width: 46px;
   height: 46px;
-  border-radius: var(--esa-radius-sm);
+  border-radius: var(--esa-radius-sm, 6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--esa-navy-900);
-  color: var(--esa-text-inverse);
+  background: var(--esa-primary-subtle, #edf3f7);
+  color: var(--esa-cosmos-blue, #3a6985);
   font-size: 1.1rem;
   flex-shrink: 0;
 }
 
-.card.gold .iconWrap { background: var(--esa-gold-100); color: var(--esa-gold-500); }
-.card.cyan .iconWrap { background: var(--esa-cyan-100); color: var(--esa-cyan-600); }
+.card.cyan .iconWrap,
+.card.teal .iconWrap {
+  background: var(--esa-secondary-subtle, #e8f4f5);
+  color: var(--esa-teal-green, #1e7c85);
+}
+
+.card.gold .iconWrap {
+  background: var(--esa-gold-subtle, #fbf8f1);
+  color: var(--esa-gold-dark, #876722);
+}
+
+.card.danger .iconWrap,
+.card.coral .iconWrap {
+  background: var(--esa-danger-subtle, #fdf1f0);
+  color: var(--esa-red-coral, #df4f4c);
+}
 
 .value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--esa-text-primary);
+  color: var(--esa-text-primary, #000000);
   line-height: 1.2;
 }
 
 .label {
   font-size: 0.85rem;
-  color: var(--esa-text-secondary);
+  color: var(--esa-text-secondary, #334155);
 }

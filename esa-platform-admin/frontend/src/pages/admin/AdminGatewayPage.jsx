@@ -11,27 +11,22 @@ const DIVISION_META = {
     icon: 'fa-school',
     path: '/admin/PRE_UNIVERSITY',
     badge: 'K-12 & Pre-College',
+    description: 'Pre-college student admissions, secondary education programs, and foundational training delivery.',
+    accentClass: styles.preUniAccent,
+    btnId: 'btn-enter-pre-university',
   },
   UNIVERSITY: {
     icon: 'fa-graduation-cap',
     path: '/admin/UNIVERSITY',
     badge: 'Undergraduate & Professional',
+    description: 'Undergraduate engineering cohorts, university partnerships, and advanced space systems curricula.',
+    accentClass: styles.uniAccent,
+    btnId: 'btn-enter-university',
   },
 };
 
-const MANAGED_ITEMS = [
-  'Students',
-  'Programs',
-  'Cohorts',
-  'Applications',
-  'Instructors',
-  'Assessments',
-  'Training Delivery',
-];
-
 // The Super Admin Administration Gateway (/admin).
-// All figures come straight from GET /api/admin/gateway — real,
-// database-derived counts, zero when the database is empty.
+// Displays real, database-derived operational metrics for each academy division.
 export default function AdminGatewayPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -59,91 +54,102 @@ export default function AdminGatewayPage() {
   if (error) return <ErrorState message={error} onRetry={load} />;
 
   return (
-    <div>
-      <PageHeader
-        title="Super Admin Administration Gateway"
-        subtitle="Full platform control across academy divisions. Select a division to enter scoped operational workflows."
-        actions={
-          <div className="d-flex gap-2">
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={() => navigate('/admin/administrators')}
-            >
-              <i className="fa-solid fa-users-gear me-1" aria-hidden="true"></i>
-              Manage Administrators
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
-              onClick={() => navigate('/admin/assessments')}
-            >
-              <i className="fa-solid fa-clipboard-check me-1" aria-hidden="true"></i>
-              Assessments Builder
-            </button>
+    <div className={styles.container}>
+      {/* Official Academy Emblem & Gateway Title Banner */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroLeft}>
+          <img
+            src="/esa-logo.png"
+            alt="Egyptian Space Agency Academy Official Emblem"
+            className={styles.heroLogo}
+          />
+          <div>
+            <h1 className={styles.heroTitle}>Administration Gateway</h1>
+            <p className={styles.heroSubtitle}>
+              Manage academy divisions and access their administrative workspaces.
+            </p>
           </div>
-        }
-      />
+        </div>
+        <div className={styles.heroActions}>
+          <button
+            type="button"
+            id="btn-gateway-manage-admins"
+            className="btn btn-primary"
+            onClick={() => navigate('/admin/administrators')}
+            title="Configure platform administrators, roles, and granular permissions"
+          >
+            <i className="fa-solid fa-user-shield me-1.5" aria-hidden="true"></i>
+            Manage Administrators
+          </button>
+        </div>
+      </div>
 
+      {/* Two Primary Division Workspace Cards */}
       <div className={styles.grid}>
         {data.divisions.map((division) => {
           const meta = DIVISION_META[division.key] || {
             icon: 'fa-building-columns',
             path: `/admin/${division.key}`,
             badge: 'Division',
+            description: `Administrative operations and training delivery for ${division.name.toLowerCase()}.`,
+            accentClass: '',
+            btnId: `btn-enter-${division.key.toLowerCase().replace(/_/g, '-')}`,
           };
 
           return (
-            <div className={styles.card} key={division.key}>
-              <div className={styles.cardHeader}>
-                <div className={styles.iconWrap}>
-                  <i className={`fa-solid ${meta.icon}`} aria-hidden="true"></i>
+            <div className={`${styles.panel} ${meta.accentClass}`} key={division.key}>
+              <div className={styles.panelHeader}>
+                <div className={styles.iconWrap} aria-hidden="true">
+                  <i className={`fa-solid ${meta.icon}`}></i>
                 </div>
-                <div>
-                  <div className={styles.cardTitle}>{division.name}</div>
-                  <span className={styles.divisionBadge}>{meta.badge}</span>
-                </div>
-              </div>
-
-              <div className={styles.cardDesc}>
-                Manage {division.name.toLowerCase()} students, programs, cohorts, applications, instructors, assessments, and training delivery.
-              </div>
-
-              <div className={styles.managedPills}>
-                {MANAGED_ITEMS.map((item) => (
-                  <span key={item} className={styles.managedPill}>
-                    <i className="fa-solid fa-check text-success me-1" style={{ fontSize: '0.65rem' }}></i>
-                    {item}
-                  </span>
-                ))}
-              </div>
-
-              <div className={styles.statsRow}>
-                <div className={styles.statBox}>
-                  <div className={styles.statValue}>{division.studentCount ?? 0}</div>
-                  <div className={styles.statLabel}>Students</div>
-                </div>
-                <div className={styles.statBox}>
-                  <div className={styles.statValue}>{division.activePrograms ?? 0}</div>
-                  <div className={styles.statLabel}>Active Programs</div>
-                </div>
-                <div className={styles.statBox}>
-                  <div className={styles.statValue}>{division.pendingApplications ?? 0}</div>
-                  <div className={styles.statLabel}>Pending Apps</div>
-                </div>
-                <div className={styles.statBox}>
-                  <div className={styles.statValue}>{division.activeCohorts ?? 0}</div>
-                  <div className={styles.statLabel}>Active Cohorts</div>
+                <div className={styles.titleArea}>
+                  <div className={styles.titleRow}>
+                    <h2 className={styles.divisionTitle}>{division.name}</h2>
+                    <span className={styles.educationBadge}>{meta.badge}</span>
+                  </div>
+                  <p className={styles.divisionDesc}>{meta.description}</p>
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="btn btn-primary w-100 mt-auto py-2"
-                onClick={() => navigate(meta.path)}
-              >
-                Enter {division.name} <i className="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
-              </button>
+              {/* Compact Metrics Row with Live Calculated Statistics */}
+              <div className={styles.metricsRow}>
+                <div className={styles.metricItem}>
+                  <span className={styles.metricLabel}>Students</span>
+                  <span className={styles.metricValue}>{division.studentCount ?? 0}</span>
+                </div>
+                <div className={styles.metricItem}>
+                  <span className={styles.metricLabel}>Active Programs</span>
+                  <span className={styles.metricValue}>{division.activePrograms ?? 0}</span>
+                </div>
+                <div className={styles.metricItem}>
+                  <span className={styles.metricLabel}>Pending Applications</span>
+                  <span className={styles.metricValue}>{division.pendingApplications ?? 0}</span>
+                </div>
+                <div className={styles.metricItem}>
+                  <span className={styles.metricLabel}>Active Cohorts</span>
+                  <span className={styles.metricValue}>{division.activeCohorts ?? 0}</span>
+                </div>
+              </div>
+
+              {/* Concise Secondary Feature Note */}
+              <div className={styles.operationsScope}>
+                <i className="fa-solid fa-layer-group me-1.5 text-muted" aria-hidden="true"></i>
+                <span>Managed operations: Students · Programs · Cohorts · Applications · Instructors · Assessments · Delivery</span>
+              </div>
+
+              {/* Panel Action Button */}
+              <div className={styles.panelFooter}>
+                <button
+                  type="button"
+                  id={meta.btnId}
+                  className={styles.entryButton}
+                  onClick={() => navigate(meta.path)}
+                  aria-label={`Enter ${division.name} workspace`}
+                >
+                  <span>Enter Workspace</span>
+                  <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </button>
+              </div>
             </div>
           );
         })}

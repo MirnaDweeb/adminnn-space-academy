@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess } = require('../utils/ApiResponse');
@@ -15,17 +16,24 @@ const { Feedback } = require('../models/Feedback');
 const { generateStudentReportPdfBuffer } = require('../utils/studentReportPdfGenerator');
 const { recordAudit } = require('../services/auditService');
 const { ROLES } = require('../constants/roles');
+const { ROLE_TO_DIVISION, DIVISIONS } = require('../constants/divisions');
+
+const SALT_ROUNDS = 12;
 
 // GET /api/admin/students
-// Division filtering is always driven by req.scopeDivision (set by the
-// resolveDivisionScope middleware), never by a raw client-supplied filter,
-// so a division admin cannot broaden their own results.
-// Query filters: isActive=true|false (or legacy status fallback), search, page, limit.
+// Division filtering is strictly enforced: division admins are locked to their division,
+// and Super Admins can filter by ?division=PRE_UNIVERSITY|UNIVERSITY|all.
 const listStudents = asyncHandler(async (req, res) => {
   const { search = '', isActive, status, page = 1, limit = 20 } = req.query;
 
   const filter = {};
-  if (req.scopeDivision !== 'all') {
+  if (req.user.role !== ROLES.SUPER_ADMIN) {
+    const adminDivision = req.scopeDivision || ROLE_TO_DIVISION[req.user.role] || req.user.division;
+    if (!adminDivision) {
+      throw ApiError.forbidden('This administrative account has no assigned division');
+    }
+    filter.division = adminDivision;
+  } else if (req.scopeDivision && req.scopeDivision !== 'all') {
     filter.division = req.scopeDivision;
   }
 
@@ -97,8 +105,11 @@ const getStudentById = asyncHandler(async (req, res) => {
 
   if (!student) throw ApiError.notFound('Student not found');
 
-  if (req.scopeDivision !== 'all' && student.division !== req.scopeDivision) {
-    throw ApiError.forbidden('You cannot access a student outside your division');
+  if (req.user.role !== ROLES.SUPER_ADMIN) {
+    const adminDivision = req.scopeDivision || ROLE_TO_DIVISION[req.user.role] || req.user.division;
+    if (!adminDivision || student.division !== adminDivision) {
+      throw ApiError.forbidden('You cannot access a student outside your division');
+    }
   }
 
   const studentObj = student.toObject();
@@ -126,8 +137,11 @@ const updateStudentStatus = asyncHandler(async (req, res) => {
   }
 
   // Division admin can only modify students inside their own division
-  if (req.user.role !== ROLES.SUPER_ADMIN && student.division !== req.scopeDivision) {
-    throw ApiError.forbidden('You cannot modify a student outside your division');
+  if (req.user.role !== ROLES.SUPER_ADMIN) {
+    const adminDivision = req.scopeDivision || ROLE_TO_DIVISION[req.user.role] || req.user.division;
+    if (!adminDivision || student.division !== adminDivision) {
+      throw ApiError.forbidden('You cannot modify a student outside your division');
+    }
   }
 
   const user = await User.findById(student.user._id || student.user);
@@ -169,7 +183,7 @@ const updateStudentAdmin = asyncHandler(async (req, res) => {
   const body = req.body || {};
 
   // Disallow forbidden security/administrative manipulations
-  const forbiddenKeys = ['password', 'passwordHash', 'role', 'permissions', 'jwt', 'isAdmin', 'isSuperAdmin'];
+  const forbiddenKeys = ['password', 'passwordHash', 'role', 'permissions', 'jwt', 'isAdmin', 'isSuperAdmin', 'division'];
   for (const key of forbiddenKeys) {
     if (body[key] !== undefined) {
       throw ApiError.badRequest(`Security violation: Cannot modify "${key}" through student profile editing.`);
@@ -186,8 +200,11 @@ const updateStudentAdmin = asyncHandler(async (req, res) => {
   }
 
   // Division access control
-  if (req.user.role !== ROLES.SUPER_ADMIN && student.division !== req.scopeDivision) {
-    throw ApiError.forbidden('You cannot modify a student outside your division');
+  if (req.user.role !== ROLES.SUPER_ADMIN) {
+    const adminDivision = req.scopeDivision || ROLE_TO_DIVISION[req.user.role] || req.user.division;
+    if (!adminDivision || student.division !== adminDivision) {
+      throw ApiError.forbidden('You cannot modify a student outside your division');
+    }
   }
 
   const user = await User.findById(student.user._id || student.user);
@@ -304,8 +321,11 @@ const getStudentOverviewAdmin = asyncHandler(async (req, res) => {
     throw ApiError.notFound('Student not found');
   }
 
-  if (req.user.role !== ROLES.SUPER_ADMIN && student.division !== req.scopeDivision) {
-    throw ApiError.forbidden('You cannot access student dossier outside your division');
+  if (req.user.role !== ROLES.SUPER_ADMIN) {
+    const adminDivision = req.scopeDivision || ROLE_TO_DIVISION[req.user.role] || req.user.division;
+    if (!adminDivision || student.division !== adminDivision) {
+      throw ApiError.forbidden('You cannot access student dossier outside your division');
+    }
   }
 
   const userId = student.user?._id || student.user;
@@ -412,8 +432,11 @@ const getStudentReportPdfAdmin = asyncHandler(async (req, res) => {
     throw ApiError.notFound('Student not found');
   }
 
-  if (req.user.role !== ROLES.SUPER_ADMIN && student.division !== req.scopeDivision) {
-    throw ApiError.forbidden('You cannot export student report outside your division');
+  if (req.user.role !== ROLES.SUPER_ADMIN) {
+    const adminDivision = req.scopeDivision || ROLE_TO_DIVISION[req.user.role] || req.user.division;
+    if (!adminDivision || student.division !== adminDivision) {
+      throw ApiError.forbidden('You cannot export student report outside your division');
+    }
   }
 
   const userId = student.user?._id || student.user;
@@ -464,6 +487,192 @@ const getStudentReportPdfAdmin = asyncHandler(async (req, res) => {
   res.status(200).send(pdfBuffer);
 });
 
+// POST /api/admin/students (Admin creates student account)
+const createStudentAdmin = asyncHandler(async (req, res) => {
+  const {
+    fullName,
+    email,
+    password,
+    division,
+    nationalId,
+    dateOfBirth,
+    educationLevel,
+    institution,
+    major,
+    phone,
+    guardianName,
+    guardianPhone,
+    emergencyContact,
+    academicYear,
+  } = req.body;
+
+  if (!fullName || fullName.trim().length < 2) {
+    throw ApiError.badRequest('Full Name is required (minimum 2 characters)');
+  }
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+    throw ApiError.badRequest('A valid email address is required');
+  }
+  if (!password || password.length < 8) {
+    throw ApiError.badRequest('Password must be at least 8 characters');
+  }
+
+  // Determine target division and enforce scope
+  let targetDivision = division;
+  if (req.user.role !== ROLES.SUPER_ADMIN) {
+    const adminDivision = req.scopeDivision || ROLE_TO_DIVISION[req.user.role] || req.user.division;
+    if (!adminDivision) {
+      throw ApiError.forbidden('This administrative account has no assigned division');
+    }
+    if (targetDivision && targetDivision !== adminDivision) {
+      throw ApiError.forbidden('You cannot provision a student outside your division');
+    }
+    targetDivision = adminDivision;
+  } else {
+    if (!targetDivision) {
+      targetDivision = req.scopeDivision && req.scopeDivision !== 'all' ? req.scopeDivision : DIVISIONS.PRE_UNIVERSITY;
+    }
+  }
+
+  const existing = await User.findOne({ email: email.toLowerCase().trim() });
+  if (existing) {
+    throw ApiError.conflict('An account with this email address already exists');
+  }
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  const user = await User.create({
+    fullName: fullName.trim(),
+    email: email.toLowerCase().trim(),
+    passwordHash,
+    role: ROLES.STUDENT,
+    division: targetDivision,
+    isActive: true,
+    createdBy: req.user._id,
+  });
+
+  const studentProfile = await StudentProfile.create({
+    user: user._id,
+    division: targetDivision,
+    nationalId: nationalId ? nationalId.trim() : undefined,
+    dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
+    educationLevel: educationLevel ? educationLevel.trim() : '',
+    institution: institution ? institution.trim() : '',
+    major: major ? major.trim() : '',
+    phone: phone ? phone.trim() : '',
+    guardianName: guardianName ? guardianName.trim() : '',
+    guardianPhone: guardianPhone ? guardianPhone.trim() : '',
+    emergencyContact: emergencyContact ? emergencyContact.trim() : '',
+    academicYear: academicYear ? academicYear.trim() : '',
+  });
+
+  await recordAudit({
+    user: req.user,
+    action: 'STUDENT_CREATED',
+    resource: 'StudentProfile',
+    resourceId: studentProfile._id,
+    division: targetDivision,
+    after: {
+      userId: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      division: user.division,
+      profileId: studentProfile._id,
+    },
+    reason: `Student account provisioned by ${req.user.role} ${req.user.fullName} (${req.user.email})`,
+  });
+
+  sendSuccess(res, 201, {
+    student: {
+      _id: studentProfile._id,
+      division: studentProfile.division,
+      nationalId: studentProfile.nationalId,
+      educationLevel: studentProfile.educationLevel,
+      institution: studentProfile.institution,
+      major: studentProfile.major,
+      phone: studentProfile.phone,
+      user: user.toSafeObject(),
+      createdAt: studentProfile.createdAt,
+    },
+  });
+});
+
+// GET /api/student/mine/profile (Student self-service)
+const getMyStudentProfile = asyncHandler(async (req, res) => {
+  let profile = await StudentProfile.findOne({ user: req.user._id }).populate(
+    'user',
+    'fullName email division isActive createdAt'
+  );
+
+  if (!profile) {
+    // Graceful creation if account was initialized without profile
+    profile = await StudentProfile.create({
+      user: req.user._id,
+      division: req.user.division || DIVISIONS.PRE_UNIVERSITY,
+    });
+    profile = await StudentProfile.findById(profile._id).populate(
+      'user',
+      'fullName email division isActive createdAt'
+    );
+  }
+
+  sendSuccess(res, 200, { profile });
+});
+
+// PUT /api/student/mine/profile (Student self-service update)
+const updateMyStudentProfile = asyncHandler(async (req, res) => {
+  const {
+    fullName,
+    phone,
+    dateOfBirth,
+    nationalId,
+    institution,
+    educationLevel,
+    major,
+    guardianName,
+    guardianPhone,
+    emergencyContact,
+    academicYear,
+    skills,
+  } = req.body;
+
+  let profile = await StudentProfile.findOne({ user: req.user._id });
+  if (!profile) {
+    profile = await StudentProfile.create({
+      user: req.user._id,
+      division: req.user.division || DIVISIONS.PRE_UNIVERSITY,
+    });
+  }
+
+  if (fullName && fullName.trim().length >= 2) {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.fullName = fullName.trim();
+      await user.save();
+    }
+  }
+
+  if (phone !== undefined) profile.phone = phone.trim();
+  if (dateOfBirth !== undefined && dateOfBirth) profile.dateOfBirth = new Date(dateOfBirth);
+  if (nationalId !== undefined) profile.nationalId = nationalId.trim();
+  if (institution !== undefined) profile.institution = institution.trim();
+  if (educationLevel !== undefined) profile.educationLevel = educationLevel.trim();
+  if (major !== undefined) profile.major = major.trim();
+  if (guardianName !== undefined) profile.guardianName = guardianName.trim();
+  if (guardianPhone !== undefined) profile.guardianPhone = guardianPhone.trim();
+  if (emergencyContact !== undefined) profile.emergencyContact = emergencyContact.trim();
+  if (academicYear !== undefined) profile.academicYear = academicYear.trim();
+  if (Array.isArray(skills)) profile.skills = skills;
+
+  await profile.save();
+
+  const updated = await StudentProfile.findById(profile._id).populate(
+    'user',
+    'fullName email division isActive createdAt'
+  );
+
+  sendSuccess(res, 200, { profile: updated });
+});
+
 module.exports = {
   listStudents,
   getStudentById,
@@ -471,4 +680,7 @@ module.exports = {
   updateStudentAdmin,
   getStudentOverviewAdmin,
   getStudentReportPdfAdmin,
+  createStudentAdmin,
+  getMyStudentProfile,
+  updateMyStudentProfile,
 };

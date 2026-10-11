@@ -27,6 +27,9 @@ const officialEmailConfigurationSchema = new mongoose.Schema(
       EVALUATION_PUBLISHED: { type: Boolean, default: true },
       CERTIFICATE_ISSUED: { type: Boolean, default: true },
       CERTIFICATE_REVOKED: { type: Boolean, default: true },
+      GENERAL_ANNOUNCEMENT: { type: Boolean, default: true },
+      STUDENT_MESSAGE: { type: Boolean, default: true },
+      FEEDBACK_REMINDER: { type: Boolean, default: true },
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -59,6 +62,9 @@ officialEmailConfigurationSchema.statics.getOrCreateConfig = async function () {
         EVALUATION_PUBLISHED: true,
         CERTIFICATE_ISSUED: true,
         CERTIFICATE_REVOKED: true,
+        GENERAL_ANNOUNCEMENT: true,
+        STUDENT_MESSAGE: true,
+        FEEDBACK_REMINDER: true,
       },
     });
   }

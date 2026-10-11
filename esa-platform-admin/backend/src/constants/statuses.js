@@ -21,6 +21,7 @@ const APPLICATION_STATUS = Object.freeze({
 const PROGRAM_STATUS = Object.freeze({
   DRAFT: 'DRAFT',
   ACTIVE: 'ACTIVE',
+  PUBLISHED: 'PUBLISHED',
   ARCHIVED: 'ARCHIVED',
 });
 
@@ -110,6 +111,13 @@ const CERTIFICATE_STATUS = Object.freeze({
   RESTORED: 'RESTORED',
 });
 
+const SESSION_STATUS = Object.freeze({
+  SCHEDULED: 'SCHEDULED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+});
+
 const { NOTIFICATION_TYPE } = require('./notifications');
 
 module.exports = {
@@ -124,6 +132,7 @@ module.exports = {
   PAYMENT_RECORDING_TYPE,
   PAYMENT_PROVIDER,
   COHORT_STATUS,
+  SESSION_STATUS,
   ATTENDANCE_STATUS,
   EVALUATION_OUTCOME,
   CERTIFICATE_STATUS,

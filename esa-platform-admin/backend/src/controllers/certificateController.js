@@ -1,4 +1,5 @@
 const certificateService = require('../services/certificateService');
+const Notification = require('../models/Notification');
 
 /**
  * POST /api/admin/evaluations/:id/certificate
@@ -78,9 +79,22 @@ async function getCertificateByIdAdmin(req, res, next) {
       certificateId: id,
       user: req.user,
     });
+
+    const notif = await Notification.findOne({
+      'relatedResource.resourceType': 'Certificate',
+      'relatedResource.resourceId': certificate._id,
+    }).sort({ createdAt: -1 });
+
+    const certObj = certificate.toObject ? certificate.toObject() : { ...certificate };
+    certObj.emailDispatch = {
+      sent: notif ? notif.emailSent : false,
+      error: notif ? notif.emailError : null,
+      notificationId: notif ? notif._id : null,
+    };
+
     res.json({
       success: true,
-      data: { certificate },
+      data: { certificate: certObj },
     });
   } catch (err) {
     next(err);

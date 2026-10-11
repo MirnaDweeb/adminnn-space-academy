@@ -1,0 +1,63 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tableWrap {
+  background: #ffffff;
+  border: 1px solid var(--esa-border, #e1e6ed);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.appItem {
+  padding: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.appItem:last-child {
+  border-bottom: none;
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.programTitle {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--esa-navy-950, #09111f);
+}
+
+.subInfo {
+  font-size: 0.82rem;
+  color: var(--esa-text-secondary, #667085);
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.statusArea {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.actionBtn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}

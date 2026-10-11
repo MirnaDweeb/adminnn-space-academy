@@ -108,21 +108,25 @@
 }
 
 .resultRecommended {
-  background: #e7f5ec;
-  color: #0d8a43;
+  background: var(--esa-secondary-subtle, #e8f4f5);
+  color: var(--esa-teal-green, #1e7c85);
+  border: 1px solid var(--esa-secondary-subtle-border, rgba(30, 124, 133, 0.22));
 }
 
 .resultFoundation {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--esa-primary-subtle, #edf3f7);
+  color: var(--esa-cosmos-blue, #3a6985);
+  border: 1px solid var(--esa-primary-subtle-border, rgba(58, 105, 133, 0.22));
 }
 
 .resultManual {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--esa-gold-subtle, #fbf8f1);
+  color: var(--esa-warning, #996814);
+  border: 1px solid var(--esa-gold-subtle-border, rgba(212, 184, 124, 0.32));
 }
 
 .resultNotRecommended {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--esa-danger-subtle, #fdf1f0);
+  color: var(--esa-red-coral, #df4f4c);
+  border: 1px solid var(--esa-danger-subtle-border, rgba(223, 79, 76, 0.25));
 }

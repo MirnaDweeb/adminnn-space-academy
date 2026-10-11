@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import LoadingState from '../../components/common/LoadingState';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
+import Modal from '../../components/common/Modal';
 import cohortService from '../../services/api/cohortService';
 import styles from './StudentCohortsPage.module.css';
 
@@ -12,6 +14,55 @@ export default function StudentCohortsPage() {
   const [evaluations, setEvaluations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Feedback Modal State
+  const [feedbackCohort, setFeedbackCohort] = useState(null);
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackType, setFeedbackType] = useState('COURSE_CONTENT');
+  const [feedbackComments, setFeedbackComments] = useState('');
+  const [feedbackStrengths, setFeedbackStrengths] = useState('');
+  const [feedbackImprovements, setFeedbackImprovements] = useState('');
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState('');
+  const [feedbackError, setFeedbackError] = useState('');
+
+  const handleOpenFeedback = (cohort) => {
+    setFeedbackCohort(cohort);
+    setFeedbackRating(5);
+    setFeedbackType('COURSE_CONTENT');
+    setFeedbackComments('');
+    setFeedbackStrengths('');
+    setFeedbackImprovements('');
+    setFeedbackError('');
+    setFeedbackSuccess('');
+  };
+
+  const handleSubmitFeedback = async (e) => {
+    e.preventDefault();
+    if (!feedbackCohort) return;
+    setFeedbackLoading(true);
+    setFeedbackError('');
+    try {
+      await cohortService.submitFeedback({
+        cohortId: feedbackCohort._id,
+        programId: feedbackCohort.program?._id || feedbackCohort.program,
+        rating: Number(feedbackRating),
+        feedbackType,
+        comments: feedbackComments,
+        strengths: feedbackStrengths,
+        improvements: feedbackImprovements,
+      });
+      setFeedbackSuccess('Thank you! Your feedback has been submitted to academy leadership.');
+      setTimeout(() => {
+        setFeedbackCohort(null);
+        setFeedbackSuccess('');
+      }, 1200);
+    } catch (err) {
+      setFeedbackError(err.response?.data?.message || err.message || 'Failed to submit feedback.');
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
 
   const fetchStudentData = async () => {
     setLoading(true);
@@ -30,9 +81,24 @@ export default function StudentCohortsPage() {
     }
   };
 
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
     fetchStudentData();
   }, []);
+
+  // Deep linking: auto-open feedback modal if ?openFeedback=cohortId is present
+  useEffect(() => {
+    const targetCohortId = searchParams.get('openFeedback') || searchParams.get('feedback');
+    if (targetCohortId && cohorts.length > 0) {
+      const match = cohorts.find(
+        (c) => String(c.cohort?._id || c.cohort?.id || c._id) === String(targetCohortId)
+      );
+      if (match) {
+        handleOpenFeedback(match.cohort || match);
+      }
+    }
+  }, [searchParams, cohorts]);
 
   if (loading) {
     return <LoadingState message="Loading your class cohorts, attendance history, and grades..." />;
@@ -84,6 +150,15 @@ export default function StudentCohortsPage() {
                     <div className="small text-muted mt-2">
                       {new Date(cohort.startDate).toLocaleDateString()} &rarr; {new Date(cohort.endDate).toLocaleDateString()}
                     </div>
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-sm mt-2 d-inline-flex align-items-center gap-1"
+                      onClick={() => handleOpenFeedback(cohort)}
+                      title="Submit student evaluation and feedback for this cohort"
+                    >
+                      <i className="fa-regular fa-comment-dots" aria-hidden="true"></i>
+                      Share Feedback
+                    </button>
                   </div>
                 </div>
 
@@ -324,6 +399,111 @@ export default function StudentCohortsPage() {
             );
           })}
         </div>
+      )}
+
+      {/* FEEDBACK SUBMISSION MODAL */}
+      {feedbackCohort && (
+        <Modal
+          title={`Submit Feedback — ${feedbackCohort.name}`}
+          isOpen={Boolean(feedbackCohort)}
+          onClose={() => !feedbackLoading && setFeedbackCohort(null)}
+        >
+          <form onSubmit={handleSubmitFeedback} className="d-flex flex-column gap-3">
+            {feedbackError && <div className="alert alert-danger py-2 small mb-0">{feedbackError}</div>}
+            {feedbackSuccess && <div className="alert alert-success py-2 small mb-0">{feedbackSuccess}</div>}
+
+            <div className="alert alert-light border small text-muted py-2 mb-0">
+              Your feedback directly impacts Egyptian Space Agency curriculum design, instructor evaluations, and educational excellence.
+            </div>
+
+            <div className="row g-2">
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Feedback Category *</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={feedbackType}
+                  onChange={(e) => setFeedbackType(e.target.value)}
+                  required
+                >
+                  <option value="COURSE_CONTENT">Course Curriculum & Materials</option>
+                  <option value="INSTRUCTOR">Instructor Guidance & Delivery</option>
+                  <option value="FACILITY">Laboratory & Space Facilities</option>
+                  <option value="GENERAL">Overall Academy Experience</option>
+                </select>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Overall Rating (1 - 5 Stars) *</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={feedbackRating}
+                  onChange={(e) => setFeedbackRating(e.target.value)}
+                  required
+                >
+                  <option value={5}>5 Stars — Excellent</option>
+                  <option value={4}>4 Stars — Very Good</option>
+                  <option value={3}>3 Stars — Satisfactory</option>
+                  <option value={2}>2 Stars — Needs Improvement</option>
+                  <option value={1}>1 Star — Unsatisfactory</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="form-label small fw-semibold text-dark">Detailed Comments *</label>
+              <textarea
+                className="form-control form-control-sm"
+                rows={3}
+                required
+                placeholder="Share your detailed thoughts on the lectures, practical sessions, and learning atmosphere..."
+                value={feedbackComments}
+                onChange={(e) => setFeedbackComments(e.target.value)}
+              />
+            </div>
+
+            <div className="row g-2">
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Key Strengths</label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="e.g. Hands-on satellite payload simulations"
+                  value={feedbackStrengths}
+                  onChange={(e) => setFeedbackStrengths(e.target.value)}
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Suggested Improvements</label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="e.g. Additional lab time for orbital telemetry"
+                  value={feedbackImprovements}
+                  onChange={(e) => setFeedbackImprovements(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                disabled={feedbackLoading}
+                onClick={() => setFeedbackCohort(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                disabled={feedbackLoading}
+              >
+                {feedbackLoading && <i className="fa-solid fa-spinner fa-spin"></i>}
+                {feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
     </div>
   );

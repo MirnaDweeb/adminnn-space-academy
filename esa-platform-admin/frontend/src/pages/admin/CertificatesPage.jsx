@@ -11,6 +11,10 @@ import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
 import certificateService from '../../services/api/certificateService';
 import programService from '../../services/api/programService';
+import {
+  sendFeedbackReminder,
+  retryNotificationEmail,
+} from '../../services/api/notificationService';
 import { useAuth } from '../../hooks/useAuth';
 import { ROLE_TO_DIVISION, DIVISION_LABELS } from '../../constants/divisions';
 import { CERTIFICATE_STATUS } from '../../constants/statuses';
@@ -65,6 +69,12 @@ export default function CertificatesPage() {
   const [selectedEvalId, setSelectedEvalId] = useState('');
   const [issuing, setIssuing] = useState(false);
   const [issueError, setIssueError] = useState('');
+
+  // Feedback Reminder & Email Retry State
+  const [sendingReminderEvalId, setSendingReminderEvalId] = useState(null);
+  const [reminderFeedback, setReminderFeedback] = useState(null);
+  const [retryingEmail, setRetryingEmail] = useState(false);
+  const [emailRetryFeedback, setEmailRetryFeedback] = useState(null);
 
   // Fetch Certificates
   const fetchCertificates = useCallback(async () => {
@@ -236,6 +246,7 @@ export default function CertificatesPage() {
     setSelectedEvalId('');
     setIssueError('');
     setEligibleError('');
+    setReminderFeedback(null);
     setEligibleLoading(true);
     try {
       const eligible = await certificateService.getEligibleEvaluations({
@@ -249,6 +260,53 @@ export default function CertificatesPage() {
       setEligibleError(err.message || 'Failed to load eligible student completions');
     } finally {
       setEligibleLoading(false);
+    }
+  };
+
+  // Send Feedback Reminder to Student
+  const handleSendFeedbackReminder = async (evalItem) => {
+    if (!evalItem?.student?._id || !evalItem?.cohort?._id) return;
+    try {
+      setSendingReminderEvalId(evalItem._id);
+      setReminderFeedback(null);
+      const res = await sendFeedbackReminder({
+        studentId: evalItem.student._id,
+        cohortId: evalItem.cohort._id,
+      });
+      setReminderFeedback({
+        type: 'success',
+        message: res.message || 'Feedback completion reminder sent to student.',
+      });
+    } catch (err) {
+      setReminderFeedback({
+        type: 'danger',
+        message: err.response?.data?.message || err.message || 'Failed to send feedback reminder.',
+      });
+    } finally {
+      setSendingReminderEvalId(null);
+    }
+  };
+
+  // Safe retry for failed certificate email delivery
+  const handleRetryCertEmail = async () => {
+    if (!selectedCert?.emailDispatch?.notificationId) return;
+    try {
+      setRetryingEmail(true);
+      setEmailRetryFeedback(null);
+      const res = await retryNotificationEmail(selectedCert.emailDispatch.notificationId);
+      setEmailRetryFeedback({
+        type: res.success ? 'success' : 'warning',
+        message: res.message || 'Email delivery re-attempted.',
+      });
+      const updated = await certificateService.getCertificate(selectedCert._id);
+      setSelectedCert(updated);
+    } catch (err) {
+      setEmailRetryFeedback({
+        type: 'danger',
+        message: err.response?.data?.message || err.message || 'Failed to retry email delivery.',
+      });
+    } finally {
+      setRetryingEmail(false);
     }
   };
 
@@ -402,18 +460,31 @@ export default function CertificatesPage() {
         title={`${divisionTitle} Certificates`}
         subtitle="Manage, verify, and revoke institutional certificates of completion. Every credential possesses an append-only audit trail and public verification token."
         actions={
-          hasPermission(user, PERMISSIONS.CERTIFICATES_MANAGE) && (
-            <button
-              type="button"
-              className="btn btn-primary d-flex align-items-center gap-2"
-              id="btn-open-issue-certificate"
-              onClick={handleOpenIssueModal}
-              title="Issue Official Certificate"
-            >
-              <i className="fa-solid fa-award"></i>
-              <span>Issue Certificate</span>
-            </button>
-          )
+          <div className="d-flex align-items-center gap-2">
+            {hasPermission(user, PERMISSIONS.NOTIFICATIONS_VIEW) && (
+              <Link
+                to={activeDivision && activeDivision !== 'ALL' ? `/admin/${activeDivision}/notifications?template=certificate` : '/admin/notifications?template=certificate'}
+                className="btn btn-outline-primary d-flex align-items-center gap-2"
+                id="btn-notify-certificate-readiness"
+                title="Send Certificate Notification Announcement"
+              >
+                <i className="fa-solid fa-bullhorn"></i>
+                <span>Notify Students</span>
+              </Link>
+            )}
+            {hasPermission(user, PERMISSIONS.CERTIFICATES_MANAGE) && (
+              <button
+                type="button"
+                className="btn btn-primary d-flex align-items-center gap-2"
+                id="btn-open-issue-certificate"
+                onClick={handleOpenIssueModal}
+                title="Issue Official Certificate"
+              >
+                <i className="fa-solid fa-award"></i>
+                <span>Issue Certificate</span>
+              </button>
+            )}
+          </div>
         }
       />
 
@@ -693,6 +764,59 @@ export default function CertificatesPage() {
               </button>
             </div>
           </div>
+
+          {/* OFFICIAL EMAIL DISPATCH STATUS */}
+          {selectedCert.emailDispatch && (
+            <div className={styles.detailCard}>
+              <h6 className="fw-bold text-dark mb-2 d-flex align-items-center justify-content-between">
+                <span>Official Email Dispatch</span>
+                {selectedCert.emailDispatch.sent ? (
+                  <span className="badge bg-success-subtle text-success border border-success-subtle">
+                    <i className="fa-solid fa-check me-1" /> Delivered via SMTP
+                  </span>
+                ) : selectedCert.emailDispatch.error ? (
+                  <span className="badge bg-danger-subtle text-danger border border-danger-subtle">
+                    <i className="fa-solid fa-triangle-exclamation me-1" /> Delivery Failed
+                  </span>
+                ) : (
+                  <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                    In-App Only
+                  </span>
+                )}
+              </h6>
+              {selectedCert.emailDispatch.sent && selectedCert.emailDispatch.sentAt && (
+                <div className="small text-muted mb-2">
+                  Dispatched: {new Date(selectedCert.emailDispatch.sentAt).toLocaleString()}
+                </div>
+              )}
+              {selectedCert.emailDispatch.error && (
+                <div className="alert alert-danger py-2 small mb-2">
+                  <strong>SMTP Error:</strong> {selectedCert.emailDispatch.error}
+                </div>
+              )}
+              {emailRetryFeedback && (
+                <div className={`alert alert-${emailRetryFeedback.type} py-2 small mb-2`}>
+                  {emailRetryFeedback.message}
+                </div>
+              )}
+              {!selectedCert.emailDispatch.sent && selectedCert.emailDispatch.notificationId && (
+                <button
+                  type="button"
+                  className="btn btn-outline-warning btn-sm"
+                  disabled={retryingEmail}
+                  onClick={handleRetryCertEmail}
+                  id="btn-retry-cert-email"
+                >
+                  {retryingEmail ? (
+                    <i className="fa-solid fa-spinner fa-spin me-1" />
+                  ) : (
+                    <i className="fa-solid fa-rotate-right me-1" />
+                  )}
+                  Retry Certificate Email Delivery
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="d-flex justify-content-end gap-2 mt-3">
             {hasPermission(user, PERMISSIONS.CERTIFICATES_MANAGE) && (
@@ -983,6 +1107,39 @@ export default function CertificatesPage() {
                         <span className="text-secondary">Attendance: {selectedEval.attendanceRate}%</span>
                       </div>
                     </div>
+                    <div className="col-sm-6">
+                      <div className="text-secondary fw-semibold">Program Feedback:</div>
+                      <div className="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                        {selectedEval.feedbackCompleted ? (
+                          <span className="badge bg-success-subtle text-success border border-success-subtle">
+                            <i className="fa-solid fa-check me-1" />
+                            Completed {selectedEval.feedbackSubmittedAt ? `(${new Date(selectedEval.feedbackSubmittedAt).toLocaleDateString()})` : ''}
+                          </span>
+                        ) : (
+                          <>
+                            <span className="badge bg-warning-subtle text-warning border border-warning-subtle">
+                              <i className="fa-solid fa-clock me-1" />
+                              Feedback Pending
+                            </span>
+                            <button
+                              type="button"
+                              className="btn btn-outline-warning btn-sm py-0 px-2"
+                              style={{ fontSize: '0.75rem' }}
+                              onClick={() => handleSendFeedbackReminder(selectedEval)}
+                              disabled={sendingReminderEvalId === selectedEval._id}
+                              title="Send personalized feedback completion reminder to student"
+                            >
+                              {sendingReminderEvalId === selectedEval._id ? (
+                                <i className="fa-solid fa-spinner fa-spin me-1" />
+                              ) : (
+                                <i className="fa-solid fa-bell me-1" />
+                              )}
+                              Send Reminder
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
                     <div className="col-12 pt-2 border-top">
                       <div className="text-secondary fw-semibold">Certificate Type:</div>
                       <div className="fw-bold text-dark d-flex align-items-center gap-2 mt-1">
@@ -991,6 +1148,19 @@ export default function CertificatesPage() {
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {reminderFeedback && (
+                <div className={`alert alert-${reminderFeedback.type} py-2 px-3 small mb-3`}>
+                  <i
+                    className={`fa-solid ${
+                      reminderFeedback.type === 'success'
+                        ? 'fa-circle-check text-success'
+                        : 'fa-circle-exclamation text-danger'
+                    } me-2`}
+                  />
+                  {reminderFeedback.message}
                 </div>
               )}
 

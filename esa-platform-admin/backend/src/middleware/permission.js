@@ -4,9 +4,8 @@ const { ROLES } = require('../constants/roles');
 /**
  * Enforces that the authenticated user possesses a specific permission.
  * - SUPER_ADMIN always passes (full platform authority).
- * - For division admins, if they have an explicit permissions array, they must possess the permission.
- * - If an existing division admin account has an empty array (legacy default), they pass to preserve existing workflows.
- * - If unauthorized, returns 403 Forbidden.
+ * - For all other roles, user must have an array of permissions containing the required permission.
+ * - Missing, null, or empty permissions FAIL CLOSED (returns 403 Forbidden).
  */
 function requirePermission(permission) {
   return (req, res, next) => {
@@ -19,12 +18,10 @@ function requirePermission(permission) {
       return next();
     }
 
-    // For division admins with an explicit permission list configured:
+    // Fail-closed enforcement: user must have an explicit permissions array containing the permission
     const userPermissions = req.user.permissions;
-    if (Array.isArray(userPermissions) && userPermissions.length > 0) {
-      if (!userPermissions.includes(permission)) {
-        throw ApiError.forbidden(`Forbidden: Missing required permission [${permission}]`);
-      }
+    if (!Array.isArray(userPermissions) || !userPermissions.includes(permission)) {
+      throw ApiError.forbidden(`Forbidden: Missing required permission [${permission}]`);
     }
 
     next();

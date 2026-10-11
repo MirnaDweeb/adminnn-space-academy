@@ -7,7 +7,14 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed": "node src/seed/seed.js"
+    "seed": "node src/seed/seed.js",
+    "test:sec001": "node tests/sec001.paymentSimulator.test.js",
+    "test:integration": "node tests/systemIntegration.test.js",
+    "test:feedback": "node tests/feedbackAndSidebarRegression.test.js",
+    "test:notification": "node tests/notificationSystem.test.js",
+    "test:gateway": "node tests/superAdminGatewayWorkflow.test.js",
+    "test:dashboard": "node tests/dashboardWorkflows.test.js",
+    "test:reminders": "node tests/paymentReminderSystem.test.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

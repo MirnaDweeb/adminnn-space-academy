@@ -6,6 +6,7 @@ import SearchBar from '../../components/common/SearchBar';
 import FilterBar from '../../components/common/FilterBar';
 import StatusBadge from '../../components/common/StatusBadge';
 import ConfirmModal from '../../components/common/ConfirmModal';
+import Modal from '../../components/common/Modal';
 import LoadingState from '../../components/common/LoadingState';
 import ErrorState from '../../components/common/ErrorState';
 import adminService from '../../services/api/adminService';
@@ -31,6 +32,49 @@ export default function StudentsListPage() {
   // Status toggle confirmation modal
   const [confirmStudent, setConfirmStudent] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
+
+  // Add Student Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [addError, setAddError] = useState('');
+  const [addSuccess, setAddSuccess] = useState('');
+  const [addForm, setAddForm] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    division: division || 'PRE_UNIVERSITY',
+    phone: '',
+    institution: '',
+    academicYear: '',
+  });
+
+  const handleCreateStudent = async (e) => {
+    e.preventDefault();
+    setAddLoading(true);
+    setAddError('');
+    try {
+      await adminService.createStudent(addForm);
+      setAddSuccess(`Student ${addForm.fullName} created successfully.`);
+      setTimeout(() => {
+        setShowAddModal(false);
+        setAddSuccess('');
+        setAddForm({
+          fullName: '',
+          email: '',
+          password: '',
+          division: division || 'PRE_UNIVERSITY',
+          phone: '',
+          institution: '',
+          academicYear: '',
+        });
+        load();
+      }, 900);
+    } catch (err) {
+      setAddError(err.response?.data?.message || err.message || 'Failed to create student account');
+    } finally {
+      setAddLoading(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -146,6 +190,17 @@ export default function StudentsListPage() {
       <PageHeader
         title="Students"
         subtitle={`Students registered in ${division === 'PRE_UNIVERSITY' ? 'Pre-University' : division === 'UNIVERSITY' ? 'University' : 'Academy'} division.`}
+        actions={
+          <button
+            type="button"
+            className="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
+            onClick={() => setShowAddModal(true)}
+            id="btn-add-student"
+          >
+            <i className="fa-solid fa-user-plus" aria-hidden="true"></i>
+            Add Student
+          </button>
+        }
       />
 
       <div className="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
@@ -220,6 +275,124 @@ export default function StudentsListPage() {
           loading={statusLoading}
           icon={confirmStudent.user?.isActive ? 'fa-user-slash' : 'fa-user-check'}
         />
+      )}
+
+      {/* Add Student Modal */}
+      {showAddModal && (
+        <Modal
+          title="Add New Student"
+          isOpen={showAddModal}
+          onClose={() => !addLoading && setShowAddModal(false)}
+        >
+          <form onSubmit={handleCreateStudent} className="d-flex flex-column gap-3">
+            {addError && <div className="alert alert-danger py-2 small mb-0">{addError}</div>}
+            {addSuccess && <div className="alert alert-success py-2 small mb-0">{addSuccess}</div>}
+
+            <div className="row g-2">
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  className="form-control form-control-sm"
+                  placeholder="e.g. Mariam Soliman"
+                  value={addForm.fullName}
+                  onChange={(e) => setAddForm({ ...addForm, fullName: e.target.value })}
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  className="form-control form-control-sm"
+                  placeholder="student@domain.com"
+                  value={addForm.email}
+                  onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="row g-2">
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Initial Password *</label>
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  className="form-control form-control-sm"
+                  placeholder="Minimum 8 characters"
+                  value={addForm.password}
+                  onChange={(e) => setAddForm({ ...addForm, password: e.target.value })}
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label small fw-semibold text-dark">Division *</label>
+                <select
+                  className="form-select form-select-sm"
+                  disabled={user.role !== ROLES.SUPER_ADMIN && !!division}
+                  value={addForm.division}
+                  onChange={(e) => setAddForm({ ...addForm, division: e.target.value })}
+                >
+                  <option value="PRE_UNIVERSITY">Pre-University Division</option>
+                  <option value="UNIVERSITY">University Division</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="row g-2">
+              <div className="col-md-4">
+                <label className="form-label small fw-semibold text-dark">Phone Number</label>
+                <input
+                  type="tel"
+                  className="form-control form-control-sm"
+                  placeholder="+20 100 123 4567"
+                  value={addForm.phone}
+                  onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })}
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label small fw-semibold text-dark">School / University</label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="e.g. Cairo University"
+                  value={addForm.institution}
+                  onChange={(e) => setAddForm({ ...addForm, institution: e.target.value })}
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label small fw-semibold text-dark">Academic Year / Grade</label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="e.g. Year 3 / Senior"
+                  value={addForm.academicYear}
+                  onChange={(e) => setAddForm({ ...addForm, academicYear: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                disabled={addLoading}
+                onClick={() => setShowAddModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                disabled={addLoading}
+              >
+                {addLoading && <i className="fa-solid fa-spinner fa-spin"></i>}
+                {addLoading ? 'Creating Account...' : 'Create Student'}
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
     </div>
   );

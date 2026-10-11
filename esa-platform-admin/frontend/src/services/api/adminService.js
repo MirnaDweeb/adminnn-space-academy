@@ -80,6 +80,25 @@ const adminService = {
       .then((r) => r.data),
   getInvoice: (id) =>
     apiClient.get(`/admin/invoices/${id}`).then((r) => r.data.data),
+  // Payment Reminder System
+  getPaymentRemindersSummary: (division, params = {}) =>
+    apiClient
+      .get('/admin/invoices/reminders/summary', {
+        params: division && division !== 'own' && division !== 'all' ? { division, ...params } : params,
+      })
+      .then((r) => r.data.data),
+  previewPaymentReminders: (payload) =>
+    apiClient.post('/admin/invoices/reminders/preview', payload).then((r) => r.data.data),
+  sendSinglePaymentReminder: (invoiceId, payload) =>
+    apiClient.post(`/admin/invoices/${invoiceId}/reminder`, payload).then((r) => r.data.data),
+  sendBulkPaymentReminders: (payload) =>
+    apiClient.post('/admin/invoices/reminders/bulk', payload).then((r) => r.data.data),
+  getPaymentRemindersHistory: (division, params = {}) =>
+    apiClient
+      .get('/admin/invoices/reminders/history', {
+        params: division && division !== 'own' && division !== 'all' ? { division, ...params } : params,
+      })
+      .then((r) => r.data),
   // Instructor account lifecycle
   syncInstructorAccess: (id) =>
     apiClient.post(`/admin/instructors/${id}/sync-access`).then((r) => r.data.data),
@@ -138,18 +157,56 @@ const adminService = {
   updateCertificateMetadata: (id, payload) =>
     apiClient.patch(`/admin/certificates/${id}`, payload).then((r) => r.data.data),
   // Feedback Center & AI/Thematic summary
-  listFeedback: (division, params = {}) =>
-    apiClient
-      .get('/admin/feedback', {
-        params: division && division !== 'own' && division !== 'all' ? { division, ...params } : params,
-      })
-      .then((r) => r.data.data),
-  getFeedbackSummary: (division, params = {}) =>
-    apiClient
-      .get('/admin/feedback/summary', {
-        params: division && division !== 'own' && division !== 'all' ? { division, ...params } : params,
-      })
-      .then((r) => r.data.data),
+  listFeedback: (divisionOrParams, maybeParams = {}) => {
+    let params = {};
+    if (typeof divisionOrParams === 'object' && divisionOrParams !== null) {
+      params = { ...divisionOrParams };
+    } else {
+      params = { ...maybeParams };
+      if (divisionOrParams && divisionOrParams !== 'own' && divisionOrParams !== 'all' && divisionOrParams !== 'ALL') {
+        params.division = divisionOrParams;
+      }
+    }
+    return apiClient.get('/admin/feedback', { params }).then((r) => r.data.data);
+  },
+  getFeedbackSummary: (divisionOrParams, maybeParams = {}) => {
+    let params = {};
+    if (typeof divisionOrParams === 'object' && divisionOrParams !== null) {
+      params = { ...divisionOrParams };
+    } else {
+      params = { ...maybeParams };
+      if (divisionOrParams && divisionOrParams !== 'own' && divisionOrParams !== 'all' && divisionOrParams !== 'ALL') {
+        params.division = divisionOrParams;
+      }
+    }
+    return apiClient.get('/admin/feedback/summary', { params }).then((r) => r.data.data);
+  },
+  // Live session monitoring
+  listSessions: (divisionOrParams, maybeParams = {}) => {
+    let params = {};
+    if (typeof divisionOrParams === 'object' && divisionOrParams !== null) {
+      params = { ...divisionOrParams };
+    } else {
+      params = { ...maybeParams };
+      if (divisionOrParams && divisionOrParams !== 'own' && divisionOrParams !== 'all' && divisionOrParams !== 'ALL') {
+        params.division = divisionOrParams;
+      }
+    }
+    return apiClient.get('/admin/sessions', { params }).then((r) => r.data.data);
+  },
+  updateSessionStatus: (cohortId, sessionId, payload) =>
+    apiClient.patch(`/admin/sessions/${cohortId}/${sessionId}/status`, payload).then((r) => r.data.data),
+  // Direct student creation
+  createStudent: (payload) =>
+    apiClient.post('/admin/students', payload).then((r) => r.data.data),
+  // Instructor update
+  updateInstructor: (id, payload) =>
+    apiClient.put(`/admin/instructors/${id}`, payload).then((r) => r.data.data),
+  // Broadcast notifications
+  previewBroadcast: (params = {}) =>
+    apiClient.get('/admin/notifications/broadcast-preview', { params }).then((r) => r.data.data),
+  broadcastAnnouncement: (payload) =>
+    apiClient.post('/admin/notifications/broadcast', payload).then((r) => r.data.data),
 };
 
 export default adminService;

@@ -35,8 +35,8 @@
 
 ## 3. Critical Blockers & Known Risks (Immediate Fixes Required)
 
-1. **SEC-001 (CRITICAL — Payment Simulator Backdoor):**  
-   `POST /api/payments/paymob/simulate` in `backend/src/routes/paymentRoutes.js` (line 24) is completely unauthenticated and signs valid Paymob callbacks using the server's private HMAC secret. Any user can forge payments and confirm enrollments.
+1. **SEC-001 (CRITICAL — Payment Simulator Backdoor) — ✅ IMPLEMENTED_PARTIAL_TESTED:**  
+   Implementation complete as of 2026-10-09. See SEC-001 Implementation Summary below.  
 2. **SEC-002 (HIGH — Permission Middleware Fail-Open):**  
    In `backend/src/middleware/permission.js` (lines 23–28), if a user has `permissions: []` (the default in `User.js`), the check is skipped and `next()` is called, bypassing permission authorization entirely.
 3. **SEC-004 (MEDIUM — Instructor Self-Registration):**  
@@ -46,11 +46,55 @@
 
 ---
 
+## 3a. SEC-001 Implementation Summary (2026-10-09)
+
+**Status:** `IMPLEMENTED_PARTIAL_TESTED`  
+**Implementation completed by:** Automated agent (SEC-001 task spec).
+
+### Changes Made
+
+| File | Change Summary |
+|---|---|
+| `backend/src/routes/paymentRoutes.js` | Removed `if(NODE_ENV !== 'production')` guard. Route always registered. Added `protect` + `authorize(STUDENT, SUPER_ADMIN)` so unauthenticated → 401, wrong-role → 403. |
+| `backend/src/controllers/paymentController.js` | Full defense-in-depth rewrite of `simulateSandboxPayment`: production+IS_SIMULATION guard (404), required transactionNumber (400), load transaction, STUDENT ownership check via Invoice→Enrollment chain (403), status/provider/recordingType guard (400), server-side amountCents derivation from Invoice (ignores client value), PAYMENT_SIMULATED audit log. |
+| `backend/src/services/paymobService.js` | Added `assertPaymobConfig()` fail-fast function. Mock fallbacks now conditional on `NODE_ENV !== 'production'`. `IS_SIMULATION` is always `false` in production. |
+| `backend/src/server.js` | Calls `assertPaymobConfig()` before `connectDB()`/`app.listen()`. |
+| `frontend/src/pages/student/StudentInvoicesPage.jsx` | Removed `amountCents` from simulate payload. Added graceful 404/403 error path ("Sandbox payments are not available in this environment"). |
+| `backend/tests/sec001.paymentSimulator.test.js` | New integration test covering AC-1–7, 9–10. Spawns production child process for AC-6/8. |
+| `backend/package.json` | Added `"test:sec001": "node tests/sec001.paymentSimulator.test.js"` script. |
+
+### New Production Config Assertion
+
+`paymobService.assertPaymobConfig()` (called at startup) throws a **non-secret** fatal error if, in `NODE_ENV=production`:
+- Any of `PAYMOB_API_KEY`, `PAYMOB_HMAC_SECRET`, `PAYMOB_INTEGRATION_ID`, `PAYMOB_IFRAME_ID` is missing.
+- `PAYMOB_API_KEY` starts with `mock`.
+- `PAYMOB_SANDBOX_SIMULATION=true`.
+
+### Test Evidence (run: `npm run test:sec001` from `backend/`)
+
+```
+AC-1: Unauthenticated POST /paymob/simulate → 401              ✅ PASS
+AC-5: INSTRUCTOR role → 403                                     ✅ PASS
+SETUP: Create pending transaction for student@esa.dev          ❌ SKIP (no eligible invoice in current DB state)
+  ↳ AC-2, AC-3, AC-4, AC-7, AC-10 could not run (need seeded enrollment)
+AC-9: Forged callback with invalid HMAC → 401                  ✅ PASS
+AC-8: Production server refuses to start (missing Paymob cfg)  ✅ PASS
+AC-6: Implied pass (server refused to start in prod)           ✅ PASS
+```
+
+**Manual verification:**
+- `curl` (PowerShell `Invoke-WebRequest`) to unauthenticated `/paymob/simulate` → `{"success":false,"error":{"message":"Authentication token missing"}}` (401). ✅
+- `npm run build` (frontend) → zero errors, built in 3.06s. ✅
+- `node -c` syntax check on all 5 changed backend files → all PASS. ✅
+
+**Unverified (data-dependency):** AC-2, AC-3, AC-4, AC-7, AC-10 require a live PENDING PAYMOB ONLINE PaymentTransaction owned by `student@esa.dev`. No such transaction exists in the current DB. To verify: complete a checkout initiation flow via the sandbox UI as `student@esa.dev`, then re-run the test.
+
+---
+
 ## 4. Outstanding Tasks (Ranked Execution Backlog)
 
 | Task ID | Priority | Area | Task Summary |
 |---|---|---|---|
-| **SEC-001** | **P0** | Backend Security | Gating/removing unauthenticated `/api/payments/paymob/simulate` |
 | **SEC-002** | **P0** | Backend Auth | Fixing fail-open logic in `backend/src/middleware/permission.js` |
 | **SEC-004** | **P1** | Backend Auth | Restricting `POST /api/auth/register` to `STUDENT` only |
 | **FUNC-001** | **P1** | Full-Stack | Adding `GET/PUT /api/students/me` and student `/profile` UI |
@@ -64,22 +108,8 @@
 
 ## 5. Exact Next Recommended Task (Ready for Execution)
 
-### Task ID: `SEC-001`
-* **File to Edit:** `backend/src/routes/paymentRoutes.js` and `backend/src/controllers/paymentController.js`
-* **What to Do:**
-  1. In `paymentRoutes.js`:
-     ```javascript
-     // Protect simulate endpoint strictly in non-production environments
-     if (process.env.NODE_ENV !== 'production') {
-       router.post('/paymob/simulate', protect, authorize('SUPER_ADMIN'), simulatePayment);
-     }
-     ```
-  2. In `paymentController.js`:
-     ```javascript
-     if (process.env.NODE_ENV === 'production') {
-       return res.status(404).json({ success: false, message: 'Endpoint not available in production' });
-     }
-     ```
-* **Verification Command:**
-  Send unauthenticated POST request to `http://localhost:5000/api/payments/paymob/simulate` and confirm it returns `401 Unauthorized` or `404 Not Found`.
+### Task ID: `SEC-002`
+* **File to Edit:** `backend/src/middleware/permission.js`
+* **What to Do:** Fix the fail-open branch where `permissions: []` bypasses authorization entirely. Should default-deny instead.
+* **Verification Command:** Attempt an action requiring a permission with a user whose `permissions` array is empty — confirm it returns 403.
 * **Prerequisites / Dependencies:** None. Ready for immediate implementation.

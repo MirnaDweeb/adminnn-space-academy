@@ -24,11 +24,9 @@ const register = asyncHandler(async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  const finalRole = role || ROLES.STUDENT;
-
-  const userDivision = (finalRole === ROLES.STUDENT || finalRole === ROLES.INSTRUCTOR)
-    ? division || DIVISIONS.PRE_UNIVERSITY
-    : null;
+  // Public self-registration is strictly restricted to STUDENT role
+  const finalRole = ROLES.STUDENT;
+  const userDivision = division || DIVISIONS.PRE_UNIVERSITY;
 
   const user = await User.create({
     fullName,
@@ -38,15 +36,7 @@ const register = asyncHandler(async (req, res) => {
     division: userDivision,
   });
 
-  if (finalRole === ROLES.STUDENT) {
-    await StudentProfile.create({ user: user._id, division: user.division });
-  } else if (finalRole === ROLES.INSTRUCTOR) {
-    await InstructorProfile.create({
-      user: user._id,
-      division: user.division,
-      divisions: [user.division],
-    });
-  }
+  await StudentProfile.create({ user: user._id, division: user.division });
 
   await recordAudit({ user: user._id, action: 'USER_REGISTER', resource: 'User', resourceId: user._id, after: user.toSafeObject() });
 

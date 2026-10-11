@@ -1,0 +1,153 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--esa-border, #e1e6ed);
+}
+
+.searchWrap {
+  flex: 1;
+  min-width: 250px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.programCard {
+  background: #ffffff;
+  border: 1px solid var(--esa-border, #e1e6ed);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--esa-shadow-sm, 0 1px 3px rgba(16, 24, 40, 0.05));
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.programCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--esa-shadow-md, 0 3px 8px rgba(16, 24, 40, 0.07));
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.divisionTag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--esa-primary-subtle, #edf3f7);
+  color: var(--esa-cosmos-blue, #3a6985);
+  border: 1px solid rgba(58, 105, 133, 0.2);
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--esa-navy-950, #09111f);
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: var(--esa-text-secondary, #667085);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.metaList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--esa-text-secondary, #667085);
+  margin-bottom: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--esa-border, #e1e6ed);
+}
+
+.price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--esa-navy-900, #0d182b);
+}
+
+.priceFree {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--esa-teal-green, #1e7c85);
+}
+
+.applyButton {
+  background: var(--esa-cosmos-blue, #3a6985);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.15s ease;
+}
+
+.applyButton:hover {
+  background: var(--esa-primary-hover, #2e546b);
+}
+
+.appliedBadge {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}

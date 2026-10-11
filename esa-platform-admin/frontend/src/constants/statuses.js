@@ -106,3 +106,11 @@ export const CERTIFICATE_STATUS = Object.freeze({
   REVOKED: 'REVOKED',
   RESTORED: 'RESTORED',
 });
+
+export const SESSION_STATUS = Object.freeze({
+  SCHEDULED: 'SCHEDULED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+});
+

@@ -33,18 +33,18 @@
 }
 
 .iconWarning {
-  background: rgba(217, 119, 6, 0.1);
-  color: #d97706;
+  background: var(--esa-gold-subtle, #fbf8f1);
+  color: var(--esa-warning, #996814);
 }
 
 .iconSuccess {
-  background: rgba(22, 163, 74, 0.1);
-  color: #16a34a;
+  background: var(--esa-secondary-subtle, #e8f4f5);
+  color: var(--esa-teal-green, #1e7c85);
 }
 
 .iconInfo {
-  background: rgba(14, 165, 233, 0.1);
-  color: #0284c7;
+  background: var(--esa-primary-subtle, #edf3f7);
+  color: var(--esa-cosmos-blue, #3a6985);
 }
 
 .summaryLabel {

@@ -31,10 +31,12 @@ function anonymizeText(text) {
 function generateDeterministicInsight(feedbackList) {
   if (!feedbackList || feedbackList.length === 0) {
     return {
-      provider: 'ESA Thematic & Grounded NLP Engine',
+      provider: 'Institutional Feedback Thematic Analysis',
       isAiGenerated: false,
       analyzedCount: 0,
+      totalAnalyzed: 0,
       averageRating: 0,
+      sentimentBreakdown: { POSITIVE: 0, NEUTRAL: 0, NEGATIVE: 0 },
       sentimentDistribution: { positive: 0, neutral: 0, negative: 0 },
       keyThemes: [],
       mostMentionedStrengths: [],
@@ -158,10 +160,12 @@ function generateDeterministicInsight(feedbackList) {
     }));
 
   return {
-    provider: 'ESA Thematic & Grounded NLP Engine',
+    provider: 'Institutional Feedback Thematic Analysis',
     isAiGenerated: false,
     analyzedCount: count,
+    totalAnalyzed: count,
     averageRating,
+    sentimentBreakdown: sentimentCounts,
     sentimentDistribution,
     keyThemes: keyThemes.length > 0 ? keyThemes : ['Applied Satellite Engineering', 'Instructor Guidance'],
     mostMentionedStrengths: Array.from(strengthsSet),
@@ -248,7 +252,9 @@ Return a strict JSON object with this exact schema:
       provider: 'Google Gemini 1.5 Flash (AI Summary)',
       isAiGenerated: true,
       analyzedCount: count,
+      totalAnalyzed: count,
       averageRating,
+      sentimentBreakdown: { POSITIVE: posCount, NEUTRAL: neuCount, NEGATIVE: negCount },
       sentimentDistribution: {
         positive: Math.round((posCount / (count || 1)) * 100),
         neutral: Math.round((neuCount / (count || 1)) * 100),

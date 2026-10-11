@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 
 import AuthLayout from './layouts/AuthLayout';
@@ -36,6 +36,9 @@ import ReportsPage from './pages/admin/ReportsPage';
 import AssessmentsPage from './pages/admin/AssessmentsPage';
 import StudentAssessmentPage from './pages/student/StudentAssessmentPage';
 import FeedbackPage from './pages/admin/FeedbackPage';
+import SessionMonitoringPage from './pages/admin/SessionMonitoringPage';
+import ProgramCatalogPage from './pages/student/ProgramCatalogPage';
+import StudentApplicationsPage from './pages/student/StudentApplicationsPage';
 
 import PublicVerifyPage from './pages/public/PublicVerifyPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -75,6 +78,8 @@ export default function App() {
                 <Route path="/instructor/cohorts" element={<InstructorCohortsPage />} />
               </Route>
               <Route element={<RoleGuard allowedRoles={[ROLES.STUDENT]} />}>
+                <Route path="/programs" element={<ProgramCatalogPage />} />
+                <Route path="/applications" element={<StudentApplicationsPage />} />
                 <Route path="/student/cohorts" element={<StudentCohortsPage />} />
                 <Route path="/student/certificates" element={<StudentCertificatesPage />} />
                 <Route path="/student/invoices" element={<StudentInvoicesPage />} />
@@ -90,21 +95,23 @@ export default function App() {
               }
             >
               <Route element={<AdminLayout />}>
-                {/* Super Admin gateway */}
+                {/* Super Admin gateway & governance */}
                 <Route element={<RoleGuard allowedRoles={[ROLES.SUPER_ADMIN]} />}>
                   <Route path="/admin" element={<AdminGatewayPage />} />
                   <Route path="/admin/administrators" element={<AdminManagementPage />} />
-                  <Route path="/admin/instructors" element={<InstructorManagementPage />} />
-                  <Route path="/admin/programs" element={<ProgramsPage />} />
-                  <Route path="/admin/cohorts" element={<CohortsPage />} />
-                  <Route path="/admin/assessments" element={<AssessmentsPage />} />
-                  <Route path="/admin/applications" element={<ApplicationsPage />} />
-                  <Route path="/admin/invoices" element={<FinancePage />} />
-                  <Route path="/admin/certificates" element={<CertificatesPage />} />
-                  <Route path="/admin/feedback" element={<FeedbackPage />} />
-                  <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
-                  <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
-                  <Route path="/admin/reports" element={<ReportsPage />} />
+                  {/* Redirect legacy un-scoped admin operational URLs to Gateway */}
+                  <Route path="/admin/instructors" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/programs" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/cohorts" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/sessions" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/assessments" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/applications" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/invoices" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/certificates" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/feedback" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/notifications" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/audit-logs" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin/reports" element={<Navigate to="/admin" replace />} />
                 </Route>
 
                 {/* Division-scoped administration */}
@@ -115,6 +122,7 @@ export default function App() {
                   <Route path="instructors" element={<InstructorManagementPage />} />
                   <Route path="programs" element={<ProgramsPage />} />
                   <Route path="cohorts" element={<CohortsPage />} />
+                  <Route path="sessions" element={<SessionMonitoringPage />} />
                   <Route path="assessments" element={<AssessmentsPage />} />
                   <Route path="applications" element={<ApplicationsPage />} />
                   <Route path="invoices" element={<FinancePage />} />

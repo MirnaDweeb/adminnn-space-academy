@@ -22,6 +22,15 @@
   box-shadow: var(--esa-shadow-md);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .summaryCard {
+    transition: none;
+  }
+  .summaryCard:hover {
+    transform: none;
+  }
+}
+
 .summaryIcon {
   width: 44px;
   height: 44px;
@@ -77,6 +86,23 @@
   gap: 0.5rem;
 }
 
+/* ── Table row ─────────────────────────────────────────── */
+.tableRow {
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.tableRow:hover {
+  background-color: var(--esa-surface-alt, #f8f9fa);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tableRow {
+    transition: none;
+  }
+}
+
+/* ── User cell ─────────────────────────────────────────── */
 .userCell {
   display: flex;
   align-items: center;
@@ -84,17 +110,18 @@
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: var(--esa-navy-800);
-  color: var(--esa-text-inverse);
+  background: linear-gradient(135deg, var(--esa-navy-700, #16295a), var(--esa-navy-800, #0f1e3d));
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.85rem;
   font-weight: 700;
   flex-shrink: 0;
+  letter-spacing: 0.03em;
 }
 
 .userName {
@@ -127,28 +154,147 @@
   color: #495057;
 }
 
+/* ── Action column ─────────────────────────────────────── */
 .actionBtns {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.4rem;
+  flex-wrap: nowrap;
 }
 
+/* ─────────────────────────────────────────────────────────
+   Detail Modal — profile header
+────────────────────────────────────────────────────────── */
+.detailHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #f8f9fc 0%, #eef1f7 100%);
+  border-radius: var(--esa-radius-md);
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--esa-border);
+}
+
+.detailAvatarLg {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--esa-navy-700, #16295a), var(--esa-navy-800, #0f1e3d));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.03em;
+}
+
+.detailHeaderInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.detailHeaderName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--esa-text-primary);
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
+}
+
+.detailHeaderEmail {
+  font-size: 0.82rem;
+  color: var(--esa-text-secondary);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailHeaderMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detailHeaderActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 576px) {
+  .detailHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .detailHeaderActions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Detail Modal — sections
+────────────────────────────────────────────────────────── */
 .detailSection {
   margin-bottom: 1.5rem;
 }
 
 .detailTitle {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--esa-text-muted);
   margin-bottom: 0.75rem;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--esa-border);
 }
 
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detailField {
+  background: var(--esa-surface-alt, #f8f9fa);
+  border: 1px solid var(--esa-border);
+  border-radius: var(--esa-radius-sm);
+  padding: 0.6rem 0.85rem;
+}
+
+.detailFieldLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--esa-text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.detailFieldValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--esa-text-primary);
+  line-height: 1.3;
+}
+
+/* legacy grid rows kept for any remaining uses */
 .detailRow {
   display: grid;
   grid-template-columns: 140px 1fr;
@@ -166,6 +312,9 @@
   font-weight: 600;
 }
 
+/* ─────────────────────────────────────────────────────────
+   Audit table
+────────────────────────────────────────────────────────── */
 .auditTable {
   width: 100%;
   font-size: 0.82rem;
@@ -188,6 +337,9 @@
   vertical-align: top;
 }
 
+/* ─────────────────────────────────────────────────────────
+   Permission badges
+────────────────────────────────────────────────────────── */
 .permBadge {
   display: inline-block;
   font-size: 0.7rem;
@@ -227,4 +379,20 @@
 .permItem {
   font-size: 0.82rem;
   margin-bottom: 0.25rem;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Self-badge (shown in detail header when viewing own account)
+────────────────────────────────────────────────────────── */
+.selfBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc10740;
 }
